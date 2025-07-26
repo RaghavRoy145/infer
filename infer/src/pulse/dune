@@ -38,6 +38,7 @@
   ATDGenerated
   IBase
   IR
+  ocamlgraph
   Textuallib
   Absint
   Topllib)

@@ -188,7 +188,7 @@ let try_repair ~proc_desc ~bug ~reanalyze =
       List.length sa, List.length ha
   in
   Logging.d_printfln
-    "🔧[repair %a:%a] ptr=%a  stack_aliases=%d  heap_aliases=%d"
+    "[repair %a:%a] ptr=%a  stack_aliases=%d  heap_aliases=%d"
     Procname.pp pname Location.pp loc
     Exp.pp bug.ptr_expr
     stack_aliases heap_aliases;

@@ -342,13 +342,18 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
                     Location.equal (Sil.location_of_instr instr) location))
                 |> Option.value ~default:(Procdesc.get_start_node proc_desc)
               in
+              (* Correctly extract the abstract value from the diagnostic information. *)
+              let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
               (* 3) assemble the bug record *)
-              let bug : PulseRepair.bug_info = {
+              let bug : _ PulseRepair.bug_info = {
+                (* The rest of the record remains identical *)
                 PulseRepair.ptr_expr   = ptr_exp;
                 PulseRepair.ptr_var    = ptr_var;
                 PulseRepair.diag_trace = na.access_trace;
                 PulseRepair.err_node   = err_node;
                 PulseRepair.astate     = astate;
+                PulseRepair.av_opt     = av_opt;
+                PulseRepair.analysis   = analysis_data;
               } in
               (* 4) reanalyze callback *)
               let reanalyze (pdesc:Procdesc.t) =

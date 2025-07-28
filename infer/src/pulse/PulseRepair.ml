@@ -218,7 +218,19 @@ let get_ptr_address ~(astate: PulseAbductiveDomain.t) (v: Var.t)
       let raw_addr, _hist = PulseValueOrigin.addr_hist vo in
       Some raw_addr
 
+let is_dereference_of ~ptr instr =
+  match (instr : Sil.instr) with
+  | Load {e; _} when Exp.equal e ptr ->
+      true
+  | Store {e1; _} when Exp.equal e1 ptr ->
+      true
+  | _ ->
+      false
 
+
+let node_dereferences_ptr ptr node =
+  Instrs.exists (Procdesc.Node.get_instrs node) ~f:(is_dereference_of ~ptr)    
+  
 let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
   let pname = Procdesc.get_proc_name proc_desc in
   let loc = Procdesc.Node.get_loc bug.err_node in
@@ -248,7 +260,6 @@ let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
           let addr_raw, _hist = PulseValueOrigin.addr_hist vo in
           Some addr_raw )
   in
-
   let stack_aliases =
     match rep_opt with
     | None ->
@@ -256,9 +267,9 @@ let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
     | Some rep ->
         collect_stack_aliases ~proc:proc_desc bug.astate rep
   in
-
   Logging.d_printfln "[repair %a:%a] ptr=%a  stack_aliases=%d" Procname.pp pname Location.pp loc
     Exp.pp bug.ptr_expr (List.length stack_aliases) ;
+  
   let all_ptrs_to_guard =
     let initial_ptr = (bug.ptr_var |> Option.value_map ~f:Var.to_exp ~default:bug.ptr_expr) in
     let alias_exps = List.map stack_aliases ~f:snd in
@@ -268,37 +279,67 @@ let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
   let lca_map =
     let lca_to_ptr_list =
       List.filter_map all_ptrs_to_guard ~f:(fun ptr_exp ->
-          let slice = 
-            let direct_derefs = compute_dereference_slice proc_desc ptr_exp in
-            if not (List.is_empty direct_derefs) then direct_derefs
-            else if Procdesc.Node.equal (List.hd_exn (Procdesc.get_nodes proc_desc)) bug.err_node then
-              (* This is likely an inter-procedural bug where the err_node is the call site.
-                 Treat the error node itself as the slice. *)
-              [bug.err_node]
-            else []
+          
+      (* *** THIS IS THE FINAL, CORRECT SLICE LOGIC *** *)
+      let slice =
+        Procdesc.fold_nodes proc_desc ~init:Procdesc.NodeSet.empty ~f:(fun acc node ->
+            let instrs = Procdesc.Node.get_instrs node in
+            
+            (* 1. Find all temporary variables (idents) loaded with our pointer's value in this node. *)
+            let idents_holding_pointer =
+              Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc' instr ->
+                  match instr with
+                  | Sil.Load {id; e; _} when Exp.equal e ptr_exp -> Ident.Set.add id acc'
+                  | _ -> acc' )
             in
-            match slice with
-            | [] ->
-                None
-            | first_node :: rest_nodes ->
-                let lca_node = List.fold rest_nodes ~init:first_node ~f:lca in
-                Logging.d_printfln "[repair] alias %a has %d dereferences, guard at node %a"
-                  Exp.pp ptr_exp (List.length slice) Procdesc.Node.pp lca_node ;
-                Some (lca_node, ptr_exp) )
+            
+            (* 2. A node is part of the slice if it contains an instruction that USES the pointer
+               in a dangerous way, either directly or via a temporary variable. *)
+            let node_has_usage =
+              Instrs.exists instrs ~f:(fun instr ->
+                  match instr with
+                  (* Direct dereference of a temporary: *tmp *)
+                  | Sil.Load {e=Exp.Var id; _}
+                  | Sil.Store {e1=Exp.Var id; _} ->
+                      Ident.Set.mem id idents_holding_pointer
+                  
+                  (* Call using the pointer, either directly or via a temporary *)
+                  | Sil.Call (_, _, args, _, _) ->
+                      List.exists args ~f:(fun (arg, _) ->
+                          if Exp.equal arg ptr_exp then true (* Direct use: foo(p) *)
+                          else
+                            match arg with
+                            | Exp.Var id -> Ident.Set.mem id idents_holding_pointer (* Indirect use: foo(tmp) *)
+                            | _ -> false )
+                  | _ -> false )
+            in
+            if node_has_usage then Procdesc.NodeSet.add node acc else acc )
+        |> Procdesc.NodeSet.elements
       in
-    (* Manual implementation of of_list_multi for Procdesc.NodeMap *)
-    List.fold lca_to_ptr_list ~init:Procdesc.NodeMap.empty ~f:(fun map (key, data) ->
-        let existing_data = Procdesc.NodeMap.find_opt key map |> Option.value ~default:[] in
-        Procdesc.NodeMap.add key (data :: existing_data) map )
+      let sanitized_slice =
+        List.filter slice ~f:(fun node ->
+            Procdesc.Node.equal node start || not (List.is_empty (Procdesc.Node.get_preds node)) )
+      in
+      match sanitized_slice with
+      | [] -> None
+      | first_node :: rest_nodes ->
+          let lca_node = List.fold rest_nodes ~init:first_node ~f:lca in
+          Logging.d_printfln "[repair] alias %a has %d sites in slice, guard at node %a"
+            Exp.pp ptr_exp (List.length sanitized_slice) Procdesc.Node.pp lca_node ;
+          Some (lca_node, ptr_exp) )
+  in
+  List.fold lca_to_ptr_list ~init:Procdesc.NodeMap.empty ~f:(fun map (key, data) ->
+    let existing_data = Procdesc.NodeMap.find_opt key map |> Option.value ~default:[] in
+    Procdesc.NodeMap.add key (data :: existing_data) map )
   in
   let repairs_applied =
     (* Use `bindings` to get a list of (key, value) pairs from the map *)
     Procdesc.NodeMap.bindings lca_map
     |> List.map ~f:(fun (guard_node, ptr_exps) ->
-           (* If multiple aliases share an LCA, just use the first one for the guard condition. *)
-           let ptr_for_guard = List.hd_exn ptr_exps in
-           (* Use the smarter guard insertion logic *)
-           insert_skip_or_evade_guard proc_desc ~guard_node ~ptr:ptr_for_guard )
+            (* If multiple aliases share an LCA, just use the first one for the guard condition. *)
+            let ptr_for_guard = List.hd_exn ptr_exps in
+            (* Use the smarter guard insertion logic *)
+            insert_skip_or_evade_guard proc_desc ~guard_node ~ptr:ptr_for_guard )
   in
   (* ... your logging code ... *)
   if List.exists repairs_applied ~f:Fn.id then (
@@ -330,7 +371,7 @@ let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
   else (
     Logging.d_printfln "[repair] No guards could be inserted." ;
     false )
-
+  
 let is_provably_local ~proc_desc ~(bug : 'payload bug_info) =
   let ptr_exp_str = Format.asprintf "%a" Exp.pp bug.ptr_expr in
   L.d_printfln "[repair-debug] is_provably_local: Checking var %s" ptr_exp_str;

@@ -319,67 +319,38 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
                  this should never happen; but make it total *)
               assert false
         in
-        (* --- begin auto‑repair hook --- *)
         begin
           match diagnostic with
           | AccessToInvalidAddress na ->
-              (* here we *do* have the full pre‐summary astate in scope, thanks to the
-                  ReportableError that brought us here *)
-              (* let astate = pull it back out of the ReportableError wrapper in *)
-              (* 1) build ptr_expr and ptr_var *)
-              let ptr_exp, ptr_var =
-                match na.invalid_address with
-                | PulseDecompilerExpr.SourceExpr ((PulseDecompilerExpr.PVar pvar, _), _) ->
-                    (Exp.Lvar pvar, Some (Var.of_pvar pvar))
-                | _ ->
-                    (Exp.null, None)
-              in
-              let location = Procdesc.get_loc proc_desc in
-              (* 2) find the node whose instruction loc matches location *)
-              let err_node =
-                List.find (Procdesc.get_nodes proc_desc) ~f:(fun node ->
-                  Instrs.exists (Procdesc.Node.get_instrs node) ~f:(fun instr ->
-                    Location.equal (Sil.location_of_instr instr) location))
-                |> Option.value ~default:(Procdesc.get_start_node proc_desc)
-              in
-              (* Correctly extract the abstract value from the diagnostic information. *)
-              let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
-              (* 3) assemble the bug record *)
-              let bug : _ PulseRepair.bug_info = {
-                (* The rest of the record remains identical *)
-                PulseRepair.ptr_expr   = ptr_exp;
-                PulseRepair.ptr_var    = ptr_var;
-                PulseRepair.diag_trace = na.access_trace;
-                PulseRepair.err_node   = err_node;
-                PulseRepair.astate     = astate;
-                PulseRepair.av_opt     = av_opt;
-                PulseRepair.analysis   = analysis_data;
-              } in
-              (* 4) reanalyze callback *)
-              let reanalyze (pdesc:Procdesc.t) =
-                match analysis_data.analyze_dependency (Procdesc.get_proc_name pdesc) with
-                | Ok _    -> true
-                | Error _ -> false
-              in
-              (* 5) try to auto‑repair *)
-              if PulseRepair.try_repair ~proc_desc:proc_desc ~bug ~reanalyze then (
-                L.d_printfln "[repair] succeeded, dropping NPE report" ;
-                None )
-              else (
-                L.d_printfln "[repair] failed, emitting original report" ;
-                report analysis_data ~latent:false ~is_suppressed diagnostic ;
-                if Diagnostic.aborts_execution path diagnostic
-                then Some (AbortProgram summary)
-                else None )
-            
-            | _ ->
-                (* anything else — just do the normal report path *)
-                report analysis_data ~latent:false ~is_suppressed diagnostic ;
-                if Diagnostic.aborts_execution path diagnostic
-                then Some (AbortProgram summary)
-                else None
-            end
-          (* --- end auto‑repair hook --- *)
+            let ptr_exp, ptr_var =
+              match na.invalid_address with
+              | PulseDecompilerExpr.SourceExpr ((PVar pvar, _), _) -> (Exp.Lvar pvar, Some (Var.of_pvar pvar))
+              | _ -> (Exp.null, None)
+            in
+            let err_node =
+              List.find (Procdesc.get_nodes proc_desc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) (Trace.get_start_location na.access_trace))
+              |> Option.value ~default:(Procdesc.get_start_node proc_desc)
+            in
+            let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
+            let bug : _ PulseRepair.bug_info = {
+                PulseRepair.ptr_expr = ptr_exp;
+                ptr_var;
+                diag_trace = na.access_trace;
+                err_node; astate; av_opt;
+                analysis = analysis_data;
+            } in
+            PulseRepair.plan_and_log_if_unique ~proc_desc ~bug;
+            report analysis_data ~latent:false ~is_suppressed diagnostic;
+            if Diagnostic.aborts_execution path diagnostic
+            then Some (AbortProgram summary)
+            else None
+          | _ ->
+          report analysis_data ~latent:false ~is_suppressed diagnostic ;
+          (* 3. Proceed with the original, unmodified reporting logic for this path. *)
+          if Diagnostic.aborts_execution path diagnostic
+          then Some (AbortProgram summary)
+          else None(* Not an NPE, so no plans *)
+          end
       | `DelayReport latent_issue ->
           if is_suppressed then L.d_printfln "DelayReport suppressed error" ;
           if Config.pulse_report_latent_issues then

@@ -10,17 +10,19 @@ module NodeSet = Stdlib.Set.Make(struct
   type t = Procdesc.Node.t
   let compare = Procdesc.Node.compare
 end)
+open PulseBasicInterface
+open PulseDomainInterface
 
 (* let idom = GDoms.compute_idom proc_desc (ProcCfg.Normal.start_node proc_desc) *)
 
 type 'payload bug_info = {
   ptr_expr   : Exp.t;
   ptr_var    : Var.t option;
-  diag_trace : PulseTrace.t;
+  diag_trace : Trace.t;
   err_node   : Procdesc.Node.t;
-  astate     : PulseAbductiveDomain.t;
+  astate     : AbductiveDomain.t;
   analysis: ('payload) InterproceduralAnalysis.t;
-  av_opt: PulseAbstractValue.t option;
+  av_opt: AbstractValue.t option;
 }
 
 (** A simple “reanalyze this proc and return true if no bug” callback *)
@@ -37,7 +39,7 @@ let compute_dereference_slice pdesc ptr_exp =
   Procdesc.iter_nodes
     (fun node ->
       let instrs = Procdesc.Node.get_instrs node in
-      (* 1. Find all temporary variables (idents) that are loaded with the value of our pointer *)
+      (* 1. ormatind all temporary variables (idents) that are loaded with the value of our pointer *)
       let idents_holding_pointer_value =
         Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc instr ->
             match instr with
@@ -67,6 +69,7 @@ let compute_dereference_slice pdesc ptr_exp =
     pdesc ;
   Procdesc.NodeSet.elements !deref_nodes |> List.sort ~compare:Procdesc.Node.compare
 
+(* 
 
 let insert_skip_or_evade_guard pdesc ~guard_node ~ptr =
   (* Helper for detailed node logging *)
@@ -152,7 +155,7 @@ let insert_skip_or_evade_guard pdesc ~guard_node ~ptr =
       pp_node_summary_log "[repair] SAFE-NODE (replaces target)" safe_node ;
       pp_node_summary_log "[repair] NEW JOIN" join_node ;
       
-      true ))
+      true )) *)
 
 let verify_and_commit reanalyze pdesc =
   if reanalyze pdesc then true else false
@@ -160,57 +163,57 @@ let verify_and_commit reanalyze pdesc =
 (** 1. Stack aliases: normalize each local’s addr before comparing to [rep]. *)
 let collect_stack_aliases
     ~(proc: Procdesc.t)
-    (astate: PulseAbductiveDomain.t)
-    (rep_raw: PulseAbstractValue.t)
+    (astate: AbductiveDomain.t)
+    (rep_raw: AbstractValue.t)
   : (Var.t * Exp.t) list =
   let acc = ref [] in
   let pname = Procdesc.get_proc_name proc in
   (* compute the canonical representative of rep_raw, then downcast back *)
-  let rep_can = PulseAbductiveDomain.CanonValue.canon' astate rep_raw in
-  let rep = PulseAbductiveDomain.CanonValue.downcast rep_can in
+  let rep_can = AbductiveDomain.CanonValue.canon' astate rep_raw in
+  let rep = AbductiveDomain.CanonValue.downcast rep_can in
   Procdesc.get_locals proc
   |> List.iter ~f:(fun var_data ->
        let pvar = Pvar.mk var_data.ProcAttributes.name pname in
        let v = Var.of_pvar pvar in
-       match PulseAbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
+       match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
        | None -> ()
        | Some vo ->
            let addr_raw, _hist = PulseValueOrigin.addr_hist vo in
            (* canonicalize and downcast *)
-           let addr_can = PulseAbductiveDomain.CanonValue.canon' astate addr_raw in
-           let addr = PulseAbductiveDomain.CanonValue.downcast addr_can in
-           if PulseAbstractValue.equal rep addr then
+           let addr_can = AbductiveDomain.CanonValue.canon' astate addr_raw in
+           let addr = AbductiveDomain.CanonValue.downcast addr_can in
+           if AbstractValue.equal rep addr then
              acc := (v, Exp.Lvar pvar) :: !acc
      ) ;
   !acc
 
 (** Collect all heap aliases of [rep_raw] by walking the post‐heap graph. *)
 let collect_heap_aliases
-    (astate: PulseAbductiveDomain.t)
-    (rep_raw: PulseAbstractValue.t)
-  : PulseAbstractValue.t list =
+    (astate: AbductiveDomain.t)
+    (rep_raw: AbstractValue.t)
+  : AbstractValue.t list =
   (* Build a Seq.t of one element *)
-  let seed_seq : PulseAbstractValue.t Seq.t = Seq.cons rep_raw Seq.empty in
-  (* reachable_addresses_from returns a PulseAbstractValue.Set.t *)
-  let raw_set : PulseAbstractValue.Set.t =
-    PulseAbductiveDomain.reachable_addresses_from
+  let seed_seq : AbstractValue.t Seq.t = Seq.cons rep_raw Seq.empty in
+  (* reachable_addresses_from returns a AbstractValue.Set.t *)
+  let raw_set : AbstractValue.Set.t =
+    AbductiveDomain.reachable_addresses_from
       ~edge_filter:(fun _ -> true)
       seed_seq astate `Post
   in
   (* Convert the set to a list *)
-  let raw_list : PulseAbstractValue.t list = PulseAbstractValue.Set.elements raw_set in
+  let raw_list : AbstractValue.t list = AbstractValue.Set.elements raw_set in
   (* Canonicalize and downcast each, then dedupe *)
   raw_list
   |> List.map ~f:(fun av_raw ->
-       let can = PulseAbductiveDomain.CanonValue.canon' astate av_raw in
-       PulseAbductiveDomain.CanonValue.downcast can )
-  |> List.dedup_and_sort ~compare:PulseAbstractValue.compare
+       let can = AbductiveDomain.CanonValue.canon' astate av_raw in
+       AbductiveDomain.CanonValue.downcast can )
+  |> List.dedup_and_sort ~compare:AbstractValue.compare
 
 (** Given the pointer Var.t that we recorded in bug.ptr_var, look up its
     current abstract address in the [astate]. *)
-let get_ptr_address ~(astate: PulseAbductiveDomain.t) (v: Var.t)
-  : PulseAbstractValue.t option =
-  match PulseAbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
+let get_ptr_address ~(astate: AbductiveDomain.t) (v: Var.t)
+  : AbstractValue.t option =
+  match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
   | None ->
       None
   | Some vo ->
@@ -231,7 +234,7 @@ let is_dereference_of ~ptr instr =
 let node_dereferences_ptr ptr node =
   Instrs.exists (Procdesc.Node.get_instrs node) ~f:(is_dereference_of ~ptr)    
   
-let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
+(* let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
   let pname = Procdesc.get_proc_name proc_desc in
   let loc = Procdesc.Node.get_loc bug.err_node in
   let start = Procdesc.get_start_node proc_desc in
@@ -253,7 +256,7 @@ let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
     | None ->
         bug.av_opt
     | Some v -> (
-      match PulseAbductiveDomain.Stack.find_opt ~pre_or_post:`Post v bug.astate with
+      match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v bug.astate with
       | None ->
           None
       | Some vo ->
@@ -370,7 +373,7 @@ let apply_skip_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
       false ) )
   else (
     Logging.d_printfln "[repair] No guards could be inserted." ;
-    false )
+    false ) *)
   
 let is_provably_local ~proc_desc ~(bug : 'payload bug_info) =
   let ptr_exp_str = Format.asprintf "%a" Exp.pp bug.ptr_expr in
@@ -489,7 +492,7 @@ let find_last_def_site ~proc_desc ~ptr_var =
       result
 
 (* Helper 2: Insert the rebinding logic for the "fresh allocation" case. *)
-let insert_rebind_fresh proc_desc ~def_node ~ptr_pvar =
+(* let insert_rebind_fresh proc_desc ~def_node ~ptr_pvar =
   let loc = Procdesc.Node.get_loc def_node in
   let pname = Procdesc.get_proc_name proc_desc in
   
@@ -545,8 +548,8 @@ let apply_replace_repair ~proc_desc ~bug ~reanalyze =
             if not verified then
               L.d_printfln "[repair] REPLACE: Verification FAILED (as expected without multi-stage pipeline).";
             verified )
-          else false ) )
-
+          else false ) ) *)
+(* 
 let try_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
   if is_provably_local ~proc_desc ~bug then (
     L.d_printfln "[repair] Pointer %a is local. Attempting REPLACE repair." Exp.pp bug.ptr_expr ;
@@ -557,4 +560,411 @@ let try_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
   else (
     L.d_printfln "[repair] Pointer %a is not local. Applying SKIP repair." Exp.pp bug.ptr_expr ;
     apply_skip_repair ~proc_desc ~bug ~reanalyze 
+  ) *)
+
+type repair_plan =
+| Skip of {
+    lca_node: Procdesc.Node.t;
+    pointer_exprs: Exp.t list; (* List of pointers guarded by this LCA *)
+    slice_nodes: Procdesc.Node.t list;
+  }
+| Evade of {
+    proc_start_node: Procdesc.Node.t;
+    pointer_expr: Exp.t;
+  }
+| Replace of {
+    def_site_node: Procdesc.Node.t;
+    pvar: Pvar.t;
+    pvar_typ: Typ.t;
+  }
+
+let logged_repairs_cache : repair_plan list ref = ref []
+let last_proc_name = ref (Procname.from_string_c_fun "")
+(* This function clears the cache when we start a new procedure *)
+let clear_cache_if_new_proc (current_proc_name : Procname.t) =
+  if not (Procname.equal !last_proc_name current_proc_name) then (
+    L.d_printfln "[repair] New procedure %a, clearing repair cache." Procname.pp current_proc_name;
+    (* Just reset the list to empty *)
+    logged_repairs_cache := [];
+    last_proc_name := current_proc_name
   )
+
+let report_repair_plan proc_desc plan =
+  let proc_name = Procdesc.get_proc_name proc_desc in
+  match plan with
+  | Skip {lca_node; pointer_exprs; slice_nodes} ->
+      let guard_ptr_expr = List.hd_exn pointer_exprs in
+      let line_nums = List.map slice_nodes ~f:(fun n -> (Procdesc.Node.get_loc n).line) in
+      let min_line = List.min_elt line_nums ~compare:Int.compare |> Option.value ~default:0 in
+      let max_line = List.max_elt line_nums ~compare:Int.compare |> Option.value ~default:0 in
+      L.d_printfln "[repair-plan]--- PULSE REPAIR PLAN ---" ;
+      L.d_printfln "[repair-plan]PROCEDURE: %a" Procname.pp proc_name ;
+      L.d_printfln "[repair-plan]STRATEGY: SKIP" ;
+      L.d_printfln "[repair-plan]ACTION: Guard the code block from line ~%d to ~%d at node %d (LCA)."
+        min_line max_line (Procdesc.Node.get_id lca_node :> int) ;
+      L.d_printfln "[repair-plan]        with the condition: if (%a != NULL) { ... }" Exp.pp guard_ptr_expr;
+      L.d_printfln "[repair-plan]        This guard protects pointers: [%a]" (Pp.seq ~sep:", " Exp.pp) pointer_exprs;
+      L.d_printfln "[repair-plan]--------------------------"
+| Evade {proc_start_node; pointer_expr} ->
+    L.d_printfln "[repair-plan]--- PULSE REPAIR PLAN ---" ;
+    L.d_printfln "[repair-plan]PROCEDURE: %a" Procname.pp proc_name ;
+    L.d_printfln "[repair-plan]STRATEGY: EVADE" ;
+    L.d_printfln "[repair-plan]ACTION: At the start of the function (node %d), insert an early return." (Procdesc.Node.get_id proc_start_node :> int);
+    L.d_printfln "[repair-plan]        Insert logic: if (%a == NULL) return;" Exp.pp pointer_expr;
+    L.d_printfln "[repair-plan]--------------------------"
+| Replace {def_site_node; pvar; pvar_typ} ->
+    L.d_printfln "[repair-plan]--- PULSE REPAIR PLAN ---" ;
+    L.d_printfln "[repair-plan]PROCEDURE: %a" Procname.pp proc_name ;
+    L.d_printfln "[repair-plan]STRATEGY: REPLACE" ;
+    L.d_printfln "[repair-plan]TARGET POINTER: %a" (Pvar.pp Pp.text) pvar;
+    L.d_printfln "[repair-plan]ACTION: At definition site node %d, modify the assignment." (Procdesc.Node.get_id def_site_node :> int) ;
+    L.d_printfln "[repair-plan]        Transform '%a = NULL;' to 'if (%a == NULL) { %a = &fresh_var; }'"
+      (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar;
+    L.d_printfln "[repair-plan]        (where fresh_var has type: %a)" (Typ.pp_full Pp.text) pvar_typ;
+    L.d_printfln "[repair-plan]--------------------------"
+
+(** This is a powerful helper. Given a trace and the top-level procedure it started from,
+    it finds the final dereference location and checks if THAT dereference is guarded in its
+    own function. *)
+(* let is_dereference_guarded_in_callee (top_pdesc: Procdesc.t) (trace: Trace.t) : bool =
+  let rec find_guarded_deref_in_trace (current_pdesc: Procdesc.t) (trace: Trace.t) =
+    match trace with
+    | Immediate {location; _} ->
+        let node_opt =
+          List.find (Procdesc.get_nodes current_pdesc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) location)
+        in
+        ( match node_opt with
+          | None -> false
+          | Some node ->
+              List.exists (Procdesc.Node.get_preds node) ~f:(fun pred_node ->
+                match Procdesc.Node.get_kind pred_node with
+                | Prune_node (true, _, _) -> true
+                | _ -> false ) )
+    | ViaCall {f; in_call; _} ->
+        let callee_pdesc_opt =
+          match (f: CallEvent.t) with
+          | Call pname | ModelName pname | SkippedKnownCall pname -> Procdesc.load pname
+          | _ -> None
+        in
+        match callee_pdesc_opt with
+        | None -> false
+        | Some callee_pdesc -> find_guarded_deref_in_trace callee_pdesc in_call
+  in
+  (* Start the traversal from the top-level procedure that was passed in. *)
+  find_guarded_deref_in_trace top_pdesc trace *)
+
+let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) : repair_plan list =
+  (* let pname = Procdesc.get_proc_name proc_desc in *)
+  let start = Procdesc.get_start_node proc_desc in
+  let idom = GDoms.compute_idom proc_desc start in
+
+  let lca x y =
+    let rec collect_ancestors n acc =
+      let acc' = Procdesc.NodeSet.add n acc in
+      if Procdesc.Node.equal n start then acc' else collect_ancestors (idom n) acc'
+    in
+    let anc_x = collect_ancestors x Procdesc.NodeSet.empty in
+    let rec climb m = if Procdesc.NodeSet.mem m anc_x then m else climb (idom m) in
+    climb y
+  in
+
+(* Checks if a dereference is already protected by a non-null check. *)
+  let is_guarded_by_preds (node: Procdesc.Node.t) (guarded_idents: Ident.Set.t) (ptr_exp: Exp.t) =
+    List.exists (Procdesc.Node.get_preds node) ~f:(fun pred_node ->
+      match Procdesc.Node.get_kind pred_node with
+      | Prune_node (true, _, _) ->
+          Instrs.exists (Procdesc.Node.get_instrs pred_node) ~f:(fun instr ->
+            match instr with
+            | Sil.Prune (cond, _, _, _) ->
+                (* This is the only case we care about. Check the condition. *)
+                if Exp.equal cond ptr_exp || Exp.equal cond (Exp.ne ptr_exp Exp.null) then 
+                  true
+                else (
+                  match cond with
+                  | Exp.Var id -> Ident.Set.mem id guarded_idents
+                  | _ -> false
+                )
+            | _ -> false
+          )
+      | _ -> false
+    )
+  in
+
+  (* Checks if `node` is dominated by `dominator`. *)
+  let is_dominated_by ~dominator ~node =
+    let rec climb current =
+      if Procdesc.Node.equal current dominator then true
+      else
+        let parent = idom current in
+        if Procdesc.Node.equal parent current then false else climb parent
+    in
+    climb node
+  in
+
+    (* This version correctly finds the final crash site and uses it to determine
+     if the node in question is a safe, intermediate step on the trace. *)
+  let is_semantically_safe_on_trace (node: Procdesc.Node.t) (trace: Trace.t) : bool =
+    let node_loc = Procdesc.Node.get_loc node in
+
+    (* Step 1: Find the location of the immediate, final crash. *)
+    let rec get_immediate_crash_location = function
+      | Trace.Immediate {location; _} -> Some location
+      | Trace.ViaCall {in_call; _} -> get_immediate_crash_location in_call
+    in
+    let final_crash_loc_opt = get_immediate_crash_location trace in
+
+    match final_crash_loc_opt with
+    | None ->
+        (* Should not happen on a valid bug trace, but as a safeguard,
+            if we can't find the crash, we can't prove anything is safe. *)
+        false
+    | Some final_crash_loc ->
+        (* A node is safe if it is NOT the final crash site.
+            We can simply check if the node's location is the final one. *)
+        if Location.equal node_loc final_crash_loc then
+          (* This node IS the final crash site. It is NOT safe. *)
+          false
+        else
+          (* This node is NOT the final crash site. Now we just need to confirm
+              it actually appears somewhere on the trace to be considered a relevant
+              (and therefore safe) intermediate step. *)
+          let rec is_on_trace = function
+            | Trace.Immediate {location; _} -> Location.equal node_loc location
+            | Trace.ViaCall {location; in_call; _} ->
+                Location.equal node_loc location || is_on_trace in_call
+          in
+          is_on_trace trace
+        in
+
+  let rep_opt =
+    match bug.ptr_var with
+    | None -> bug.av_opt
+    | Some v -> get_ptr_address ~astate:bug.astate v
+  in
+  let stack_aliases =
+    match rep_opt with
+    | None -> []
+    | Some rep -> collect_stack_aliases ~proc:proc_desc bug.astate rep
+  in
+  L.d_printfln "[repair-plan] ptr=%a, stack_aliases=%d" Exp.pp bug.ptr_expr (List.length stack_aliases);
+
+  let all_ptrs_to_guard =
+    let initial_ptr = (bug.ptr_var |> Option.value_map ~f:Var.to_exp ~default:bug.ptr_expr) in
+    let alias_exps = List.map stack_aliases ~f:snd in
+    List.dedup_and_sort ~compare:Exp.compare (initial_ptr :: alias_exps)
+  in
+  
+  (* This is the read-only core of the original `apply_skip_repair` function *)
+
+  let lca_map =
+    let lca_to_ptr_list =
+      List.filter_map all_ptrs_to_guard ~f:(fun ptr_exp ->
+        let syntactic_slice =
+          Procdesc.fold_nodes proc_desc ~init:Procdesc.NodeSet.empty ~f:(fun acc node ->
+              let instrs = Procdesc.Node.get_instrs node in
+              let idents_holding_pointer =
+                Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc' instr ->
+                  match instr with
+                  | Sil.Load {id; e; _} when Exp.equal e ptr_exp -> Ident.Set.add id acc'
+                  | _ -> acc' )
+              in
+
+              (* --- BEGIN DEFINITIVE has_usage LOGIC --- *)
+              let has_usage =
+                Instrs.exists instrs ~f:(fun instr ->
+                  match instr with
+                  (* Case A: Dereference of a temporary variable (e.g., *tmp) *)
+                  | Sil.Load {e=Exp.Var id; _} | Sil.Store {e1=Exp.Var id; _} ->
+                      if Ident.Set.mem id idents_holding_pointer then
+                        not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
+                      else false
+
+                  (* Case B: Direct dereference of the program variable (e.g., *x) *)
+                  | Sil.Load {e; _} when Exp.equal e ptr_exp ->
+                      not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
+                  | Sil.Store {e1; _} when Exp.equal e1 ptr_exp ->
+                      not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
+
+                  (* Case C: Call using the pointer either directly or via a temporary *)
+                  | Sil.Call (_, _, args, _, _) ->
+                      let is_call_to_check =
+                        List.exists args ~f:(fun (arg, _) ->
+                          if Exp.equal arg ptr_exp then true
+                          else match arg with Exp.Var id -> Ident.Set.mem id idents_holding_pointer | _ -> false )
+                      in
+                      if is_call_to_check then
+                        not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
+                      else false
+                  | _ -> false )
+              in
+              (* --- END DEFINITIVE has_usage LOGIC --- *)
+
+              if has_usage then Procdesc.NodeSet.add node acc else acc )
+          |> Procdesc.NodeSet.elements
+        in
+        (* --- Vett the slice using the new SEMANTIC check --- *)
+        let semantic_slice =
+          List.filter syntactic_slice ~f:(fun node ->
+            (* A node is kept in the slice if it is NOT semantically safe. *)
+            not (is_semantically_safe_on_trace node bug.diag_trace)
+          )
+        in
+
+        let sanitized_slice = 
+          List.filter semantic_slice ~f:(fun n -> Procdesc.Node.equal n start || not (List.is_empty (Procdesc.Node.get_preds n))) in
+        
+        (* --- STEP 3: Proceed with LCA and Adjustment on the clean, semantic slice --- *)
+        match sanitized_slice with
+        | [] -> None
+        | first :: rest ->
+            let lca_node = List.fold rest ~init:first ~f:lca in
+            let adjusted_lca_node =
+              match Procdesc.Node.get_kind lca_node with
+              | Prune_node _ -> (
+                  match Procdesc.Node.get_succs lca_node with
+                  | [then_branch_start] ->
+                      if List.for_all sanitized_slice ~f:(fun slice_node -> is_dominated_by ~dominator:then_branch_start ~node:slice_node) then (
+                        L.d_printfln "[repair-plan] Adjusting LCA from Prune node %a to successor %a"
+                          Procdesc.Node.pp lca_node Procdesc.Node.pp then_branch_start;
+                        then_branch_start )
+                      else lca_node
+                  | _ -> lca_node )
+              | _ -> lca_node
+            in
+            L.d_printfln "[repair-plan] alias %a has slice of size %d, final guard at node %a"
+              Exp.pp ptr_exp (List.length sanitized_slice) Procdesc.Node.pp adjusted_lca_node;
+            Some (adjusted_lca_node, (ptr_exp, sanitized_slice)) )
+    in
+    List.fold lca_to_ptr_list ~init:Procdesc.NodeMap.empty ~f:(fun map (lca_node, (ptr_exp, slice)) ->
+    let existing_pointers, existing_slice = Procdesc.NodeMap.find_opt lca_node map |> Option.value ~default:([], []) in
+    let new_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare (List.append slice existing_slice) in
+    Procdesc.NodeMap.add lca_node (ptr_exp :: existing_pointers, new_slice) map )
+    in
+    
+    Procdesc.NodeMap.bindings lca_map
+    |> List.map ~f:(fun (lca_node, map_value) ->
+        let pointer_exprs, slice_nodes = map_value in
+        if Procdesc.Node.equal lca_node start then
+          Evade {proc_start_node = lca_node; pointer_expr = List.hd_exn pointer_exprs}
+        else
+          Skip {lca_node; pointer_exprs; slice_nodes} )
+
+let get_pvar_type proc_desc pvar =
+  let locals = Procdesc.get_locals proc_desc in
+  List.find_map locals ~f:(fun (var_data: ProcAttributes.var_data) ->
+    if Mangled.equal var_data.name (Pvar.get_name pvar) then Some var_data.typ else None
+  )
+
+(** This function performs the analysis part of `apply_replace_repair` *)
+let plan_replace_repair proc_desc (bug : 'payload bug_info) : repair_plan list =
+  let open IOption.Let_syntax in
+  let plan_opt =
+    let* ptr_var = bug.ptr_var in
+    let* pvar = Var.get_pvar ptr_var in
+    let* def_site = find_last_def_site ~proc_desc ~ptr_var:pvar in
+    let+ pvar_typ = get_pvar_type proc_desc pvar in
+    Replace {def_site_node= def_site; pvar; pvar_typ}
+  in
+  Option.to_list plan_opt
+
+(* Helper to define equality between two plans for deduplication *)
+let equal_repair_plan p1 p2 =
+  match (p1, p2) with
+  | Skip r1, Skip r2 -> Procdesc.Node.equal r1.lca_node r2.lca_node
+  | Evade r1, Evade r2 -> Procdesc.Node.equal r1.proc_start_node r2.proc_start_node
+  | Replace r1, Replace r2 -> Procdesc.Node.equal r1.def_site_node r2.def_site_node
+  | _, _ -> false
+
+(* let compare_repair_plan p1 p2 =
+  match (p1, p2) with
+  | Skip r1, Skip r2 -> Procdesc.Node.compare r1.lca_node r2.lca_node
+  | Evade r1, Evade r2 -> Procdesc.Node.compare r1.proc_start_node r2.proc_start_node
+  | Replace r1, Replace r2 -> Procdesc.Node.compare r1.def_site_node r2.def_site_node
+  (* Define an arbitrary but consistent order for different kinds of plans. *)
+  | Skip _, _ -> -1
+  | _, Skip _ -> 1
+  | Evade _, _ -> -1
+  | _, Evade _ -> 1 *)
+
+(** Performs a reverse lookup to find the program variable in a given procedure
+that corresponds to a given abstract value. *)
+(* let find_pvar_for_abstract_value ~proc_desc ~astate (av_target: AbstractValue.t) : Pvar.t option =
+
+  let local_names =
+    List.map (Procdesc.get_locals proc_desc) ~f:(fun (var_data: ProcAttributes.var_data) -> var_data.name)
+  in
+  let formal_names =
+    List.map (Procdesc.get_formals proc_desc) ~f:(fun (name, _typ, _annot) -> name)
+  in
+  let all_var_names = local_names @ formal_names in
+  
+  let p_name = Procdesc.get_proc_name proc_desc in
+  List.find_map all_var_names ~f:(fun var_name ->
+    let pvar = Pvar.mk var_name p_name in
+    match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post (Var.of_pvar pvar) astate with
+    | None -> None
+    | Some vo ->
+        let av_actual, _history = PulseValueOrigin.addr_hist vo in
+        if AbstractValue.equal av_target av_actual then Some pvar else None
+  ) *)
+
+(* let rec get_final_callee_pdesc_loc (current_pdesc: Procdesc.t) (trace: Trace.t) : (Procdesc.t * Location.t) =
+  match trace with
+  | Immediate {location; _} ->
+      (* Base case: The trace ends here. The location is in the current procedure. *)
+      (current_pdesc, location)
+  | ViaCall {f; in_call; _} ->
+      (* Recursive step: The trace continues inside a callee. *)
+      let callee_proc_name_opt =
+        match (f : CallEvent.t) with
+        | Call proc_name | ModelName proc_name | SkippedKnownCall proc_name ->
+            (* These cases all provide a procname we can try to load. *)
+            Some proc_name
+        | Model _ | SkippedUnknownCall _ ->
+            (* These cases do not have a procname we can load. Stop traversal. *)
+            None
+      in
+      match callee_proc_name_opt with
+      | None ->
+          (* This can happen for calls to function pointers or other indirect calls.
+              It's safest to stop here and use the current context. *)
+          (current_pdesc, Trace.get_outer_location trace)
+      | Some callee_proc_name ->
+          (* We found the name of the callee. Now we must load its proc_desc. *)
+          match Procdesc.load callee_proc_name with
+          | None ->
+              (* This is rare, but could happen if the callee's source is not available.
+                  Safest to stop here. *)
+              L.d_printfln "[repair] Could not load proc_desc for %a" Procname.pp callee_proc_name;
+              (current_pdesc, Trace.get_outer_location trace)
+          | Some callee_pdesc ->
+              (* SUCCESS: We have the callee's procedure. Recurse into the rest of the trace. *)
+              get_final_callee_pdesc_loc callee_pdesc in_call *)
+
+let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
+  clear_cache_if_new_proc (Procdesc.get_proc_name proc_desc);
+  
+  (* `plans` is now correctly a list, preserving your multi-LCA design. *)
+  let plans : repair_plan list =
+    if is_provably_local ~proc_desc ~bug then (
+      let replace_plans = plan_replace_repair proc_desc bug in
+      if not (List.is_empty replace_plans) then
+        replace_plans
+      else (
+        L.d_printfln "[repair-plan] REPLACE planning failed. Falling back to SKIP/EVADE.";
+        plan_skip_or_evade_repair proc_desc bug
+      )
+    ) else (
+      plan_skip_or_evade_repair proc_desc bug
+    )
+  in
+  
+  (* The rest of the function iterates through the generated list of plans. *)
+  List.iter plans ~f:(fun plan ->
+    if not (List.mem !logged_repairs_cache plan ~equal:equal_repair_plan) then (
+      L.d_printfln "[repair] Found new unique plan.";
+      report_repair_plan proc_desc plan;
+      logged_repairs_cache := plan :: !logged_repairs_cache
+    )
+  )
+      

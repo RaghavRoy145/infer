@@ -1,5 +1,8 @@
 open! IStd
 open Graph
+open PulseBasicInterface
+open PulseDomainInterface
+
 module L = Logging
 module CFG = ProcCfg.Normal
 
@@ -10,10 +13,61 @@ module NodeSet = Stdlib.Set.Make(struct
   type t = Procdesc.Node.t
   let compare = Procdesc.Node.compare
 end)
-open PulseBasicInterface
-open PulseDomainInterface
 
-(* let idom = GDoms.compute_idom proc_desc (ProcCfg.Normal.start_node proc_desc) *)
+module PostDominators = struct
+  (* 1. Use the Exceptional CFG. Its type `t` will be a tuple. *)
+  module ReversedCFG = ProcCfg.Backward (ProcCfg.Exceptional)
+
+  (* 2. Adapt to the OcamlGraph interface. *)
+  module ReversedOcamlGraph = ProcCfg.MakeOcamlGraph (ReversedCFG)
+
+  (*
+    3. Build the final adapter for the Dominators functor.
+       THIS IS THE CRITICAL CHANGE. We now define the graph type `t` to be the
+       actual tuple type from the exceptional graph.
+  *)
+  module DominatorGraph :
+    Dominator.G with type t = ReversedOcamlGraph.t and type V.t = Procdesc.Node.t = struct
+    (* The graph type `t` IS the tuple from ReversedOcamlGraph. *)
+    type t = ReversedOcamlGraph.t
+    module V = ReversedOcamlGraph.V
+
+    (* These functions already correctly expect the tuple type. *)
+    let pred = ReversedOcamlGraph.pred
+    let succ = ReversedOcamlGraph.succ
+
+    let get_all_nodes pdesc =
+      let start_node = Procdesc.get_start_node pdesc in
+      let exit_node = Procdesc.get_exit_node pdesc in
+      let all_nodes = Procdesc.get_nodes pdesc in
+      let complete_nodes = start_node :: exit_node :: all_nodes in
+      List.dedup_and_sort ~compare:Procdesc.Node.compare complete_nodes
+
+    (*
+      Now, we fix our manual functions to also expect the tuple.
+      We destructure the tuple `g` to get the `pdesc` we need.
+    *)
+    let fold_vertex f g acc =
+      let pdesc, _ = g in
+      List.fold (get_all_nodes pdesc) ~init:acc ~f:(fun acc' node -> f node acc')
+
+    let iter_vertex f g =
+      let pdesc, _ = g in
+      List.iter (get_all_nodes pdesc) ~f
+
+    let nb_vertex g =
+      let pdesc, _ = g in
+      List.length (get_all_nodes pdesc)
+
+    let iter_succ f g v = ReversedOcamlGraph.iter_succ f g v
+  end
+
+  (* 4. Create the analysis module. It is now guaranteed to be consistent. *)
+  module D = Dominator.Make (DominatorGraph)
+
+  (* 5. Expose the compute function. *)
+  let compute_idom = D.compute_idom
+end
 
 type 'payload bug_info = {
   ptr_expr   : Exp.t;
@@ -162,30 +216,41 @@ let verify_and_commit reanalyze pdesc =
 
 (** 1. Stack aliases: normalize each local’s addr before comparing to [rep]. *)
 let collect_stack_aliases
-    ~(proc: Procdesc.t)
     (astate: AbductiveDomain.t)
     (rep_raw: AbstractValue.t)
   : (Var.t * Exp.t) list =
-  let acc = ref [] in
-  let pname = Procdesc.get_proc_name proc in
-  (* compute the canonical representative of rep_raw, then downcast back *)
-  let rep_can = AbductiveDomain.CanonValue.canon' astate rep_raw in
-  let rep = AbductiveDomain.CanonValue.downcast rep_can in
-  Procdesc.get_locals proc
-  |> List.iter ~f:(fun var_data ->
-       let pvar = Pvar.mk var_data.ProcAttributes.name pname in
-       let v = Var.of_pvar pvar in
-       match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
-       | None -> ()
-       | Some vo ->
-           let addr_raw, _hist = PulseValueOrigin.addr_hist vo in
-           (* canonicalize and downcast *)
-           let addr_can = AbductiveDomain.CanonValue.canon' astate addr_raw in
-           let addr = AbductiveDomain.CanonValue.downcast addr_can in
-           if AbstractValue.equal rep addr then
-             acc := (v, Exp.Lvar pvar) :: !acc
-     ) ;
-  !acc
+  (* 1. Canonicalize the abstract value of the pointer we are looking for. *)
+  let canonical_rep_to_match =
+    let canon_v = AbductiveDomain.CanonValue.canon' astate rep_raw in
+    AbductiveDomain.CanonValue.downcast canon_v
+  in
+  (* 2. Fold over the ENTIRE abstract stack. *)
+  AbductiveDomain.Stack.fold
+    (fun stack_var value_origin acc ->
+      (*
+        FIX #2 & #3: The value is a `ValueOrigin.t`. We must deconstruct it
+        to get the abstract value (`stack_av`).
+      *)
+      let stack_av, _ = ValueOrigin.addr_hist value_origin in
+      (* 3. For each variable on the stack, get its canonical representative. *)
+      let current_var_canonical_rep =
+        let canon_v = AbductiveDomain.CanonValue.canon' astate stack_av in
+        AbductiveDomain.CanonValue.downcast canon_v
+      in
+      (* 4. If they match, we have found an alias. *)
+      if PulseBasicInterface.AbstractValue.equal canonical_rep_to_match current_var_canonical_rep
+      then (
+        (*
+          FIX #4: `Var.get_pvar` returns an option. We must handle the `None`
+          case where a stack variable is not a program variable.
+        *)
+        match Var.get_pvar stack_var with
+        | Some pvar ->
+            (stack_var, Exp.Lvar pvar) :: acc
+        | None ->
+            acc )
+      else acc )
+    astate []
 
 (** Collect all heap aliases of [rep_raw] by walking the post‐heap graph. *)
 let collect_heap_aliases
@@ -564,9 +629,10 @@ let try_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
 
 type repair_plan =
 | Skip of {
-    lca_node: Procdesc.Node.t;
-    pointer_exprs: Exp.t list; (* List of pointers guarded by this LCA *)
-    slice_nodes: Procdesc.Node.t list;
+    lca_node : Procdesc.Node.t;
+    join_node : Procdesc.Node.t; (* Add this field *)
+    pointer_exprs : Exp.t list;
+    slice_nodes : Procdesc.Node.t list;
   }
 | Evade of {
     proc_start_node: Procdesc.Node.t;
@@ -653,6 +719,20 @@ let report_repair_plan proc_desc plan =
   (* Start the traversal from the top-level procedure that was passed in. *)
   find_guarded_deref_in_trace top_pdesc trace *)
 
+(*
+  For a given bug trace, finds the location of the call in the *current*
+  procedure that is the entry point to the crashing trace.
+*)
+(* let get_top_level_call_location (trace : Trace.t) : Location.t option =
+  match trace with
+  | Immediate {location; _} ->
+      (* This is an intra-procedural crash. The top-level location is the crash itself. *)
+      Some location
+  | ViaCall {location; _} ->
+      (* This is an inter-procedural crash. The location of the ViaCall is exactly
+         what we need—it's the call site in the current function. *)
+      Some location *)
+
 let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) : repair_plan list =
   (* let pname = Procdesc.get_proc_name proc_desc in *)
   let start = Procdesc.get_start_node proc_desc in
@@ -701,6 +781,44 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) : repair_plan 
     climb node
   in
 
+  let compute_ipdom proc_desc =
+    let exit_node = Procdesc.get_exit_node proc_desc in
+    (*
+      `from_pdesc` from the Exceptional CFG view creates the required tuple
+      of `(Procdesc.t * exceptional_edge_map)`. This is the graph instance.
+    *)
+    let reversed_graph_instance = PostDominators.ReversedCFG.from_pdesc proc_desc in
+    PostDominators.compute_idom reversed_graph_instance exit_node
+  in
+
+
+  let lcpd ipdom_fun x y =
+    let safe_get_parent node =
+      try Some (ipdom_fun node)
+      (*
+        Catch the wildcard exception '_'. This will catch ANY exception that
+        occurs during the call to `ipdom_fun`, including raw exceptions from
+        C++ bindings or other unexpected OCaml exceptions.
+      *)
+      with _ -> None
+    in
+  
+    let rec collect_ancestors n acc =
+      let acc' = Procdesc.NodeSet.add n acc in
+      match safe_get_parent n with
+      | Some parent when not (Procdesc.Node.equal n parent) ->
+          collect_ancestors parent acc'
+      | _ ->
+          acc'
+    in
+    let anc_x = collect_ancestors x Procdesc.NodeSet.empty in
+    let rec climb m =
+      if Procdesc.NodeSet.mem m anc_x then m
+      else match safe_get_parent m with Some parent -> climb parent | None -> m
+    in
+    climb y
+  in
+
     (* This version correctly finds the final crash site and uses it to determine
      if the node in question is a safe, intermediate step on the trace. *)
   let is_semantically_safe_on_trace (node: Procdesc.Node.t) (trace: Trace.t) : bool =
@@ -738,27 +856,89 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) : repair_plan 
 
   let rep_opt =
     match bug.ptr_var with
-    | None -> bug.av_opt
-    | Some v -> get_ptr_address ~astate:bug.astate v
+      | None -> bug.av_opt
+      | Some v -> get_ptr_address ~astate:bug.astate v
   in
   let stack_aliases =
     match rep_opt with
-    | None -> []
-    | Some rep -> collect_stack_aliases ~proc:proc_desc bug.astate rep
+      | None -> []
+      | Some rep -> collect_stack_aliases bug.astate rep
   in
+  
   L.d_printfln "[repair-plan] ptr=%a, stack_aliases=%d" Exp.pp bug.ptr_expr (List.length stack_aliases);
+
+  (* Performs a simple, syntactic scan of the procedure to find direct aliases.
+  It takes a set of known pointer expressions and finds other variables that
+  are assigned to or from them. It iterates until no new aliases are found. *)
+  let find_syntactic_aliases proc_desc (initial_ptrs : Exp.t list) : Exp.t list =
+    (* Step 1: Build a map from temporary identifiers to the program variables they were loaded from. *)
+    let ident_map =
+      Procdesc.fold_instrs proc_desc ~init:Ident.Map.empty ~f:(fun map _node instr ->
+          match instr with
+          | Sil.Load {id; e= Exp.Lvar pvar; _} ->
+              Ident.Map.add id pvar map
+          | _ ->
+              map )
+    in
+    (*
+      Step 2: Build a graph of alias relationships, correctly handling both
+      direct assignments (pvar1 = pvar2) and assignments through a temp (pvar1 = temp).
+    *)
+    let alias_graph =
+      Procdesc.fold_instrs proc_desc ~init:Pvar.Map.empty ~f:(fun graph _node instr ->
+          let add_edge p1 p2 g =
+            let s1 = Pvar.Map.find_opt p1 g |> Option.value ~default:Pvar.Set.empty in
+            let s2 = Pvar.Map.find_opt p2 g |> Option.value ~default:Pvar.Set.empty in
+            g |> Pvar.Map.add p1 (Pvar.Set.add p2 s1) |> Pvar.Map.add p2 (Pvar.Set.add p1 s2)
+          in
+          match instr with
+          | Sil.Store {e1= Exp.Lvar pvar_dest; e2= Exp.Lvar pvar_src; _} ->
+              add_edge pvar_dest pvar_src graph
+          | Sil.Store {e1= Exp.Lvar pvar_dest; e2= Exp.Var ident; _} -> (
+            match Ident.Map.find_opt ident ident_map with
+            | Some pvar_src ->
+                add_edge pvar_dest pvar_src graph
+            | None ->
+                graph )
+          | _ ->
+              graph )
+    in
+    (* Step 3: Find the transitive closure (all connected aliases) for our initial pointers. *)
+    let initial_pvars =
+      List.filter_map initial_ptrs ~f:(function Exp.Lvar pvar -> Some pvar | _ -> None)
+    in
+    let rec find_all_connected worklist seen =
+      match worklist with
+      | [] ->
+          seen
+      | pvar :: rest ->
+          let neighbors =
+            Pvar.Map.find_opt pvar alias_graph |> Option.value ~default:Pvar.Set.empty
+          in
+          let new_worklist =
+            Pvar.Set.fold
+              (fun neighbor acc -> if Pvar.Set.mem neighbor seen then acc else neighbor :: acc)
+              neighbors []
+          in
+          find_all_connected (List.rev_append new_worklist rest) (Pvar.Set.add pvar seen)
+    in
+    let all_aliased_pvars = find_all_connected initial_pvars Pvar.Set.empty in
+    Pvar.Set.elements all_aliased_pvars |> List.map ~f:(fun pvar -> Exp.Lvar pvar) 
+  in
 
   let all_ptrs_to_guard =
     let initial_ptr = (bug.ptr_var |> Option.value_map ~f:Var.to_exp ~default:bug.ptr_expr) in
-    let alias_exps = List.map stack_aliases ~f:snd in
-    List.dedup_and_sort ~compare:Exp.compare (initial_ptr :: alias_exps)
+    (* First, get semantic aliases from the astate (for complex cases). *)
+    let semantic_alias_exps = List.map stack_aliases ~f:snd in
+    let known_ptrs = List.dedup_and_sort ~compare:Exp.compare (initial_ptr :: semantic_alias_exps) in
+    (* Then, use the syntactic collector to find aliases defined after the crash point. *)
+    find_syntactic_aliases proc_desc known_ptrs
   in
-  
-  (* This is the read-only core of the original `apply_skip_repair` function *)
-
+    
   let lca_map =
     let lca_to_ptr_list =
       List.filter_map all_ptrs_to_guard ~f:(fun ptr_exp ->
+
         let syntactic_slice =
           Procdesc.fold_nodes proc_desc ~init:Procdesc.NodeSet.empty ~f:(fun acc node ->
               let instrs = Procdesc.Node.get_instrs node in
@@ -768,24 +948,23 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) : repair_plan 
                   | Sil.Load {id; e; _} when Exp.equal e ptr_exp -> Ident.Set.add id acc'
                   | _ -> acc' )
               in
-
-              (* --- BEGIN DEFINITIVE has_usage LOGIC --- *)
               let has_usage =
                 Instrs.exists instrs ~f:(fun instr ->
                   match instr with
-                  (* Case A: Dereference of a temporary variable (e.g., *tmp) *)
                   | Sil.Load {e=Exp.Var id; _} | Sil.Store {e1=Exp.Var id; _} ->
                       if Ident.Set.mem id idents_holding_pointer then
+                        (* We must call is_guarded_by_preds here! *)
                         not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
                       else false
-
-                  (* Case B: Direct dereference of the program variable (e.g., *x) *)
                   | Sil.Load {e; _} when Exp.equal e ptr_exp ->
-                      not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
-                  | Sil.Store {e1; _} when Exp.equal e1 ptr_exp ->
-                      not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
-
-                  (* Case C: Call using the pointer either directly or via a temporary *)
+                      not (is_guarded_by_preds node Ident.Set.empty ptr_exp)
+                  | Sil.Store {e1; _} -> (
+                    match e1 with
+                    | Exp.Lvar _ -> false
+                    | _ ->
+                        if Exp.equal e1 ptr_exp then
+                          not (is_guarded_by_preds node Ident.Set.empty ptr_exp)
+                        else false )
                   | Sil.Call (_, _, args, _, _) ->
                       let is_call_to_check =
                         List.exists args ~f:(fun (arg, _) ->
@@ -797,57 +976,136 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) : repair_plan 
                       else false
                   | _ -> false )
               in
-              (* --- END DEFINITIVE has_usage LOGIC --- *)
-
               if has_usage then Procdesc.NodeSet.add node acc else acc )
           |> Procdesc.NodeSet.elements
         in
-        (* --- Vett the slice using the new SEMANTIC check --- *)
-        let semantic_slice =
-          List.filter syntactic_slice ~f:(fun node ->
-            (* A node is kept in the slice if it is NOT semantically safe. *)
-            not (is_semantically_safe_on_trace node bug.diag_trace)
-          )
-        in
 
-        let sanitized_slice = 
-          List.filter semantic_slice ~f:(fun n -> Procdesc.Node.equal n start || not (List.is_empty (Procdesc.Node.get_preds n))) in
-        
-        (* --- STEP 3: Proceed with LCA and Adjustment on the clean, semantic slice --- *)
-        match sanitized_slice with
-        | [] -> None
-        | first :: rest ->
-            let lca_node = List.fold rest ~init:first ~f:lca in
-            let adjusted_lca_node =
-              match Procdesc.Node.get_kind lca_node with
-              | Prune_node _ -> (
-                  match Procdesc.Node.get_succs lca_node with
-                  | [then_branch_start] ->
-                      if List.for_all sanitized_slice ~f:(fun slice_node -> is_dominated_by ~dominator:then_branch_start ~node:slice_node) then (
-                        L.d_printfln "[repair-plan] Adjusting LCA from Prune node %a to successor %a"
-                          Procdesc.Node.pp lca_node Procdesc.Node.pp then_branch_start;
-                        then_branch_start )
-                      else lca_node
-                  | _ -> lca_node )
-              | _ -> lca_node
+
+        (* 2. Now, we refine this list based on the type of bug trace. *)
+        let semantic_slice =
+          match bug.diag_trace with
+          | Trace.ViaCall {location=crash_loc; _} ->
+              (
+                (*
+                  INTER-PROCEDURAL CASE: Here, we do NOT need the syntactic_slice.
+                  We know the exact location of the single problematic call site.
+                  So, we find that one node directly for efficiency.
+                *)
+                L.d_printfln "[repair-plan] Inter-procedural crash. Targeting call site at %a"
+                  Location.pp crash_loc;
+                List.filter (Procdesc.get_nodes proc_desc) ~f:(fun node ->
+                    Location.equal (Procdesc.Node.get_loc node) crash_loc ) )
+          | Trace.Immediate _ ->
+              (
+                (*
+                  INTRA-PROCEDURAL CASE: Here, the syntactic_slice is CRITICAL.
+                  It gives us the list of candidate nodes that might be crashing.
+                  We then filter THIS LIST to get the final set of nodes to guard.
+                  This is much more efficient than re-scanning all nodes.
+                *)
+                L.d_printfln "[repair-plan] Intra-procedural crash. Vetting syntactic slice.";
+                List.filter syntactic_slice ~f:(fun node ->
+                    (* Keep the node if it's not semantically safe (i.e., it's a real crash) *)
+                    not (is_semantically_safe_on_trace node bug.diag_trace) ) )
+        in
+      let final_slice_for_this_ptr = semantic_slice in
+
+      (* Step 2: Find the LCA for this pointer's individual slice. *)
+      match final_slice_for_this_ptr with
+      | [] -> None
+      | first :: rest ->
+          let lca_node = List.fold rest ~init:first ~f:lca in
+          let adjusted_lca_node =
+            match Procdesc.Node.get_kind lca_node with
+            | Prune_node _ -> (
+                match Procdesc.Node.get_succs lca_node with
+                | [then_branch_start] ->
+                    if List.for_all final_slice_for_this_ptr ~f:(fun slice_node -> is_dominated_by ~dominator:then_branch_start ~node:slice_node) then (
+                      L.d_printfln "[repair-plan] Adjusting LCA from Prune node %a to successor %a"
+                        Procdesc.Node.pp lca_node Procdesc.Node.pp then_branch_start;
+                      then_branch_start )
+                    else lca_node
+                | _ -> lca_node )
+            | _ -> lca_node
+          in
+          L.d_printfln "[repair-plan] alias %a has slice of size %d, final guard at node %a"
+            Exp.pp ptr_exp (List.length final_slice_for_this_ptr) Procdesc.Node.pp adjusted_lca_node;
+          Some (adjusted_lca_node, (ptr_exp, final_slice_for_this_ptr)) )
+      in
+      (* Step 3: Group the pointers and their slices by their common LCA key. This forms the clusters. *)
+      List.fold lca_to_ptr_list ~init:Procdesc.NodeMap.empty
+      ~f:(fun map (lca_node, (ptr_exp, slice)) ->
+        let existing_pointers, existing_slice =
+          Procdesc.NodeMap.find_opt lca_node map |> Option.value ~default:([], [])
+        in
+        let new_slice = List.rev_append slice existing_slice in
+        Procdesc.NodeMap.add lca_node (ptr_exp :: existing_pointers, new_slice) map )
+      in
+
+    (* Step 4: Generate a separate, minimal repair plan for each cluster found in the map *)
+      let ipdom_fun = lazy (compute_ipdom proc_desc) in
+
+      let find_correct_scope (slice : Procdesc.Node.t list) =
+        let ipdom_fun = Lazy.force ipdom_fun in
+        (* Helper to find the immediate dominator of a node. *)
+        let idom_fun = idom in
+      
+        (* For a given node, climb the dominator tree to find the nearest enclosing Prune node (if/loop condition). *)
+        let get_enclosing_prune_opt node =
+          let rec climb current =
+            if Procdesc.Node.equal current start then None
+            else
+              let parent = idom_fun current in
+              match Procdesc.Node.get_kind parent with Prune_node _ -> Some parent | _ -> climb parent
+          in
+          climb node
+        in
+        (*
+          Find the highest "common" prune node that encloses the entire slice.
+          We do this by finding the enclosing prune for the LCA of the slice.
+        *)
+        let lca_of_slice =
+          let first = List.hd_exn slice in
+          let rest = List.tl_exn slice in
+          List.fold rest ~init:first ~f:lca
+        in
+        match get_enclosing_prune_opt lca_of_slice with
+        | Some prune_node ->
+            (*
+              The slice is inside a control structure. The scope is the structure itself.
+              Start Node: The Prune node (the `if` condition).
+              End Node: The immediate post-dominator of the Prune node (the "join" node after the `if`).
+            *)
+            (prune_node, ipdom_fun prune_node)
+        | None ->
+            (*
+              The slice is not in a common control structure. The scope is simply the
+              LCA of the slice and the post-dominator (LCPD) of the slice.
+            *)
+            let lcpd_of_slice =
+              let first = List.hd_exn slice in
+              let rest = List.tl_exn slice in
+              List.fold rest ~init:first ~f:(lcpd ipdom_fun)
             in
-            L.d_printfln "[repair-plan] alias %a has slice of size %d, final guard at node %a"
-              Exp.pp ptr_exp (List.length sanitized_slice) Procdesc.Node.pp adjusted_lca_node;
-            Some (adjusted_lca_node, (ptr_exp, sanitized_slice)) )
-    in
-    List.fold lca_to_ptr_list ~init:Procdesc.NodeMap.empty ~f:(fun map (lca_node, (ptr_exp, slice)) ->
-    let existing_pointers, existing_slice = Procdesc.NodeMap.find_opt lca_node map |> Option.value ~default:([], []) in
-    let new_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare (List.append slice existing_slice) in
-    Procdesc.NodeMap.add lca_node (ptr_exp :: existing_pointers, new_slice) map )
-    in
-    
-    Procdesc.NodeMap.bindings lca_map
-    |> List.map ~f:(fun (lca_node, map_value) ->
-        let pointer_exprs, slice_nodes = map_value in
-        if Procdesc.Node.equal lca_node start then
-          Evade {proc_start_node = lca_node; pointer_expr = List.hd_exn pointer_exprs}
+            (lca_of_slice, lcpd_of_slice)
+          in
+      Procdesc.NodeMap.bindings lca_map
+      |> List.map ~f:(fun (_, (pointer_exprs, slice_nodes)) ->
+        let unique_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare slice_nodes in
+        if List.is_empty unique_slice then None
         else
-          Skip {lca_node; pointer_exprs; slice_nodes} )
+          let start_node, end_node =
+            (* Call the new, correct scope-finding logic on the cluster's unified slice. *)
+            find_correct_scope unique_slice
+          in
+          if Procdesc.Node.equal start_node start then
+            Some (Evade {proc_start_node = start_node; pointer_expr = List.hd_exn pointer_exprs})
+          else
+            ( L.d_printfln "[repair-plan] Found cluster with %d pointers. Scope: START=%a, END=%a"
+                (List.length pointer_exprs) Procdesc.Node.pp start_node Procdesc.Node.pp end_node;
+              Some
+                (Skip {lca_node = start_node; join_node = end_node; pointer_exprs; slice_nodes= unique_slice}) ) )
+    |> List.filter_map ~f:Fn.id (* To remove the None values from empty slices *)
 
 let get_pvar_type proc_desc pvar =
   let locals = Procdesc.get_locals proc_desc in

@@ -705,54 +705,6 @@ let report_repair_plan proc_desc plan =
     L.d_printfln "[repair-plan]        (where fresh_var has type: %a)" (Typ.pp_full Pp.text) pvar_typ;
     L.d_printfln "[repair-plan]--------------------------"
 
-(** This is a powerful helper. Given a trace and the top-level procedure it started from,
-    it finds the final dereference location and checks if THAT dereference is guarded in its
-    own function. *)
-(* let is_dereference_guarded_in_callee (top_pdesc: Procdesc.t) (trace: Trace.t) : bool =
-  let rec find_guarded_deref_in_trace (current_pdesc: Procdesc.t) (trace: Trace.t) =
-    match trace with
-    | Immediate {location; _} ->
-        let node_opt =
-          List.find (Procdesc.get_nodes current_pdesc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) location)
-        in
-        ( match node_opt with
-          | None -> false
-          | Some node ->
-              List.exists (Procdesc.Node.get_preds node) ~f:(fun pred_node ->
-                match Procdesc.Node.get_kind pred_node with
-                | Prune_node (true, _, _) -> true
-                | _ -> false ) )
-    | ViaCall {f; in_call; _} ->
-        let callee_pdesc_opt =
-          match (f: CallEvent.t) with
-          | Call pname | ModelName pname | SkippedKnownCall pname -> Procdesc.load pname
-          | _ -> None
-        in
-        match callee_pdesc_opt with
-        | None -> false
-        | Some callee_pdesc -> find_guarded_deref_in_trace callee_pdesc in_call
-  in
-  (* Start the traversal from the top-level procedure that was passed in. *)
-  find_guarded_deref_in_trace top_pdesc trace *)
-
-(*
-  For a given bug trace, finds the location of the call in the *current*
-  procedure that is the entry point to the crashing trace.
-*)
-(* let get_top_level_call_location (trace : Trace.t) : Location.t option =
-  match trace with
-  | Immediate {location; _} ->
-      (* This is an intra-procedural crash. The top-level location is the crash itself. *)
-      Some location
-  | ViaCall {location; _} ->
-      (* This is an inter-procedural crash. The location of the ViaCall is exactly
-         what we need—it's the call site in the current function. *)
-      Some location *)
-
-
-  (* Performs a simple, syntactic scan of the procedure to find direct aliases.
-  It takes a set of known pointer expressions and finds other variables that
-  are assigned to or from them. It iterates until no new aliases are found. *)
 let find_syntactic_aliases proc_desc (initial_ptrs : Exp.t list) : Exp.t list =
   (* Step 1: Build a map from temporary identifiers to the program variables they were loaded from. *)
   let ident_map =
@@ -896,37 +848,12 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) all_ptrs_to_gu
   
   L.d_printfln "[repair-plan] ptr=%a, stack_aliases=%d" Exp.pp bug.ptr_expr (List.length stack_aliases);
 
-
-
-  (* let all_ptrs_to_guard =
-    let initial_ptr = (bug.ptr_var |> Option.value_map ~f:Var.to_exp ~default:bug.ptr_expr) in
-    (* First, get semantic aliases from the astate (for complex cases). *)
-    let semantic_alias_exps = List.map stack_aliases ~f:snd in
-    let known_ptrs = List.dedup_and_sort ~compare:Exp.compare (initial_ptr :: semantic_alias_exps) in
-    (* Then, use the syntactic collector to find aliases defined after the crash point. *)
-    find_syntactic_aliases proc_desc known_ptrs
-  in *)
     (* Step 1: UNIFY the slice for the ENTIRE alias set first. This is the key. *)
   (* This new helper function fixes Flaw #1. It ONLY finds true dereferences. *)
   L.d_printfln "[repair-log] >>> Starting plan_skip_or_evade_repair for %a" Procname.pp
   (Procdesc.get_proc_name proc_desc) ;
   L.d_printfln "[repair-log] Initial `all_ptrs_to_guard` list: [%a]" (Pp.seq ~sep:", " Exp.pp)
     all_ptrs_to_guard ;
-  (* This new helper function is simple and correct. *)
-  (* let is_the_final_crash_site (node : Procdesc.Node.t) (trace : Trace.t) : bool =
-    let node_loc = Procdesc.Node.get_loc node in
-    let rec get_immediate_crash_location = function
-      | Trace.Immediate {location; _} ->
-          Some location
-      | Trace.ViaCall {in_call; _} ->
-          get_immediate_crash_location in_call
-    in
-    match get_immediate_crash_location trace with
-    | None ->
-        false
-    | Some final_crash_loc ->
-        Location.equal node_loc final_crash_loc
-  in *)
 
   (* This is the new, correct implementation that understands SIL's two-step dereference. *)
   let get_proven_crash_nodes ptr_exp =
@@ -1067,150 +994,6 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) all_ptrs_to_gu
   L.d_printfln "\n[repair-log] STAGE 1.1: Found a unified slice of %d proven crash node(s)."
     (List.length unified_crash_slice);
 
-  (* let unified_crash_slice =
-    List.concat_map all_ptrs_to_guard ~f:get_proven_crash_nodes
-    |> List.dedup_and_sort ~compare:Procdesc.Node.compare
-  in *)
-  (* Now, generate one candidate plan per cluster. This is still part of Stage 1. *)
-  (* let candidate_plans =
-    Procdesc.NodeMap.bindings lca_map
-    |> List.filter_map ~f:(fun (_, pointers_in_cluster) ->
-           (* Get all crash nodes for all pointers in this cluster. *)
-           let slice_nodes_for_cluster =
-             List.concat_map pointers_in_cluster ~f:(fun ptr ->
-                 List.Assoc.find_exn ptr_to_crashes_map ~equal:Exp.equal )
-             |> List.dedup_and_sort ~compare:Procdesc.Node.compare
-           in
-           if List.is_empty slice_nodes_for_cluster then None
-           else
-             let start_node, end_node = find_minimal_scope slice_nodes_for_cluster ipdom_fun in
-             if Procdesc.Node.equal start_node start then
-               Some (Evade {proc_start_node= start; pointer_expr= List.hd_exn pointers_in_cluster})
-             else
-               Some
-                 (Skip
-                    { lca_node= start_node
-                    ; join_node= end_node
-                    ; pointer_exprs= pointers_in_cluster
-                    ; slice_nodes= slice_nodes_for_cluster } ) )
-  in *)
-
-  (* let lca_map =
-    let lca_to_ptr_list =
-      List.filter_map all_ptrs_to_guard ~f:(fun ptr_exp ->
-
-        let syntactic_slice =
-          Procdesc.fold_nodes proc_desc ~init:Procdesc.NodeSet.empty ~f:(fun acc node ->
-              let instrs = Procdesc.Node.get_instrs node in
-              let idents_holding_pointer =
-                Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc' instr ->
-                  match instr with
-                  | Sil.Load {id; e; _} when Exp.equal e ptr_exp -> Ident.Set.add id acc'
-                  | _ -> acc' )
-              in
-              let has_usage =
-                Instrs.exists instrs ~f:(fun instr ->
-                  match instr with
-                  | Sil.Load {e=Exp.Var id; _} | Sil.Store {e1=Exp.Var id; _} ->
-                      if Ident.Set.mem id idents_holding_pointer then
-                        (* We must call is_guarded_by_preds here! *)
-                        not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
-                      else false
-                  | Sil.Load {e; _} when Exp.equal e ptr_exp ->
-                      not (is_guarded_by_preds node Ident.Set.empty ptr_exp)
-                  | Sil.Store {e1; _} -> (
-                    match e1 with
-                    | Exp.Lvar _ -> false
-                    | _ ->
-                        if Exp.equal e1 ptr_exp then
-                          not (is_guarded_by_preds node Ident.Set.empty ptr_exp)
-                        else
-                          match e1 with
-                          | Exp.Var id ->
-                              if Ident.Set.mem id idents_holding_pointer then
-                                not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
-                              else false
-                          | _ ->
-                              false )
-                  | Sil.Call (_, _, args, _, _) ->
-                      let is_call_to_check =
-                        List.exists args ~f:(fun (arg, _) ->
-                          if Exp.equal arg ptr_exp then true
-                          else match arg with Exp.Var id -> Ident.Set.mem id idents_holding_pointer | _ -> false )
-                      in
-                      if is_call_to_check then
-                        not (is_guarded_by_preds node idents_holding_pointer ptr_exp)
-                      else false
-                  | _ -> false )
-              in
-              if has_usage then Procdesc.NodeSet.add node acc else acc )
-          |> Procdesc.NodeSet.elements
-        in
-
-
-        (* 2. Now, we refine this list based on the type of bug trace. *)
-        let semantic_slice =
-          match bug.diag_trace with
-          | Trace.ViaCall {location=crash_loc; _} ->
-              (
-                (*
-                  INTER-PROCEDURAL CASE: Here, we do NOT need the syntactic_slice.
-                  We know the exact location of the single problematic call site.
-                  So, we find that one node directly for efficiency.
-                *)
-                L.d_printfln "[repair-plan] Inter-procedural crash. Targeting call site at %a"
-                  Location.pp crash_loc;
-                List.filter (Procdesc.get_nodes proc_desc) ~f:(fun node ->
-                    Location.equal (Procdesc.Node.get_loc node) crash_loc ) )
-          | Trace.Immediate _ ->
-              (
-                (*
-                  INTRA-PROCEDURAL CASE: Here, the syntactic_slice is CRITICAL.
-                  It gives us the list of candidate nodes that might be crashing.
-                  We then filter THIS LIST to get the final set of nodes to guard.
-                  This is much more efficient than re-scanning all nodes.
-                *)
-                L.d_printfln "[repair-plan] Intra-procedural crash. Vetting syntactic slice.";
-                List.filter syntactic_slice ~f:(fun node ->
-                    (* Keep the node if it's not semantically safe (i.e., it's a real crash) *)
-                    not (is_semantically_safe_on_trace node bug.diag_trace) ) )
-        in
-      let final_slice_for_this_ptr = semantic_slice in
-      (* let unified_slice =
-        List.concat_map all_ptrs_to_guard semantic_slice
-        |> List.dedup_and_sort ~compare:Procdesc.Node.compare
-      in *)
-      (* Step 2: Find the LCA for this pointer's individual slice. *)
-      match final_slice_for_this_ptr with
-      | [] -> None
-      | first :: rest ->
-          let lca_node = List.fold rest ~init:first ~f:lca in
-          let adjusted_lca_node =
-            match Procdesc.Node.get_kind lca_node with
-            | Prune_node _ -> (
-                match Procdesc.Node.get_succs lca_node with
-                | [then_branch_start] ->
-                    if List.for_all final_slice_for_this_ptr ~f:(fun slice_node -> is_dominated_by ~dominator:then_branch_start ~node:slice_node) then (
-                      L.d_printfln "[repair-plan] Adjusting LCA from Prune node %a to successor %a"
-                        Procdesc.Node.pp lca_node Procdesc.Node.pp then_branch_start;
-                      then_branch_start )
-                    else lca_node
-                | _ -> lca_node )
-            | _ -> lca_node
-          in
-          L.d_printfln "[repair-plan] alias %a has slice of size %d, final guard at node %a"
-            Exp.pp ptr_exp (List.length final_slice_for_this_ptr) Procdesc.Node.pp adjusted_lca_node;
-          Some (adjusted_lca_node, (ptr_exp, final_slice_for_this_ptr)) )
-      in
-      (* Step 3: Group the pointers and their slices by their common LCA key. This forms the clusters. *)
-      List.fold lca_to_ptr_list ~init:Procdesc.NodeMap.empty
-      ~f:(fun map (lca_node, (ptr_exp, slice)) ->
-        let existing_pointers, existing_slice =
-          Procdesc.NodeMap.find_opt lca_node map |> Option.value ~default:([], [])
-        in
-        let new_slice = List.rev_append slice existing_slice in
-        Procdesc.NodeMap.add lca_node (ptr_exp :: existing_pointers, new_slice) map )
-      in *)
 
     (* Step 4: Generate a separate, minimal repair plan for each cluster found in the map *)
       let is_post_dominated_by ~pdominator ~node ipdom_fun =
@@ -1223,35 +1006,7 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) all_ptrs_to_gu
         in
         climb node
       in
-      (* let find_minimal_scope (slice : Procdesc.Node.t list) ipdom_fun =
-        (* The start of the scope is the LCA of the entire slice. *)
-        let start_node =
-          let first = List.hd_exn slice in
-          let rest = List.tl_exn slice in
-          let lca_of_slice = List.fold rest ~init:first ~f:lca in
-          (* Apply the lca_adjustment logic to ensure we don't start inside an `if` condition. *)
-          match Procdesc.Node.get_kind lca_of_slice with
-          | Prune_node _ -> (
-            match Procdesc.Node.get_succs lca_of_slice with
-            | [then_branch_start]
-              when List.for_all slice ~f:(fun slice_node ->
-                       is_dominated_by ~dominator:then_branch_start ~node:slice_node ) ->
-                then_branch_start
-            | _ ->
-                lca_of_slice )
-          | _ ->
-              lca_of_slice
-        in
-        (* The end of the scope is the LCPD of the entire slice. *)
-        let end_node =
-          let ipdom_fun = Lazy.force ipdom_fun in
-          let lca_on_postdom_tree x y = lcpd ipdom_fun x y in
-          let first = List.hd_exn slice in
-          let rest = List.tl_exn slice in
-          List.fold rest ~init:first ~f:lca_on_postdom_tree
-        in
-        (start_node, end_node)
-      in *)
+
       let find_minimal_scope (slice : Procdesc.Node.t list) ipdom_fun =
         let slice_locs = List.map slice ~f:(fun n -> (Procdesc.Node.get_loc n).line) in
         L.d_printfln "[repair-scope] >> find_minimal_scope for slice with %d node(s) at C lines: [%a]"

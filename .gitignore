@@ -107,7 +107,7 @@ META-INF
 /infer/tests/.idea/workspace.xml
 /infer/tests/.idea/runConfigurations
 /infer/tests/.idea/copyright/profiles_settings.xml
-
+.idea
 # VS code
 .vscode/
 .lsp-buck-out/

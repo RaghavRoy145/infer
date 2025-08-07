@@ -43,10 +43,6 @@ module PostDominators = struct
       let complete_nodes = start_node :: exit_node :: all_nodes in
       List.dedup_and_sort ~compare:Procdesc.Node.compare complete_nodes
 
-    (*
-      Now, we fix our manual functions to also expect the tuple.
-      We destructure the tuple `g` to get the `pdesc` we need.
-    *)
     let fold_vertex f g acc =
       let pdesc, _ = g in
       List.fold (get_all_nodes pdesc) ~init:acc ~f:(fun acc' node -> f node acc')
@@ -227,10 +223,7 @@ let collect_stack_aliases
   (* 2. Fold over the ENTIRE abstract stack. *)
   AbductiveDomain.Stack.fold
     (fun stack_var value_origin acc ->
-      (*
-        FIX #2 & #3: The value is a `ValueOrigin.t`. We must deconstruct it
-        to get the abstract value (`stack_av`).
-      *)
+
       let stack_av, _ = ValueOrigin.addr_hist value_origin in
       (* 3. For each variable on the stack, get its canonical representative. *)
       let current_var_canonical_rep =
@@ -240,10 +233,7 @@ let collect_stack_aliases
       (* 4. If they match, we have found an alias. *)
       if PulseBasicInterface.AbstractValue.equal canonical_rep_to_match current_var_canonical_rep
       then (
-        (*
-          FIX #4: `Var.get_pvar` returns an option. We must handle the `None`
-          case where a stack variable is not a program variable.
-        *)
+
         match Var.get_pvar stack_var with
         | Some pvar ->
             (stack_var, Exp.Lvar pvar) :: acc
@@ -635,7 +625,9 @@ let try_repair ~proc_desc ~(bug : 'payload bug_info) ~reanalyze =
     L.d_printfln "[repair] Pointer %a is not local. Applying SKIP repair." Exp.pp bug.ptr_expr ;
     apply_skip_repair ~proc_desc ~bug ~reanalyze 
   ) *)
-
+type reuse_candidate = {
+    reused_pvar: Pvar.t; (* The variable to reuse, e.g., 'q' *)
+  }
 type repair_plan =
 | Skip of {
     lca_node : Procdesc.Node.t;
@@ -651,6 +643,7 @@ type repair_plan =
       { def_site_node: Procdesc.Node.t
       ; pvar: Pvar.t
       ; pvar_typ: Typ.t
+      ; reuse_info: reuse_candidate option
       ; all_aliases: Exp.t list (* Add this field *) }
 
 let logged_repairs_cache : repair_plan list ref = ref []
@@ -672,7 +665,6 @@ let report_repair_plan proc_desc plan =
       (* Get the line numbers from the calculated scope boundaries. *)
       let line1 = (Procdesc.Node.get_loc lca_node).line in
       let line2 = (Procdesc.Node.get_loc join_node).line in
-      (* THE FIX: Ensure start_line is always the smaller one. *)
       let start_line = min line1 line2 in
       let end_line = max line1 line2 in
 
@@ -694,15 +686,32 @@ let report_repair_plan proc_desc plan =
     L.d_printfln "[repair-plan]ACTION: At the start of the function (node %d), insert an early return." (Procdesc.Node.get_id proc_start_node :> int);
     L.d_printfln "[repair-plan]        Insert logic: if (%a == NULL) return;" Exp.pp pointer_expr;
     L.d_printfln "[repair-plan]--------------------------"
-| Replace {def_site_node; pvar; pvar_typ} ->
+| Replace {def_site_node; pvar; pvar_typ; reuse_info} ->
+    let def_line = (Procdesc.Node.get_loc def_site_node).line in
     L.d_printfln "[repair-plan]--- PULSE REPAIR PLAN ---" ;
     L.d_printfln "[repair-plan]PROCEDURE: %a" Procname.pp proc_name ;
     L.d_printfln "[repair-plan]STRATEGY: REPLACE" ;
     L.d_printfln "[repair-plan]TARGET POINTER: %a" (Pvar.pp Pp.text) pvar;
-    L.d_printfln "[repair-plan]ACTION: At definition site node %d, modify the assignment." (Procdesc.Node.get_id def_site_node :> int) ;
-    L.d_printfln "[repair-plan]        Transform '%a = NULL;' to 'if (%a == NULL) { %a = &fresh_var; }'"
+
+    (* Option 1: Always show the "assign-fresh" strategy *)
+    L.d_printfln "[repair-plan]OPTION 1 (Assign Fresh):" ;
+    L.d_printfln "[repair-plan]  ACTION: At definition site on line %d, modify the assignment." def_line;
+    L.d_printfln "[repair-plan]          (Definition site is node %d)" (Procdesc.Node.get_id def_site_node :> int);
+    L.d_printfln "[repair-plan]          Transform '%a = NULL;' to 'if (%a == NULL) { %a = &fresh_var; }'"
       (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar;
-    L.d_printfln "[repair-plan]        (where fresh_var has type: %a)" (Typ.pp_full Pp.text) pvar_typ;
+    L.d_printfln "[repair-plan]          (where fresh_var has type: %a)" (Typ.pp_full Pp.text) pvar_typ;
+
+    (* Option 2: Conditionally show the "reuse-existing" strategy *)
+    ( match reuse_info with
+    | None -> ()
+    | Some {reused_pvar} ->
+        L.d_printfln "[repair-plan]OPTION 2 (Reuse Existing):" ;
+        L.d_printfln "[repair-plan]  ACTION: At definition site on line %d, modify the assignment." def_line;
+        L.d_printfln "[repair-plan]          Transform '%a = NULL;' to 'if (%a == NULL) { %a = %a; }'"
+            (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar
+            (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) reused_pvar;
+        L.d_printfln "[repair-plan]          (Reusing provably non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
+    ) ;
     L.d_printfln "[repair-plan]--------------------------"
 
 let find_syntactic_aliases proc_desc (initial_ptrs : Exp.t list) : Exp.t list =
@@ -848,8 +857,8 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) all_ptrs_to_gu
   
   L.d_printfln "[repair-plan] ptr=%a, stack_aliases=%d" Exp.pp bug.ptr_expr (List.length stack_aliases);
 
-    (* Step 1: UNIFY the slice for the ENTIRE alias set first. This is the key. *)
-  (* This new helper function fixes Flaw #1. It ONLY finds true dereferences. *)
+    (* Step 1: UNIFY the slice for the ENTIRE alias set first. *)
+
   L.d_printfln "[repair-log] >>> Starting plan_skip_or_evade_repair for %a" Procname.pp
   (Procdesc.get_proc_name proc_desc) ;
   L.d_printfln "[repair-log] Initial `all_ptrs_to_guard` list: [%a]" (Pp.seq ~sep:", " Exp.pp)
@@ -995,137 +1004,318 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) all_ptrs_to_gu
     (List.length unified_crash_slice);
 
 
-    (* Step 4: Generate a separate, minimal repair plan for each cluster found in the map *)
-      let is_post_dominated_by ~pdominator ~node ipdom_fun =
-        let ipdom_fun = Lazy.force ipdom_fun in
-        let rec climb current =
-          if Procdesc.Node.equal current pdominator then true
-          else
-            let parent = try ipdom_fun current with _ -> current in
-            if Procdesc.Node.equal parent current then false else climb parent
-        in
-        climb node
+  (* Step 4: Generate a separate, minimal repair plan for each cluster found in the map *)
+    let is_post_dominated_by ~pdominator ~node ipdom_fun =
+      let ipdom_fun = Lazy.force ipdom_fun in
+      let rec climb current =
+        if Procdesc.Node.equal current pdominator then true
+        else
+          let parent = try ipdom_fun current with _ -> current in
+          if Procdesc.Node.equal parent current then false else climb parent
+      in
+      climb node
+    in
+
+    let find_minimal_scope (slice : Procdesc.Node.t list) ipdom_fun =
+      let slice_locs = List.map slice ~f:(fun n -> (Procdesc.Node.get_loc n).line) in
+      L.d_printfln "[repair-scope] >> find_minimal_scope for slice with %d node(s) at C lines: [%a]"
+        (List.length slice) (Pp.seq ~sep:", " Int.pp) slice_locs;
+
+      let lca_of_slice, lcpd_of_slice =
+        match slice with
+        | [] ->
+            L.d_printfln "[repair-scope]    - Case: Empty slice. Returning procedure boundaries.";
+            (Procdesc.get_start_node proc_desc, Procdesc.get_exit_node proc_desc)
+        | first :: rest ->
+            L.d_printfln "[repair-scope]    - Case: Non-empty slice. Calculating overall LCA and LCPD.";
+            let lca_val = List.fold rest ~init:first ~f:lca in
+            let lcpd_fun = lcpd (Lazy.force ipdom_fun) in
+            let lcpd_val = List.fold rest ~init:first ~f:lcpd_fun in
+            (lca_val, lcpd_val)
       in
 
-      let find_minimal_scope (slice : Procdesc.Node.t list) ipdom_fun =
-        let slice_locs = List.map slice ~f:(fun n -> (Procdesc.Node.get_loc n).line) in
-        L.d_printfln "[repair-scope] >> find_minimal_scope for slice with %d node(s) at C lines: [%a]"
-          (List.length slice) (Pp.seq ~sep:", " Int.pp) slice_locs;
-
-        let lca_of_slice, lcpd_of_slice =
-          match slice with
-          | [] ->
-              L.d_printfln "[repair-scope]    - Case: Empty slice. Returning procedure boundaries.";
-              (Procdesc.get_start_node proc_desc, Procdesc.get_exit_node proc_desc)
-          | [node] ->
-              L.d_printfln "[repair-scope]    - Case: Single node. Finding immediate dominator and post-dominator.";
-              let pdom = (Lazy.force ipdom_fun) node in
-              (idom node, pdom)
-          | first :: rest ->
-              L.d_printfln "[repair-scope]    - Case: Multiple nodes. Calculating overall LCA and LCPD.";
-              let lca = List.fold rest ~init:first ~f:lca in
-              let lcpd_fun = lcpd (Lazy.force ipdom_fun) in
-              let lcpd_val = List.fold rest ~init:first ~f:lcpd_fun in
-              (lca, lcpd_val)
-        in
-
-        L.d_printfln "[repair-scope]    - Initial scope calculated: LCA node %a (line %d), LCPD node %a (line %d)"
-          Procdesc.Node.pp lca_of_slice (Procdesc.Node.get_loc lca_of_slice).line
-          Procdesc.Node.pp lcpd_of_slice (Procdesc.Node.get_loc lcpd_of_slice).line;
-
-        (* Apply the lca_adjustment logic to the calculated start node. *)
-        let start_node =
-          match Procdesc.Node.get_kind lca_of_slice with
-          | Prune_node _ -> (
-            match Procdesc.Node.get_succs lca_of_slice with
+      (* Adjust LCA to handle Prune nodes. *)
+      let start_node =
+        match Procdesc.Node.get_kind lca_of_slice with
+        | Prune_node _ ->
+            (match Procdesc.Node.get_succs lca_of_slice with
             | [then_branch_start]
               when List.for_all slice ~f:(fun slice_node ->
                        is_dominated_by ~dominator:then_branch_start ~node:slice_node ) ->
-                L.d_printfln "[repair-scope]    - Adjusting start node from Prune node %a to its successor %a."
-                  Procdesc.Node.pp lca_of_slice Procdesc.Node.pp then_branch_start;
+                L.d_printfln "[repair-scope]    - Adjusting start node from Prune node.";
                 then_branch_start
-            | _ -> lca_of_slice )
-          | _ -> lca_of_slice
+            | _ -> lca_of_slice)
+        | _ -> lca_of_slice
+      in
+
+      (* ADJUST LCPD: We want the end of the syntactic block. *)
+      let end_node =
+        (* Find the first node that is a post-dominator of the calculated LCPD.
+           This will find the exit node of the enclosing block. *)
+
+           (*COULD BE A POTENTIAL PROBLEM*) 
+        let find_end_node current_node =
+          let succs = Procdesc.Node.get_succs current_node in
+          match succs with
+          | [] -> current_node
+          | [next_node] ->
+              (* If the LCPD is a Prune node, we need to adjust it to the successor that post-dominates the slice. *)
+              (match Procdesc.Node.get_kind current_node with
+              | Prune_node _ ->
+                  (* let ipdom = Lazy.force ipdom_fun in *)
+
+                  let is_post_dom_of_slice n = List.for_all slice ~f:(fun sn -> is_post_dominated_by ~pdominator:n ~node:sn ipdom_fun) in
+                  if is_post_dom_of_slice next_node then
+                    next_node
+                  else
+                    current_node
+              | _ -> current_node)
+          | _ -> current_node
         in
+        find_end_node lcpd_of_slice
+      in
+
+      L.d_printfln "[repair-scope] << Returning final scope: start node %a (line %d), end node %a (line %d)"
+        Procdesc.Node.pp start_node (Procdesc.Node.get_loc start_node).line
+        Procdesc.Node.pp end_node (Procdesc.Node.get_loc end_node).line;
+
+      (start_node, end_node)
+    in
+    (* This new helper guarantees that the first element of the pair is the dominator. *)
+    let normalize_scope (node1, node2) =
+      if is_dominated_by ~dominator:node1 ~node:node2 then (node1, node2) else (node2, node1)
+    in
+
+    let is_strictly_contained_within scope1_raw scope2_raw =
+      let start1, end1 = normalize_scope scope1_raw in
+      let start2, end2 = normalize_scope scope2_raw in
+      if Procdesc.Node.equal start1 start2 && Procdesc.Node.equal end1 end2 then false
+      else
+        is_dominated_by ~dominator:start1 ~node:start2
+        && is_post_dominated_by ~pdominator:end1 ~node:end2 ipdom_fun
+    in
+          
+    let should_merge_scopes all_aliases scope1_raw scope2_raw =
+      let s1_loc, e1_loc = ((Procdesc.Node.get_loc (fst scope1_raw)).line, (Procdesc.Node.get_loc (snd scope1_raw)).line) in
+      let s2_loc, e2_loc = ((Procdesc.Node.get_loc (fst scope2_raw)).line, (Procdesc.Node.get_loc (snd scope2_raw)).line) in
+      L.d_printfln "\n[repair-merge-check] >> Checking if scopes [lines ~%d-%d] and [~%d-%d] should merge."
+        (min s1_loc e1_loc) (max s1_loc e1_loc) (min s2_loc e2_loc) (max s2_loc e2_loc);
+
+      let s1, e1 = normalize_scope scope1_raw in
+      let s2, e2 = normalize_scope scope2_raw in
+
+      (* Condition 1: Partial Overlap *)
+      let partial_overlap =
+        (is_dominated_by ~dominator:s1 ~node:s2 && is_post_dominated_by ~pdominator:e1 ~node:s2 ipdom_fun)
+        || (is_dominated_by ~dominator:s2 ~node:s1 && is_post_dominated_by ~pdominator:e2 ~node:s1 ipdom_fun)
+      in
+      L.d_printfln "[repair-merge-check]    - Partial overlap? %b" partial_overlap;
+
+      (* Helper to find external side effects *)
+      let has_external_side_effects (instr : Sil.instr) =
+        match instr with
+        (* | Prune _ | Metadata _ -> None | Load _ -> None *)
+        | Prune _ | Metadata _ -> None
+        | Load {e; _} | Store {e1= e; _} ->
+          (* A load or store is an external side effect ONLY if the address `e`
+             is NOT one of the pointers we are explicitly trying to guard.
+             If it *is* one of our pointers, it's part of the buggy behavior we want to skip. *)
+          let is_aliased_access = List.exists all_aliases ~f:(fun alias -> Exp.equal e alias) in
+          if is_aliased_access then
+            (* Not an EXTERNAL side effect, it's part of the bug. Benign for merging purposes. *)
+            Some instr
+          else
+            (* This is a memory access to an unrelated pointer. It's a side effect. *)
+            None
+        | Call (_, _, args, _, _) ->
+          if List.exists args ~f:(fun (arg_exp, _) -> not (Exp.is_const arg_exp)) then Some instr else None
+      in
+
+      (* Helper to check if all nodes BETWEEN a start and end node are benign. *)
+      let is_path_benign ~from_node ~to_node =
+        L.d_printfln "[repair-merge-check]      - Checking for benign path from node %a to node %a."
+          Procdesc.Node.pp from_node Procdesc.Node.pp to_node;
+        let all_proc_nodes = Procdesc.get_nodes proc_desc in
+        let nodes_between =
+          List.filter all_proc_nodes ~f:(fun n ->
+            not (Procdesc.Node.equal n from_node) && not (Procdesc.Node.equal n to_node) &&
+            is_dominated_by ~dominator:from_node ~node:n && is_post_dominated_by ~pdominator:to_node ~node:n ipdom_fun
+          )
+        in
+        L.d_printfln "[repair-merge-check]      - Found %d node(s) between the two scopes." (List.length nodes_between);
         
-        L.d_printfln "[repair-scope] << Returning final scope: start node %a (line %d), end node %a (line %d)"
-          Procdesc.Node.pp start_node (Procdesc.Node.get_loc start_node).line
-          Procdesc.Node.pp lcpd_of_slice (Procdesc.Node.get_loc lcpd_of_slice).line;
-
-        (start_node, lcpd_of_slice)
-      in
-      (* This new helper guarantees that the first element of the pair is the dominator. *)
-      let normalize_scope (node1, node2) =
-        if is_dominated_by ~dominator:node1 ~node:node2 then (node1, node2) else (node2, node1)
-      in
-
-      let is_strictly_contained_within scope1_raw scope2_raw =
-        let start1, end1 = normalize_scope scope1_raw in
-        let start2, end2 = normalize_scope scope2_raw in
-        if Procdesc.Node.equal start1 start2 && Procdesc.Node.equal end1 end2 then false
-        else
-          is_dominated_by ~dominator:start1 ~node:start2
-          && is_post_dominated_by ~pdominator:end1 ~node:end2 ipdom_fun
-      in
-
-      let should_merge_scopes scope1_raw scope2_raw =
-        let s1, e1 = normalize_scope scope1_raw in
-        let s2, e2 = normalize_scope scope2_raw in
-
-        (* Condition 1: Partial Overlap (your original, correct logic).
-           This checks if the start of one scope is contained within the other. *)
-        let partial_overlap =
-          (is_dominated_by ~dominator:s1 ~node:s2 && is_post_dominated_by ~pdominator:e1 ~node:s2 ipdom_fun)
-          || (is_dominated_by ~dominator:s2 ~node:s1 && is_post_dominated_by ~pdominator:e2 ~node:s1 ipdom_fun)
-        in
-        (* Condition 2: Principled Adjacency.
-        Checks if the exit of one scope dominates the start of the other, which means
-        they are on the same sequential control-flow path. *)
-        let are_adjacent =
-          (* Case A: Scope 1 comes before Scope 2 *)
-          (is_dominated_by ~dominator:s1 ~node:s2 && is_dominated_by ~dominator:e1 ~node:s2)
-          (* Case B: Scope 2 comes before Scope 1 *)
-          || (is_dominated_by ~dominator:s2 ~node:s1 && is_dominated_by ~dominator:e2 ~node:s1)
+        (* Check if ANY of these intermediate nodes have a side effect. *)
+        let offending_node_and_instr =
+          List.find_map nodes_between ~f:(fun node ->
+            let offending_instr_opt =
+              Instrs.find_map (Procdesc.Node.get_instrs node) ~f:has_external_side_effects
+            in
+            match offending_instr_opt with
+            | None -> None
+            | Some instr -> Some (node, instr)
+          )
         in
 
-        partial_overlap || are_adjacent
+        match offending_node_and_instr with
+        | Some (node, instr) ->
+            L.d_printfln "[repair-merge-check]      - Path NOT benign. Found external side-effect in node %a: %a"
+              Procdesc.Node.pp node (Sil.pp_instr ~print_types:false Pp.text) instr;
+            false
+        | None ->
+            L.d_printfln "[repair-merge-check]      - Path is benign. No external side-effects found between scopes.";
+            true
       in
 
-      let merge_plans (plan1 : repair_plan) (plan2 : repair_plan) ipdom_fun : repair_plan =
-        match (plan1, plan2) with
-        | ( Skip {lca_node=s1; join_node=e1; pointer_exprs=p1; slice_nodes=n1}
-          , Skip {lca_node=s2; join_node=e2; pointer_exprs=p2; slice_nodes=n2} ) ->
-            let new_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare (n1 @ n2) in
-            let new_lca = lca s1 s2 in
-            let new_join = lcpd (Lazy.force ipdom_fun) e1 e2 in
-            let new_pointers = List.dedup_and_sort ~compare:Exp.compare (p1 @ p2) in
-            Skip {lca_node=new_lca; join_node=new_join; pointer_exprs=new_pointers; slice_nodes=new_slice}
-        | _ ->
-            (* Should not happen if we only try to merge Skip plans. *)
-            plan1 
+      (* Condition 2: Principled Adjacency (Sequentiality). *)
+      let are_sequential =
+        L.d_printfln "[repair-merge-check]    - Checking for sequentiality...";
+        if is_dominated_by ~dominator:e1 ~node:s2 then
+          is_path_benign ~from_node:e1 ~to_node:s2
+        else if is_dominated_by ~dominator:e2 ~node:s1 then
+          is_path_benign ~from_node:e2 ~to_node:s1
+        else false
       in
+      L.d_printfln "[repair-merge-check]    - Are sequential? %b" are_sequential;
 
-      let candidate_plans =
-        List.filter_map unified_crash_slice ~f:(fun crash_node ->
-            let slice_for_this_node = [crash_node] in
-            let start_node, end_node = find_minimal_scope slice_for_this_node ipdom_fun in
+      let result = partial_overlap || are_sequential in
+      L.d_printfln "[repair-merge-check] << Should merge? %b" result;
+      result
+    in
+
+  let merge_plans (plan1 : repair_plan) (plan2 : repair_plan) ipdom_fun : repair_plan =
+    match (plan1, plan2) with
+    | ( Skip {lca_node=s1; join_node=e1; pointer_exprs=p1; slice_nodes=n1}
+      , Skip {lca_node=s2; join_node=e2; pointer_exprs=p2; slice_nodes=n2} ) ->
+        let s1_loc, e1_loc = ((Procdesc.Node.get_loc s1).line, (Procdesc.Node.get_loc e1).line) in
+        let s2_loc, e2_loc = ((Procdesc.Node.get_loc s2).line, (Procdesc.Node.get_loc e2).line) in
+        L.d_printfln "\n[repair-merge] >> Attempting to merge plan [lines %d-%d] with plan [lines %d-%d]"
+          (min s1_loc e1_loc) (max s1_loc e1_loc) (min s2_loc e2_loc) (max s2_loc e2_loc);
+
+        let new_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare (n1 @ n2) in
+        let new_pointers = List.dedup_and_sort ~compare:Exp.compare (p1 @ p2) in
+        
+        (*
+          Step 1: Calculate the initial merged scope from the UNION of crash sites, not the old boundaries.
+        *)
+        let initial_lca = lca s1 s2 in
+
+        (* The new join node is the one that is post-dominated by the other (i.e., the "latest" join). *)
+        let new_join =
+          L.d_printfln "[repair-merge-join] -- Deciding join node between e1=%a (line %d) and e2=%a (line %d)"
+            Procdesc.Node.pp e1 (Procdesc.Node.get_loc e1).line
+            Procdesc.Node.pp e2 (Procdesc.Node.get_loc e2).line;
+
+          let e1_postdoms_e2 = is_post_dominated_by ~pdominator:e1 ~node:e2 ipdom_fun in
+          L.d_printfln "[repair-merge-join]    - Does e1 post-dominate e2? %b" e1_postdoms_e2;
+
+          let e2_postdoms_e1 = is_post_dominated_by ~pdominator:e2 ~node:e1 ipdom_fun in
+          L.d_printfln "[repair-merge-join]    - Does e2 post-dominate e1? %b" e2_postdoms_e1;
+
+          if e1_postdoms_e2 then (
+            L.d_printfln "[repair-merge-join]    - Decision: e1 is the latest join. Using e1.";
+            e1 )
+          else if e2_postdoms_e1 then (
+            L.d_printfln "[repair-merge-join]    - Decision: e2 is the latest join. Using e2.";
+            e2 )
+            (*COULD BE A POTENTIAL PROBLEM*) 
+          else (* Fallback: Parallel branches. The true join is the IPDOM of the LCPD. *)
+          (
+            let lcpd_node = lcpd (Lazy.force ipdom_fun) e1 e2 in
+            L.d_printfln "[repair-merge-join]    - Fallback: Nodes are in parallel branches." ;
+            L.d_printfln "[repair-merge-join]    - Earliest rejoin point (LCPD) is node %a (line %d)."
+              Procdesc.Node.pp lcpd_node
+              (Procdesc.Node.get_loc lcpd_node).line ;
             
-            L.d_printfln "\n[repair-log] STAGE 1.2: Generating candidate plan for single crash node at line %d..."
-              (Procdesc.Node.get_loc crash_node).line;
-            L.d_printfln "[repair-log]   - Calculated minimal scope: start node %a (line %d), end node %a (line %d)"
-                Procdesc.Node.pp start_node (Procdesc.Node.get_loc start_node).line
-                Procdesc.Node.pp end_node (Procdesc.Node.get_loc end_node).line;
-    
-            if Procdesc.Node.equal start_node start then
-              Some (Evade {proc_start_node= start; pointer_expr= List.hd_exn all_ptrs_to_guard})
-            else
-              Some
-                (Skip
-                   { lca_node= start_node
-                   ; join_node= end_node
-                   ; pointer_exprs= all_ptrs_to_guard
-                   ; slice_nodes= slice_for_this_node } ) )
-      in
+            let ipdom = Lazy.force ipdom_fun in
+            let final_join_node = ipdom lcpd_node in
+
+            L.d_printfln
+              "[repair-merge-join]    - The true join is the IPDOM of the LCPD. Result is node %a (line %d)."
+              Procdesc.Node.pp final_join_node
+              (Procdesc.Node.get_loc final_join_node).line ;
+            final_join_node
+          )
+        in
+
+        L.d_printfln "[repair-merge]    - Initial merged scope from old boundaries: LCA node %a, Join node %a"
+          Procdesc.Node.pp initial_lca Procdesc.Node.pp new_join;
+        (*
+          Step 2: The existing, correct data-flow-awareness logic now runs on a sound initial scope.
+        *)
+        let is_inside_scope node =
+          is_dominated_by ~dominator:initial_lca ~node
+          && is_post_dominated_by ~pdominator:new_join ~node ipdom_fun
+        in
+        let trapped_decls =
+          Procdesc.fold_instrs proc_desc ~init:[] ~f:(fun acc node instr ->
+            if is_inside_scope node then
+              match instr with
+              | Sil.Store {e1=Exp.Lvar pvar; _} when Pvar.is_local pvar ->
+                  (* Find the FIRST time this local is assigned. *)
+                  if not (List.exists acc ~f:(Pvar.equal pvar)) then (
+                    L.d_printfln "[repair-merge]    - Found trapped local variable declaration: %a in node %a"                           
+                    (Pvar.pp Pp.text) pvar Procdesc.Node.pp node;
+                    pvar :: acc
+          ) else acc
+              | _ -> acc
+            else acc
+          )
+        in
+        let earliest_decl_node =
+          List.fold trapped_decls ~init:initial_lca ~f:(fun current_lca pvar ->
+            let all_nodes = Procdesc.get_nodes proc_desc in
+            let decl_node_opt =
+              List.find all_nodes ~f:(fun node ->
+                Instrs.exists (Procdesc.Node.get_instrs node) ~f:(function
+                  | Sil.Store {e1=Exp.Lvar p; _} -> Pvar.equal p pvar
+                  | _ -> false ) )
+            in
+  
+            match decl_node_opt with
+            | None ->
+                L.d_printfln "[repair-merge]    - WARNING: Could not find decl node for %a. This should not happen."
+                  (Pvar.pp Pp.text) pvar;
+                current_lca
+            | Some decl_node ->
+                L.d_printfln "[repair-merge]    - Declaration of %a is at node %a. Recalculating LCA."
+                  (Pvar.pp Pp.text) pvar Procdesc.Node.pp decl_node;
+                lca current_lca decl_node
+          )
+        in
+        let new_lca = earliest_decl_node in
+
+        if not (Procdesc.Node.equal new_lca new_lca) then
+          L.d_printfln "[repair-merge]    - Scope expanded! New LCA is node %a (line %d) to include declarations."
+            Procdesc.Node.pp new_lca (Procdesc.Node.get_loc new_lca).line;
+        
+        L.d_printfln "[repair-merge] << Finished merge. Final scope: [%a -> %a]"
+          Procdesc.Node.pp new_lca Procdesc.Node.pp new_join;
+
+        Skip {lca_node=new_lca; join_node=new_join; pointer_exprs=new_pointers; slice_nodes=new_slice}
+    | _ -> plan1
+        in
+
+    let candidate_plans =
+      List.filter_map unified_crash_slice ~f:(fun crash_node ->
+          let slice_for_this_node = [crash_node] in
+          let start_node, end_node = find_minimal_scope slice_for_this_node ipdom_fun in
+          
+          L.d_printfln "\n[repair-log] STAGE 1.2: Generating candidate plan for single crash node at line %d..."
+            (Procdesc.Node.get_loc crash_node).line;
+          L.d_printfln "[repair-log]   - Calculated minimal scope: start node %a (line %d), end node %a (line %d)"
+              Procdesc.Node.pp start_node (Procdesc.Node.get_loc start_node).line
+              Procdesc.Node.pp end_node (Procdesc.Node.get_loc end_node).line;
+  
+          if Procdesc.Node.equal start_node start then
+            Some (Evade {proc_start_node= start; pointer_expr= List.hd_exn all_ptrs_to_guard})
+          else
+            Some
+              (Skip
+                  { lca_node= start_node
+                  ; join_node= end_node
+                  ; pointer_exprs= all_ptrs_to_guard
+                  ; slice_nodes= slice_for_this_node } ) )
+    in
   (*********************************************************************************)
   (* Stage 2 & 3: Filter and Merge                             *)
   (*********************************************************************************)
@@ -1148,30 +1338,43 @@ let plan_skip_or_evade_repair proc_desc (bug : 'payload bug_info) all_ptrs_to_gu
         not is_enveloped )
   in
 
-  L.d_printfln "\n[repair-log] STEP 3: Merging %d filtered plan(s)." (List.length filtered_plans);
+  L.d_printfln "\n[repair-log] STEP 3: Merging %d filtered plan(s) using a fixed-point algorithm." (List.length filtered_plans);
+  
   let final_plans =
-    let rec merge_worklist (worklist : repair_plan list) (acc : repair_plan list) =
-      match worklist with
-      | [] ->
-          acc
-      | current_plan :: rest ->
-          let did_merge, merged_rest, new_plan =
-            List.fold rest ~init:(false, [], current_plan)
-              ~f:(fun (merged, remaining, plan_acc) other_plan ->
-                match (plan_acc, other_plan) with
-                | ( Skip {lca_node= s1; join_node= e1; _}, Skip {lca_node= s2; join_node= e2; _} ) ->
-                    (* CORRECTED CALL: Pass scopes as two separate arguments *)
-                    if not merged && should_merge_scopes (s1, e1) (s2, e2) then
-                      (L.d_printfln "[repair-log]   Merging two overlapping plans.";
-                      (true, remaining, merge_plans plan_acc other_plan ipdom_fun))
-                    else (merged, other_plan :: remaining, plan_acc)
-                | _ ->
-                    (merged, other_plan :: remaining, plan_acc) )
-          in
-          if did_merge then merge_worklist (new_plan :: merged_rest) acc
-          else merge_worklist rest (new_plan :: acc)
+    let rec merge_fixed_point plans_to_merge =
+      let rec find_and_merge_pair worklist acc =
+        match worklist with
+        | [] -> None (* No merge found in this pass *)
+        | current_plan :: rest ->
+            let found_merge =
+              List.find_map rest ~f:(fun other_plan ->
+                match (current_plan, other_plan) with
+                | (Skip {lca_node=s1; join_node=e1; _}, Skip {lca_node=s2; join_node=e2; _}) ->
+                    if should_merge_scopes all_ptrs_to_guard (s1, e1) (s2, e2) then
+                      let merged_plan = merge_plans current_plan other_plan ipdom_fun in
+                      let remaining_plans = List.filter rest ~f:(fun p -> not (phys_equal p other_plan)) in
+                      Some (merged_plan, acc @ remaining_plans)
+                    else None
+                | _ -> None
+              )
+            in
+            match found_merge with
+            | Some (new_plan, new_worklist) -> Some (new_plan :: new_worklist)
+            | None -> find_and_merge_pair rest (current_plan :: acc)
+      in
+
+      match find_and_merge_pair plans_to_merge [] with
+      | None ->
+          (* BASE CASE: No merges possible in a full pass. *)
+          L.d_printfln "[repair-log]   - Fixed-point reached. No more merges possible.";
+          plans_to_merge
+      | Some new_list ->
+          (* RECURSIVE STEP: A merge happened. Restart with the new list. *)
+          L.d_printfln "[repair-log]   - Merge successful. Restarting merge pass.";
+          merge_fixed_point new_list
     in
-    merge_worklist filtered_plans []
+    
+    merge_fixed_point filtered_plans
   in
   
   L.d_printfln "\n[repair-log] <<< Generated %d final plan(s)." (List.length final_plans);
@@ -1183,6 +1386,71 @@ let get_pvar_type proc_desc pvar =
     if Mangled.equal var_data.name (Pvar.get_name pvar) then Some var_data.typ else None
   )
 
+let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
+  let locals = Procdesc.get_locals proc_desc in
+  let proc_name = Procdesc.get_proc_name proc_desc in
+
+  (*
+    Step 1: Create a set of all local variables that are potential candidates.
+    This is more efficient than iterating through the list repeatedly.
+  *)
+  let local_pvar_candidates =
+    List.fold locals ~init:Pvar.Set.empty ~f:(fun acc (attrs : ProcAttributes.var_data) ->
+        if Typ.equal attrs.typ pvar_typ then
+          let pvar = Pvar.mk attrs.name proc_name in
+          if Pvar.equal pvar pvar_to_fix then acc else Pvar.Set.add pvar acc
+        else acc )
+  in
+  L.d_printfln "[repair-reuse-debug] >> Identified %d potential reuse candidates of the correct type."
+    (Pvar.Set.cardinal local_pvar_candidates);
+
+
+  (*
+    Step 2: Iterate through the stack (the analysis's ground truth) and find the first
+    variable that is in our candidate set and is provably non-null.
+  *)
+  L.d_printfln "[repair-reuse] >> Searching for a viable local variable by iterating through the abstract stack...";
+  AbductiveDomain.Stack.fold
+    (fun var vo found_opt ->
+      if Option.is_some found_opt then found_opt
+      else
+        match Var.get_pvar var with
+        | None ->
+            found_opt (* Not a program variable, skip *)
+        | Some pvar_in_stack when Pvar.Set.mem pvar_in_stack local_pvar_candidates -> (
+            (* This variable from the stack is one of our local candidates. Now check it. *)
+            L.d_printfln "[repair-reuse-debug] >> Found candidate '%a' in stack. Checking its status..."
+              (Pvar.pp Pp.text) pvar_in_stack;
+            let addr, history = (ValueOrigin.value vo, ValueOrigin.hist vo) in
+            L.d_printfln "[repair-reuse-debug]    - Addr: %a, History: %a"
+                AbstractValue.pp addr ValueHistory.pp history;
+            
+            let has_allocated_cell =
+              AbductiveDomain.find_post_cell_opt addr astate |> Option.is_some
+            in
+            (* let is_initialized =
+              (* Get the attribute map from the post-state, as shown in [check_all_valid] *)
+              let attributes = BaseDomain.attr in
+              (* Call the correct function from the snippet you provided *)
+              BaseAddressAttributes.get_must_be_initialized addr attributes |> Option.is_some
+            in *)
+
+            if has_allocated_cell then (
+              L.d_printfln "[repair-reuse-debug]   + SUCCESS: Candidate '%a' is allocated but CAN'T CONFIRM if initialized. Selecting it anyway."
+                (Pvar.pp Pp.text) pvar_in_stack;
+              Some {reused_pvar= pvar_in_stack} )
+            else (
+              L.d_printfln
+                "[repair-reuse-debug]    - FAILED: Candidate '%a' check failed: has_cell=%b, is_initialized=Can't confirm. Continuing search."
+                (Pvar.pp Pp.text) pvar_in_stack has_allocated_cell;
+              found_opt ) )
+        | Some pvar_in_stack ->
+            (* It's a pvar, but not one we're looking for *)
+            L.d_printfln "[repair-reuse-debug]    - Found pvar '%a' in stack, but it's not a candidate. Skipping."
+                (Pvar.pp Pp.text) pvar_in_stack;
+            found_opt
+      )
+    astate None
 (** This function performs the analysis part of `apply_replace_repair` *)
 let plan_replace_repair proc_desc (bug : 'payload bug_info) (all_aliases : Exp.t list) : repair_plan list =
   let open IOption.Let_syntax in
@@ -1195,7 +1463,11 @@ let plan_replace_repair proc_desc (bug : 'payload bug_info) (all_aliases : Exp.t
       The `all_aliases` list is now included in the final plan record.
       This makes the plan's data complete and available for the reporter.
     *)
-    Replace {def_site_node= def_site; pvar; pvar_typ; all_aliases}
+    L.d_printfln "[repair-reuse] >> Searching for a viable local variable to reuse...";
+    let reuse_candidate_opt =
+      find_reuse_candidate proc_desc bug.astate (pvar, pvar_typ)
+    in
+    Replace {def_site_node= def_site; pvar; pvar_typ; reuse_info= reuse_candidate_opt; all_aliases}
   in
   Option.to_list plan_opt
 
@@ -1206,72 +1478,6 @@ let equal_repair_plan p1 p2 =
   | Evade r1, Evade r2 -> Procdesc.Node.equal r1.proc_start_node r2.proc_start_node
   | Replace r1, Replace r2 -> Procdesc.Node.equal r1.def_site_node r2.def_site_node
   | _, _ -> false
-
-(* let compare_repair_plan p1 p2 =
-  match (p1, p2) with
-  | Skip r1, Skip r2 -> Procdesc.Node.compare r1.lca_node r2.lca_node
-  | Evade r1, Evade r2 -> Procdesc.Node.compare r1.proc_start_node r2.proc_start_node
-  | Replace r1, Replace r2 -> Procdesc.Node.compare r1.def_site_node r2.def_site_node
-  (* Define an arbitrary but consistent order for different kinds of plans. *)
-  | Skip _, _ -> -1
-  | _, Skip _ -> 1
-  | Evade _, _ -> -1
-  | _, Evade _ -> 1 *)
-
-(** Performs a reverse lookup to find the program variable in a given procedure
-that corresponds to a given abstract value. *)
-(* let find_pvar_for_abstract_value ~proc_desc ~astate (av_target: AbstractValue.t) : Pvar.t option =
-
-  let local_names =
-    List.map (Procdesc.get_locals proc_desc) ~f:(fun (var_data: ProcAttributes.var_data) -> var_data.name)
-  in
-  let formal_names =
-    List.map (Procdesc.get_formals proc_desc) ~f:(fun (name, _typ, _annot) -> name)
-  in
-  let all_var_names = local_names @ formal_names in
-  
-  let p_name = Procdesc.get_proc_name proc_desc in
-  List.find_map all_var_names ~f:(fun var_name ->
-    let pvar = Pvar.mk var_name p_name in
-    match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post (Var.of_pvar pvar) astate with
-    | None -> None
-    | Some vo ->
-        let av_actual, _history = PulseValueOrigin.addr_hist vo in
-        if AbstractValue.equal av_target av_actual then Some pvar else None
-  ) *)
-
-(* let rec get_final_callee_pdesc_loc (current_pdesc: Procdesc.t) (trace: Trace.t) : (Procdesc.t * Location.t) =
-  match trace with
-  | Immediate {location; _} ->
-      (* Base case: The trace ends here. The location is in the current procedure. *)
-      (current_pdesc, location)
-  | ViaCall {f; in_call; _} ->
-      (* Recursive step: The trace continues inside a callee. *)
-      let callee_proc_name_opt =
-        match (f : CallEvent.t) with
-        | Call proc_name | ModelName proc_name | SkippedKnownCall proc_name ->
-            (* These cases all provide a procname we can try to load. *)
-            Some proc_name
-        | Model _ | SkippedUnknownCall _ ->
-            (* These cases do not have a procname we can load. Stop traversal. *)
-            None
-      in
-      match callee_proc_name_opt with
-      | None ->
-          (* This can happen for calls to function pointers or other indirect calls.
-              It's safest to stop here and use the current context. *)
-          (current_pdesc, Trace.get_outer_location trace)
-      | Some callee_proc_name ->
-          (* We found the name of the callee. Now we must load its proc_desc. *)
-          match Procdesc.load callee_proc_name with
-          | None ->
-              (* This is rare, but could happen if the callee's source is not available.
-                  Safest to stop here. *)
-              L.d_printfln "[repair] Could not load proc_desc for %a" Procname.pp callee_proc_name;
-              (current_pdesc, Trace.get_outer_location trace)
-          | Some callee_pdesc ->
-              (* SUCCESS: We have the callee's procedure. Recurse into the rest of the trace. *)
-              get_final_callee_pdesc_loc callee_pdesc in_call *)
 
 let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
   clear_cache_if_new_proc (Procdesc.get_proc_name proc_desc);

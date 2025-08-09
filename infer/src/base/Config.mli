@@ -172,6 +172,8 @@ val buck_out_gen : string
 
 val buck_swift : bool
 
+val buck_swift_keep_going : bool
+
 val buck_targets_block_list : string list
 
 val capture : bool
@@ -889,6 +891,8 @@ val topl_properties : ToplAst.t list
 val topl_report_latent_issues : bool
 
 val trace_events : bool
+
+val trace_mutual_recursion_cycle_checker : bool
 
 val trace_ondemand : bool
 

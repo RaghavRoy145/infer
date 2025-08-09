@@ -47,6 +47,8 @@ module Lang = struct
 
 
   let is_swift lang = match lang with Swift -> true | _ -> false
+
+  let is_c lang = match lang with C -> true | _ -> false
 end
 
 module Location = struct
@@ -328,7 +330,7 @@ module QualifiedProcName = struct
   end)
 end
 
-type qualified_fieldname = {enclosing_class: TypeName.t; name: FieldName.t}
+type qualified_fieldname = {enclosing_class: TypeName.t; name: FieldName.t} [@@deriving equal]
 (* field name [name] must be declared in type [enclosing_class] *)
 
 let pp_qualified_fieldname fmt ({enclosing_class; name} : qualified_fieldname) =
@@ -470,6 +472,8 @@ module Typ = struct
 
 
   let mk_without_attributes typ = {typ; attributes= []}
+
+  let any_type_llvm = Struct (TypeName.of_string "ptr_elt")
 end
 
 module Ident : sig
@@ -816,16 +820,16 @@ module ProcDecl = struct
     builtins @ unop_builtins @ binop_builtins
 
 
+  let builtins_swift = [builtin_assert_fail]
+
   let is_builtin (proc : QualifiedProcName.t) lang =
-    match lang with Lang.C -> List.mem builtins ~equal:String.equal proc.name.value | _ -> false
-end
-
-module Global = struct
-  type t = {name: VarName.t; typ: Typ.t; attributes: Attr.t list}
-
-  let pp fmt {name; typ; attributes} =
-    let annotated_typ : Typ.annotated = {typ; attributes} in
-    F.fprintf fmt "%a: %a" VarName.pp name Typ.pp_annotated annotated_typ
+    match lang with
+    | Lang.C ->
+        List.mem builtins ~equal:String.equal proc.name.value
+    | Lang.Swift ->
+        List.mem builtins_swift ~equal:String.equal proc.name.value
+    | _ ->
+        false
 end
 
 module FieldDecl = struct
@@ -1144,6 +1148,17 @@ module Node = struct
 
 
   module Set = Stdlib.Set.Make (T)
+end
+
+module Global = struct
+  type t = {name: VarName.t; typ: Typ.t; attributes: Attr.t list; init_exp: Exp.t option}
+
+  let pp fmt {name; typ; attributes; init_exp} =
+    let annotated_typ : Typ.annotated = {typ; attributes} in
+    if Option.is_some init_exp then
+      F.fprintf fmt "%a: %a = %a" VarName.pp name Typ.pp_annotated annotated_typ (Pp.option Exp.pp)
+        init_exp
+    else F.fprintf fmt "%a: %a" VarName.pp name Typ.pp_annotated annotated_typ
 end
 
 module ProcDesc = struct

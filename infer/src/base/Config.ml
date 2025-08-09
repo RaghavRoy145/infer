@@ -109,7 +109,8 @@ let build_system_of_exe_name name =
        If this is an alias for another build system that infer supports, you can use@\n\
        `--force-integration <command>` where <command> is one of the following supported build \
        systems:@\n\
-       @[<v2>  %a@]" name
+       @[<v2>  %a@]"
+      name
       (Pp.seq ~print_env:Pp.text_break ~sep:"" F.pp_print_string)
       ( List.map ~f:fst build_system_exe_assoc
       |> List.map ~f:string_of_build_system
@@ -962,6 +963,12 @@ and buck_swift =
     ~in_help:InferCommand.[(Capture, manual_buck)]
     "When using the BXL Clang integration, pass $(b, --swift <bool>) to control capture of Swift \
      files."
+
+
+and buck_swift_keep_going =
+  CLOpt.mk_bool ~long:"buck-swift-keep-going" ~default:false
+    ~in_help:InferCommand.[(Capture, manual_buck)]
+    "When using the BXL Clang integration, pass $(b, --swift-keep-going <bool>)."
 
 
 and buck_targets_block_list =
@@ -2054,7 +2061,8 @@ and merge_summaries =
 
 and minor_heap_size_mb =
   CLOpt.mk_int ~long:"minor-heap-size-mb" ~default:8
-    "Set minor heap size (in Mb) for each process/domain. Defaults to 8"
+    "Set minor heap size (in Mb) for each process/domain. Defaults to 8, unless in multicore mode \
+     where it defaults to 64."
 
 
 and _method_decls_info =
@@ -3537,6 +3545,11 @@ and trace_events =
        (ResultsDirEntryName.get_path ~results_dir:"infer-out" PerfEvents) )
 
 
+and trace_mutual_recursion_cycle_checker =
+  CLOpt.mk_bool ~long:"trace-mutual-recursion-cycle-checker"
+    "Emit debug information for the mutual recursion cycle checker."
+
+
 and trace_ondemand =
   CLOpt.mk_bool ~long:"trace-ondemand" "Emit debug information for the ondemand analysis scheduler."
 
@@ -3665,11 +3678,12 @@ let inferconfig_file =
 
 
 let set_gc_params () =
+  let minor_heap_size_mb = if !multicore then min 64 !minor_heap_size_mb else !minor_heap_size_mb in
   let ctrl = Gc.get () in
   let words_of_Mb nMb = nMb * 1024 * 1024 * 8 / Sys.word_size_in_bits in
   let new_size nMb = max ctrl.minor_heap_size (words_of_Mb nMb) in
   (* increase the minor heap size *)
-  let minor_heap_size = new_size !minor_heap_size_mb in
+  let minor_heap_size = new_size minor_heap_size_mb in
   Gc.set {ctrl with minor_heap_size}
 
 
@@ -3886,6 +3900,8 @@ and buck_mode : BuckMode.t option =
 
 
 and buck_swift = !buck_swift
+
+and buck_swift_keep_going = !buck_swift_keep_going
 
 and buck_targets_block_list = RevList.to_list !buck_targets_block_list
 
@@ -4141,7 +4157,8 @@ and help_checker =
           L.die UserError
             "Wrong argument for --help-checker: '%s' is not a known checker identifier.@\n\
              @\n\
-             See --list-checkers for the list of all checkers." checker_string )
+             See --list-checkers for the list of all checkers."
+            checker_string )
 
 
 and help_issue_type =
@@ -4153,7 +4170,8 @@ and help_issue_type =
           L.die UserError
             "Wrong argument for --help-issue-type: '%s' is not a known issue type identifier.@\n\
              @\n\
-             See --list-issue-types for the list of all known issue types." id )
+             See --list-issue-types for the list of all known issue types."
+            id )
 
 
 and hoisting_report_only_expensive = !hoisting_report_only_expensive
@@ -4825,6 +4843,8 @@ and topl_properties =
 and topl_report_latent_issues = !topl_report_latent_issues
 
 and trace_events = !trace_events
+
+and trace_mutual_recursion_cycle_checker = !trace_mutual_recursion_cycle_checker
 
 and trace_ondemand = !trace_ondemand
 

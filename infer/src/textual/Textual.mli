@@ -17,6 +17,8 @@ module Lang : sig
   val to_string : t -> string
 
   val is_swift : t -> bool
+
+  val is_c : t -> bool
 end
 
 module Location : sig
@@ -112,7 +114,7 @@ module QualifiedProcName : sig
   module Hashtbl : Hashtbl.S with type key = t
 end
 
-type qualified_fieldname = {enclosing_class: TypeName.t; name: FieldName.t}
+type qualified_fieldname = {enclosing_class: TypeName.t; name: FieldName.t} [@@deriving equal]
 (* field name [name] must be declared in type [enclosing_class] *)
 
 val pp_qualified_fieldname : F.formatter -> qualified_fieldname -> unit
@@ -196,6 +198,8 @@ module Typ : sig
   val pp_annotated : F.formatter -> annotated -> unit
 
   val mk_without_attributes : t -> annotated
+
+  val any_type_llvm : t
 end
 
 module Ident : sig
@@ -327,10 +331,6 @@ module ProcDecl : sig
   val is_builtin : QualifiedProcName.t -> Lang.t -> bool
 end
 
-module Global : sig
-  type t = {name: VarName.t; typ: Typ.t; attributes: Attr.t list}
-end
-
 module FieldDecl : sig
   type t = {qualified_name: qualified_fieldname; typ: Typ.t; attributes: Attr.t list}
 end
@@ -422,6 +422,10 @@ module Node : sig
   [@@deriving equal]
 
   module Set : Stdlib.Set.S with type elt = t
+end
+
+module Global : sig
+  type t = {name: VarName.t; typ: Typ.t; attributes: Attr.t list; init_exp: Exp.t option}
 end
 
 module ProcDesc : sig

@@ -236,8 +236,9 @@ open struct
               in
               add_sym ~orig_name scope md.(0) loc
             else
-              warn "could not find variable for debug info at %a with metadata %a" Loc.pp loc
-                (List.pp ", " pp_llvalue) (Array.to_list md) ()
+              Logging.debug Capture Verbose
+                "could not find variable for debug info at %a with metadata %a" Loc.pp loc
+                (List.pp ", " pp_llvalue) (Array.to_list md)
         | _ ->
             () )
       | _ ->
@@ -392,11 +393,11 @@ let rec xlate_type : x -> Llvm.lltype -> Typ.t =
       xlate_type_ llt
       |>
       [%Dbg.retn fun {pf} ty ->
-        pf "%a" Typ.pp_defn ty ;
-        assert (
-          (not (Llvm.type_is_sized llt))
-          || (not (Typ.is_sized ty))
-          || Typ.size_of ty = size_of x llt )] )
+         pf "%a" Typ.pp_defn ty ;
+         assert (
+           (not (Llvm.type_is_sized llt))
+           || (not (Typ.is_sized ty))
+           || Typ.size_of ty = size_of x llt )] )
 
 
 and xlate_type_opt : x -> Llvm.lltype -> Typ.t option =
@@ -414,11 +415,13 @@ let xlate_int : x -> Llvm.llvalue -> Exp.t =
   let llt = Llvm.type_of llv in
   let typ = xlate_type x llt in
   let data =
-    match Llvm.int64_of_const llv with
-    | Some n ->
-        Z.of_int64 n
-    | None ->
-        Z.of_string (suffix_after_last_space (Llvm.string_of_llvalue llv))
+    if String.equal (suffix_after_last_space (Llvm.string_of_llvalue llv)) "true" then Z.of_int 1
+    else
+      match Llvm.int64_of_const llv with
+      | Some n ->
+          Z.of_int64 n
+      | None ->
+          Z.of_string (suffix_after_last_space (Llvm.string_of_llvalue llv))
   in
   Exp.integer typ data
 
@@ -966,16 +969,38 @@ and xlate_opcode : x -> Llvm.llvalue -> Llvm.Opcode.t -> Inst.t list * Exp.t =
       then
         let lltyp1 = Llvm.get_gep_source_element_type llv in
         let op2 = Llvm.operand llv 2 in
-        let _, ptr = xlate_value x (Llvm.operand llv 0) in
+        let instrs, ptr = xlate_value x (Llvm.operand llv 0) in
+        let typ = xlate_type x lltyp1 in
+        match typ with
+        | Typ.Struct {name} when String.equal name "swift.protocol_requirement" ->
+            (* don't know what to do with [swift.protocol_requirement] *)
+            (instrs, ptr)
+        | _ ->
+            let fld =
+              match Option.bind ~f:Int64.unsigned_to_int (Llvm.int64_of_const op2) with
+              | Some n ->
+                  n
+              | None ->
+                  fail "field offset %a not an int: %a" pp_llvalue op2 pp_llvalue llv ()
+            in
+            ([], Llair.Exp.select typ ptr fld)
+      else if
+        Poly.equal (Llvm.classify_type (Llvm.type_of llv)) Pointer
+        && Poly.equal (Llvm.classify_type (Llvm.get_gep_source_element_type llv)) Pointer
+        && Int.equal len 2
+      then
+        let lltyp1 = Llvm.get_gep_source_element_type llv in
+        let op1 = Llvm.operand llv 1 in
+        let instrs, ptr = xlate_value x (Llvm.operand llv 0) in
         let typ = xlate_type x lltyp1 in
         let fld =
-          match Option.bind ~f:Int64.unsigned_to_int (Llvm.int64_of_const op2) with
+          match Option.bind ~f:Int64.unsigned_to_int (Llvm.int64_of_const op1) with
           | Some n ->
               n
           | None ->
-              fail "field offset %a not an int: %a" pp_llvalue op2 pp_llvalue llv ()
+              fail "field offset %a not an int: %a" pp_llvalue op1 pp_llvalue llv ()
         in
-        ([], Llair.Exp.select typ ptr fld)
+        ([], Llair.Exp.gep typ ptr fld)
       else
         let rec xlate_indices i =
           [%Dbg.call fun {pf} -> pf "@ %i %a" i pp_llvalue (Llvm.operand llv i)]
@@ -1099,7 +1124,8 @@ let pop_stack_frame_of_function : x -> Llvm.llvalue -> Llvm.llbasicblock -> pop_
           (fun instr ->
             match Llvm.instr_opcode instr with
             | Alloca ->
-                warn "stack allocation after function entry:@ %a" Loc.pp (find_loc instr) ()
+                Logging.debug Capture Verbose "stack allocation after function entry:@ %a" Loc.pp
+                  (find_loc instr)
             | _ ->
                 () )
           blk )
@@ -1439,59 +1465,62 @@ let xlate_instr :
       let name_segs = String.split_on_char fname ~by:'.' in
       let skip msg =
         if StringS.add ignored_callees fname then
-          warn "ignoring uninterpreted %s %s at %a" msg fname Loc.pp loc () ;
+          Logging.debug Capture Verbose "ignoring uninterpreted %s %s at %a" msg fname Loc.pp loc ;
         let reg = xlate_name_opt x instr in
         emit_inst (Inst.nondet ~reg ~msg:fname ~loc)
       in
-      (* builtins *)
-      match xlate_builtin_exp fname with
-      | Some builtin ->
-          inline_or_move (builtin x)
-      | None -> (
-        match xlate_builtin_inst emit_inst x name_segs instr num_actuals loc with
-        | Some code ->
-            code
+      let swift_methods_to_skip = ["swift_release"; "swift_beginAccess"; "swift_endAccess"] in
+      if List.mem fname ~eq:String.equal swift_methods_to_skip then skip fname
+      else
+        (* builtins *)
+        match xlate_builtin_exp fname with
+        | Some builtin ->
+            inline_or_move (builtin x)
         | None -> (
-          match name_segs with
-          | ["__llair_throw"] ->
-              let pre, exc = xlate_value x (Llvm.operand instr 0) in
-              emit_term ~prefix:(pop loc @ pre) (Term.throw ~exc ~loc)
-          | ["__llair_unreachable"] ->
-              emit_term (Term.unreachable ())
-          (* dropped / handled elsewhere *)
-          | ["llvm"; "dbg"; ("declare" | "label" | "value")]
-          | "llvm" :: ("lifetime" | "invariant") :: ("start" | "end") :: _ ->
-              nop ()
-          (* unimplemented *)
-          | ["llvm"; ("stacksave" | "stackrestore")] ->
-              skip "dynamic stack deallocation"
-          | "llvm" :: "coro" :: _ ->
-              todo "coroutines:@ %a" pp_llvalue instr ()
-          | "llvm" :: "experimental" :: "gc" :: "statepoint" :: _ ->
-              todo "statepoints:@ %a" pp_llvalue instr ()
-          | "llvm" :: "call" :: "preallocated" :: _ ->
-              todo "preallocated operand bundles:@ %a" pp_llvalue instr ()
-          | ["llvm"; ("va_start" | "va_copy" | "va_end")] ->
-              skip "variadic function intrinsic"
-          | "llvm" :: _ ->
-              skip "intrinsic"
-          | _ when Poly.equal (Llvm.classify_value llcallee) InlineAsm ->
-              skip "inline asm"
-          (* general function call that may not throw *)
-          | _ ->
-              let typ = xlate_type x lltyp in
-              let name, _ = find_name instr in
-              let lbl = name ^ ".ret" in
-              let pre_1, actuals = xlate_values x num_actuals (Llvm.operand instr) in
-              let areturn = xlate_name_opt x instr in
-              let return = Jump.mk lbl in
-              let pre_0, call =
-                term_call x llcallee ~unmangled_name fname ~typ ~actuals ~areturn ~return
-                  ~throw:None ~loc
-              in
-              continue (fun (insts, term) ->
-                  let cmnd = IArray.of_list insts in
-                  (pre_0 @ pre_1, call, [Block.mk ~lbl ~cmnd ~term]) ) ) ) )
+          match xlate_builtin_inst emit_inst x name_segs instr num_actuals loc with
+          | Some code ->
+              code
+          | None -> (
+            match name_segs with
+            | ["__llair_throw"] ->
+                let pre, exc = xlate_value x (Llvm.operand instr 0) in
+                emit_term ~prefix:(pop loc @ pre) (Term.throw ~exc ~loc)
+            | ["__llair_unreachable"] ->
+                emit_term (Term.unreachable ())
+            (* dropped / handled elsewhere *)
+            | ["llvm"; "dbg"; ("declare" | "label" | "value")]
+            | "llvm" :: ("lifetime" | "invariant") :: ("start" | "end") :: _ ->
+                nop ()
+            (* unimplemented *)
+            | ["llvm"; ("stacksave" | "stackrestore")] ->
+                skip "dynamic stack deallocation"
+            | "llvm" :: "coro" :: _ ->
+                todo "coroutines:@ %a" pp_llvalue instr ()
+            | "llvm" :: "experimental" :: "gc" :: "statepoint" :: _ ->
+                todo "statepoints:@ %a" pp_llvalue instr ()
+            | "llvm" :: "call" :: "preallocated" :: _ ->
+                todo "preallocated operand bundles:@ %a" pp_llvalue instr ()
+            | ["llvm"; ("va_start" | "va_copy" | "va_end")] ->
+                skip "variadic function intrinsic"
+            | "llvm" :: _ ->
+                skip "intrinsic"
+            | _ when Poly.equal (Llvm.classify_value llcallee) InlineAsm ->
+                skip "inline asm"
+            (* general function call that may not throw *)
+            | _ ->
+                let typ = xlate_type x lltyp in
+                let name, _ = find_name instr in
+                let lbl = name ^ ".ret" in
+                let pre_1, actuals = xlate_values x num_actuals (Llvm.operand instr) in
+                let areturn = xlate_name_opt x instr in
+                let return = Jump.mk lbl in
+                let pre_0, call =
+                  term_call x llcallee ~unmangled_name fname ~typ ~actuals ~areturn ~return
+                    ~throw:None ~loc
+                in
+                continue (fun (insts, term) ->
+                    let cmnd = IArray.of_list insts in
+                    (pre_0 @ pre_1, call, [Block.mk ~lbl ~cmnd ~term]) ) ) ) )
   | Invoke -> (
       let llcallee = Llvm.operand instr (Llvm.num_operands instr - 1) in
       let lltyp = Llvm.type_of llcallee in
@@ -1761,7 +1790,7 @@ let xlate_instr :
       inline_or_move (xlate_value ~inline:true x)
   | VAArg ->
       let reg = xlate_name_opt x instr in
-      warn "variadic function argument: %a" Loc.pp loc () ;
+      Logging.debug Capture Verbose "variadic function argument: %a" Loc.pp loc ;
       emit_inst (Inst.nondet ~reg ~msg:"vaarg" ~loc)
   | CleanupRet | CatchRet | CatchPad | CleanupPad | CatchSwitch ->
       todo "windows exception handling: %a" pp_llvalue instr ()
@@ -1987,7 +2016,7 @@ let translate ?dump_bitcode : string -> Llair.program =
           let func =
             try xlate_function x llf typ
             with Unimplemented feature ->
-              warn "Unimplemented feature %s in %s" feature name () ;
+              Logging.debug Capture Verbose "Unimplemented feature %s in %s" feature name ;
               xlate_function_decl x llf typ Func.mk_undefined
             (* TODO $> Report.unimplemented feature *)
           in
@@ -2014,4 +2043,4 @@ let translate ?dump_bitcode : string -> Llair.program =
   Llair.Program.mk ~globals ~functions ~typ_defns
   |>
   [%Dbg.retn fun {pf} _ ->
-    pf "number of globals %d, number of functions %d" (List.length globals) (List.length functions)]
+     pf "number of globals %d, number of functions %d" (List.length globals) (List.length functions)]

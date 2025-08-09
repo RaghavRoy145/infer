@@ -33,11 +33,8 @@ val update_locals : proc_state:t -> VarMap.key -> Textual.Typ.annotated -> unit
 
 val update_ids : proc_state:t -> IdentMap.key -> Textual.Typ.annotated -> unit
 
-type typ_modif = NoModif | PtrModif | RemovePtrModif
+val pp : F.formatter -> print_types:bool -> t -> unit [@@warning "-unused-value-declaration"]
 
-val update_local_or_formal_type :
-  proc_state:t -> typ_modif:typ_modif -> Textual.Exp.t -> Textual.Typ.t -> unit
+val global_proc_state : Textual.Lang.t -> Textual.Location.t -> string -> t
 
-val get_local_or_formal_type : proc_state:t -> Textual.Exp.t -> Textual.Typ.annotated option
-
-val pp : F.formatter -> t -> unit [@@warning "-unused-value-declaration"]
+val get_fresh_fake_line : unit -> int

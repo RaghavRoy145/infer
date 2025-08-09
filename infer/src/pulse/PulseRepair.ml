@@ -1421,28 +1421,24 @@ let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
             (* This variable from the stack is one of our local candidates. Now check it. *)
             L.d_printfln "[repair-reuse-debug] >> Found candidate '%a' in stack. Checking its status..."
               (Pvar.pp Pp.text) pvar_in_stack;
-            let addr, history = (ValueOrigin.value vo, ValueOrigin.hist vo) in
+            let addr, history = (ValueOrigin.value vo, ValueOrigin  .hist vo) in
             L.d_printfln "[repair-reuse-debug]    - Addr: %a, History: %a"
                 AbstractValue.pp addr ValueHistory.pp history;
-            
+
+            let path_condition = astate.AbductiveDomain.path_condition in
             let has_allocated_cell =
               AbductiveDomain.find_post_cell_opt addr astate |> Option.is_some
             in
-            (* let is_initialized =
-              (* Get the attribute map from the post-state, as shown in [check_all_valid] *)
-              let attributes = BaseDomain.attr in
-              (* Call the correct function from the snippet you provided *)
-              BaseAddressAttributes.get_must_be_initialized addr attributes |> Option.is_some
-            in *)
+            let is_not_null = not (PulseFormula.is_known_zero path_condition addr) in
 
-            if has_allocated_cell then (
-              L.d_printfln "[repair-reuse-debug]   + SUCCESS: Candidate '%a' is allocated but CAN'T CONFIRM if initialized. Selecting it anyway."
+            if has_allocated_cell && is_not_null then (
+              L.d_printfln "[repair-reuse-debug]   + SUCCESS: Candidate '%a' is allocated and not_null. Selecting it."
                 (Pvar.pp Pp.text) pvar_in_stack;
               Some {reused_pvar= pvar_in_stack} )
             else (
               L.d_printfln
-                "[repair-reuse-debug]    - FAILED: Candidate '%a' check failed: has_cell=%b, is_initialized=Can't confirm. Continuing search."
-                (Pvar.pp Pp.text) pvar_in_stack has_allocated_cell;
+                "[repair-reuse-debug]    - FAILED: Candidate '%a' check failed: has_cell=%b, is_not_null=%b. Continuing search."
+                (Pvar.pp Pp.text) pvar_in_stack has_allocated_cell is_not_null;
               found_opt ) )
         | Some pvar_in_stack ->
             (* It's a pvar, but not one we're looking for *)
@@ -1453,6 +1449,7 @@ let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
     astate None
 (** This function performs the analysis part of `apply_replace_repair` *)
 let plan_replace_repair proc_desc (bug : 'payload bug_info) (all_aliases : Exp.t list) : repair_plan list =
+
   let open IOption.Let_syntax in
   let plan_opt =
     let* ptr_var = bug.ptr_var in
@@ -1463,6 +1460,7 @@ let plan_replace_repair proc_desc (bug : 'payload bug_info) (all_aliases : Exp.t
       The `all_aliases` list is now included in the final plan record.
       This makes the plan's data complete and available for the reporter.
     *)
+    
     L.d_printfln "[repair-reuse] >> Searching for a viable local variable to reuse...";
     let reuse_candidate_opt =
       find_reuse_candidate proc_desc bug.astate (pvar, pvar_typ)

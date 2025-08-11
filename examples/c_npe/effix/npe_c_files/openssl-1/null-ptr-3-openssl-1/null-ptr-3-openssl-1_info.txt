@@ -1,8 +1,0 @@
-Bug ID: null-ptr-3-openssl-1
-Project: openssl-1
-Source tarball: openssl-1-instrumented.tar.gz
-Original file path: crypto/ocsp/ocsp_ht.c
-Original filename: ocsp_ht.c
-Function: OCSP_sendreq_new
-NPE source line: 160
-NPE sink line: 161

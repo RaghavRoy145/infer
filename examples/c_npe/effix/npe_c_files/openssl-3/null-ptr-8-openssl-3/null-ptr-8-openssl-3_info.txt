@@ -1,8 +1,0 @@
-Bug ID: null-ptr-8-openssl-3
-Project: openssl-3
-Source tarball: openssl-3-instrumented.tar.gz
-Original file path: test/params_test.c
-Original filename: params_test.c
-Function: init_object
-NPE source line: 100
-NPE sink line: 102

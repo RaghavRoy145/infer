@@ -1,8 +1,0 @@
-Bug ID: null-ptr-7-openssl-3
-Project: openssl-3
-Source tarball: openssl-3-instrumented.tar.gz
-Original file path: apps/s_server.c
-Original filename: s_server.c
-Function: add_session
-NPE source line: 3575
-NPE sink line: 3578

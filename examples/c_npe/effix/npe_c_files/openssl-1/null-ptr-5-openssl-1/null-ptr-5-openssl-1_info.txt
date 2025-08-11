@@ -1,8 +1,0 @@
-Bug ID: null-ptr-5-openssl-1
-Project: openssl-1
-Source tarball: openssl-1-instrumented.tar.gz
-Original file path: ssl/d1_both.c
-Original filename: d1_both.c
-Function: dtls1_buffer_message
-NPE source line: 1181
-NPE sink line: 1183

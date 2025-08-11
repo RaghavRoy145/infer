@@ -1,0 +1,8 @@
+Bug ID: null-ptr-1-openssl-1
+Project: openssl-1
+Source tarball: openssl-1-instrumented.tar.gz
+Original file path: crypto/x509/x509_vpm.c
+Original filename: x509_vpm.c
+Function: X509_VERIFY_PARAM_new
+NPE source line: 91
+NPE sink line: 92

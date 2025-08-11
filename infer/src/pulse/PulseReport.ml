@@ -332,14 +332,14 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
               |> Option.value ~default:(Procdesc.get_start_node proc_desc)
             in
             let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
-            let bug : _ PulseRepair.bug_info = {
-                PulseRepair.ptr_expr = ptr_exp;
+            let bug : _ PulseTransform.bug_info = {
+                PulseTransform.ptr_expr = ptr_exp;
                 ptr_var;
                 diag_trace = na.access_trace;
                 err_node; astate; av_opt;
                 analysis = analysis_data;
             } in
-            PulseRepair.plan_and_log_if_unique ~proc_desc ~bug;
+            PulseTransform.plan_and_log_if_unique ~proc_desc ~bug;
             report analysis_data ~latent:false ~is_suppressed diagnostic;
             if Diagnostic.aborts_execution path diagnostic
             then Some (AbortProgram summary)

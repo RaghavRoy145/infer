@@ -17,7 +17,7 @@ type reuse_candidate = {
 type transformation_plan =
 | Skip of { 
     lca_node : Procdesc.Node.t;
-    join_node : Procdesc.Node.t; (* Add this field *)
+    join_node : Procdesc.Node.t;
     pointer_exprs : Exp.t list;
     slice_nodes : Procdesc.Node.t list;
   }
@@ -30,7 +30,7 @@ type transformation_plan =
     ; pvar: Pvar.t
     ; pvar_typ: Typ.t
     ; reuse_info: reuse_candidate option
-    ; all_aliases: Exp.t list (* Add this field *) }
+    ; all_aliases: Exp.t list }
 
 
 (** A simple cache to avoid reporting the same transformation plan multiple times for a single procedure. *)
@@ -635,15 +635,10 @@ match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
     total number of guards. The decision to merge is a critical heuristic that balances minimizing
     guard count against avoiding wrapping unrelated code with side-effects. *)
 let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_ptrs_to_guard: transformation_plan list =
-  (* let pname = Procdesc.get_proc_name proc_desc in *)
   let start = Procdesc.get_start_node proc_desc in
   let idom = GDoms.compute_idom proc_desc start in
   let compute_ipdom proc_desc =
     let exit_node = Procdesc.get_exit_node proc_desc in
-    (*
-      `from_pdesc` from the Exceptional CFG view creates the required tuple
-      of `(Procdesc.t * exceptional_edge_map)`. This is the graph instance.
-    *)
     let reversed_graph_instance = PostDominators.ReversedCFG.from_pdesc proc_desc in
     PostDominators.compute_idom reversed_graph_instance exit_node
   in
@@ -687,8 +682,6 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       Procdesc.fold_nodes proc_desc ~init:[] ~f:(fun acc node ->
           let instrs = Procdesc.Node.get_instrs node in
           let node_loc = Procdesc.Node.get_loc node in
-          (* L.d_printfln "[transformation-log]    Scanning Node %a (C line %d)..." Procdesc.Node.pp node
-            node_loc.line ; *)
 
           (* Step 1: Find all temporary identifiers that hold the value of our pointer. *)
           let idents_holding_pointer_value =
@@ -874,12 +867,11 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     (* Helper to find external side effects *)
     let has_external_side_effects (instr : Sil.instr) =
       match instr with
-      (* | Prune _ | Metadata _ -> None | Load _ -> None *)
       | Prune _ | Metadata _ -> None
       | Load {e; _} | Store {e1= e; _} ->
         (* A load or store is an external side effect ONLY if the address `e`
             is NOT one of the pointers we are explicitly trying to guard.
-            If it *is* one of our pointers, it's part of the buggy behavior we want to skip. *)
+            If it *is* one of our pointers, we want to skip. *)
         let is_aliased_access = List.exists all_aliases ~f:(fun alias -> Exp.equal e alias) in
         if is_aliased_access then
           (* Not an EXTERNAL side effect, it's part of the bug. Benign for merging purposes. *)

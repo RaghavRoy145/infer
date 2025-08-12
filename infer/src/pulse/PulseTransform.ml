@@ -340,6 +340,7 @@ let find_syntactic_aliases proc_desc (initial_ptrs : Exp.t list) : Exp.t list =
   let all_aliased_pvars = find_all_connected initial_pvars Pvar.Set.empty in
   Pvar.Set.elements all_aliased_pvars |> List.map ~f:(fun pvar -> Exp.Lvar pvar) 
 
+
 (** {4. transformation Strategy Planners} *)
 
 (** {4a. The REPLACE Strategy Planner} *)
@@ -349,9 +350,9 @@ let find_syntactic_aliases proc_desc (initial_ptrs : Exp.t list) : Exp.t list =
     argument to another function. This is a conservative (sound but incomplete) heuristic.
     It trades off a few missed opportunities for `REPLACE` transformations for speed and safety,
     as proving non-escape with 100% precision is a hard problem. *)
-let is_provably_local ~proc_desc ~(bug : 'payload bug_info) (all_aliases: Exp.t list) =
+let is_local ~proc_desc ~(bug : 'payload bug_info) (all_aliases: Exp.t list) =
   let ptr_exp_str = Format.asprintf "%a" Exp.pp bug.ptr_expr in
-  L.d_printfln "[transformation-debug] is_provably_local: Checking alias set starting with %s" ptr_exp_str;
+  L.d_printfln "[transformation-debug] is_local: Checking alias set starting with %s" ptr_exp_str;
 
   let var_is_local =
     match bug.ptr_var with
@@ -364,7 +365,7 @@ let is_provably_local ~proc_desc ~(bug : 'payload bug_info) (all_aliases: Exp.t 
   in
 
   if not var_is_local then (
-    L.d_printfln "[transformation-debug] is_provably_local: Variable properties failed.";
+    L.d_printfln "[transformation-debug] is_local: Variable properties failed.";
     false )
   else
 
@@ -396,7 +397,7 @@ let is_provably_local ~proc_desc ~(bug : 'payload bug_info) (all_aliases: Exp.t 
                           | _ -> false )
                   | _ -> false ) )
     in
-    L.d_printfln "[transformation-debug] is_provably_local: has_call_usage=%b" has_call_usage;
+    L.d_printfln "[transformation-debug] is_local: has_call_usage=%b" has_call_usage;
     not has_call_usage
 
 
@@ -508,7 +509,7 @@ let find_last_def_site ~proc_desc ~ptr_var =
       result
 
 (** Searches the current abstract state for a local variable that is a suitable "reuse" candidate.
-    A candidate is viable if it has a compatible type and is provably non-null at the crash point.
+    A candidate is viable if it has a compatible type and is non-null at the crash point.
     This logic is complex as it must correctly query Pulse's abstract state, distinguishing between
     a pointer's address and the value it holds to determine if it points to allocated, initialized memory. *)
 let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
@@ -532,7 +533,7 @@ let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
 
   (*
     Step 2: Iterate through the stack (the analysis's ground truth) and find the first
-    variable that is in our candidate set and is provably non-null.
+    variable that is in our candidate set and is non-null.
   *)
   L.d_printfln "[transformation-reuse] >> Searching for a viable local variable by iterating through the abstract stack...";
   AbductiveDomain.Stack.fold
@@ -668,7 +669,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   
   L.d_printfln "[transformation-plan] ptr=%a, stack_aliases=%d" Exp.pp bug.ptr_expr (List.length stack_aliases);
 
-    (* Step 1: UNIFY the slice for the ENTIRE alias set first. *)
+  (* Step 1: UNIFY the slice for the ENTIRE alias set first. *)
 
   L.d_printfln "[transformation-log] >>> Starting plan_skip_or_evade_transformation for %a" Procname.pp
   (Procdesc.get_proc_name proc_desc) ;
@@ -676,8 +677,8 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     all_ptrs_to_guard ;
 
   (* This is the new, correct implementation that understands SIL's two-step dereference. *)
-  let get_proven_crash_nodes ptr_exp =
-    L.d_printfln "\n[transformation-log] >> Running get_proven_crash_nodes for pointer: %a" Exp.pp ptr_exp ;
+  let get_crash_nodes ptr_exp =
+    L.d_printfln "\n[transformation-log] >> Running get_crash_nodes for pointer: %a" Exp.pp ptr_exp ;
     let result_nodes =
       Procdesc.fold_nodes proc_desc ~init:[] ~f:(fun acc node ->
           let instrs = Procdesc.Node.get_instrs node in
@@ -723,7 +724,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
               node :: acc )
             else acc ) )
     in
-    L.d_printfln "[transformation-log] << Finished get_proven_crash_nodes for %a. Found %d crash nodes."
+    L.d_printfln "[transformation-log] << Finished get_crash_nodes for %a. Found %d crash nodes."
       Exp.pp ptr_exp (List.length result_nodes) ;
     result_nodes
   in
@@ -732,11 +733,11 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   (* Stage 0: Cluster by Control-Flow Proximity                                  *)
   (*********************************************************************************)
   let ptr_to_crashes_map =
-    List.map all_ptrs_to_guard ~f:(fun ptr -> (ptr, get_proven_crash_nodes ptr))
+    List.map all_ptrs_to_guard ~f:(fun ptr -> (ptr, get_crash_nodes ptr))
     |> List.filter ~f:(fun (_, crashes) -> not (List.is_empty crashes))
   in
 
-  L.d_printfln "\n[transformation-log] STEP 1.1: Mapped each pointer to its proven crash sites." ;
+  L.d_printfln "\n[transformation-log] STEP 1.1: Mapped each pointer to itt crash sites." ;
   List.iter ptr_to_crashes_map ~f:(fun (ptr, nodes) ->
       let node_locs = List.map nodes ~f:(fun n -> (Procdesc.Node.get_loc n).line) in
       L.d_printfln "[transformation-log]   Pointer %a has %d crash site(s) at C file line(s): [%a]" Exp.pp
@@ -799,7 +800,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             of all aliases, filtered to remove any non-crashing nodes. *)
         L.d_printfln "[transformation-log]   Trace is Immediate. Unifying all syntactic dereferences.";
         let all_syntactic_dereferences =
-          List.concat_map all_ptrs_to_guard ~f:get_proven_crash_nodes
+          List.concat_map all_ptrs_to_guard ~f:get_crash_nodes
         in
         (* In the multi-alias case, the trace only blames one site. We must keep all
             syntactic sites for the other aliases. A simple union is the most robust approach. *)
@@ -810,7 +811,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
           (Option.to_list final_crash_node @ all_syntactic_dereferences)
   in
   
-  L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d proven crash node(s)."
+  L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d crash node(s)."
     (List.length unified_crash_slice);
 
   let candidate_plans =
@@ -1165,7 +1166,7 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]          Transform '%a = NULL;' to 'if (%a == NULL) { %a = %a; }'"
             (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar
             (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) reused_pvar;
-        L.d_printfln "[transformation-plan]          (Reusing provably non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
+        L.d_printfln "[transformation-plan]          (Reusing non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
     ) ;
     L.d_printfln "[transformation-plan]--------------------------"
 
@@ -1175,7 +1176,7 @@ let report_transformation_plan proc_desc plan =
     This function orchestrates the entire transformation planning process:
     1. It performs a comprehensive alias analysis (both semantic and syntactic).
     2. It dispatches to the appropriate planner (`plan_replace_transformation` or `plan_skip_or_evade_transformation`)
-       based on the `is_provably_local` check.
+       based on the `is_local` check.
     3. It logs any generated plans to the console, ensuring not to report duplicates. *)
 
 (* Helper to define equality between two plans for deduplication *)
@@ -1221,7 +1222,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
     Step 2: Now that we have the complete alias set, dispatch to the correct planner.
   *)
   let plans : transformation_plan list =
-    if is_provably_local ~proc_desc ~bug all_ptrs_to_guard then (
+    if is_local ~proc_desc ~bug all_ptrs_to_guard then (
       let replace_plans = plan_replace_transformation proc_desc bug all_ptrs_to_guard in
       if not (List.is_empty replace_plans) then replace_plans
       else (

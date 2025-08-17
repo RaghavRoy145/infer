@@ -607,7 +607,6 @@ let plan_replace_transformation proc_desc (bug : 'payload bug_info) (all_aliases
 
 (** {4b. The SKIP Strategy Planner & Three-Stage Compaction} ---> Currently Monolith, can be separated later*)
 
-
 (** Helper: Given the pointer Var.t that we recorded in bug.ptr_var, look up its
     current abstract address in the [astate]. *)
 let get_ptr_address ~(astate: AbductiveDomain.t) (v: Var.t)
@@ -621,7 +620,7 @@ match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
     Some raw_addr
 
 (** The main planner for the SKIP/EVADE strategy. It orchestrates the three-stage compaction
-    pipeline: generate -> filter -> merge. This complex process is what allows the tool
+    pipeline: generate -> filter -> merge. This process is what allows the tool
     to find a Pareto-optimal solution, balancing the number of guards with the number of
     unnecessarily guarded lines of code. *)
 
@@ -633,7 +632,7 @@ match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
 
 (** STAGE 3 of compaction. Iteratively merges adjacent or overlapping plans into a single, larger plan.
     This is a fixed-point algorithm that continues until no more merges are possible, reducing the
-    total number of guards. The decision to merge is a critical heuristic that balances minimizing
+    total number of guards. The decision to merge is a heuristic that balances minimizing
     guard count against avoiding wrapping unrelated code with side-effects. *)
 let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_ptrs_to_guard: transformation_plan list =
   let start = Procdesc.get_start_node proc_desc in
@@ -676,7 +675,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   L.d_printfln "[transformation-log] Initial `all_ptrs_to_guard` list: [%a]" (Pp.seq ~sep:", " Exp.pp)
     all_ptrs_to_guard ;
 
-  (* This is the new, correct implementation that understands SIL's two-step dereference. *)
+  (* This is the version of the implementation that understands SIL's two-step dereference. *)
   let get_crash_nodes ptr_exp =
     L.d_printfln "\n[transformation-log] >> Running get_crash_nodes for pointer: %a" Exp.pp ptr_exp ;
     let result_nodes =
@@ -776,7 +775,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       let node_loc = Procdesc.Node.get_loc node in
       let get_immediate_crash_location = function
         | Trace.Immediate {location; _} -> Some location
-        | Trace.ViaCall {location; _} -> Some location (* Corrected based on your structure *)
+        | Trace.ViaCall {location; _} -> Some location 
       in
       match get_immediate_crash_location trace with
       | None -> false
@@ -787,6 +786,75 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   (* Stage 1: Seed the Compaction Algorithm (Hybrid Approach)                    *)
   (*********************************************************************************)
 
+  (** A robust, syntactic check to see if a dereference at a given [node] is protected
+    by an explicit null check. It works by searching the dominator tree of the node
+    for a Prune instruction that enforces a non-null condition on any of the known aliases. *)
+  let is_syntactically_guarded proc_desc idom (node : Procdesc.Node.t) (all_ptrs_to_guard : Exp.t list) : bool =
+    let start_node = Procdesc.get_start_node proc_desc in
+    let rec find_guard_in_dominators current_node =
+      if Procdesc.Node.equal current_node start_node then false
+      else
+        let parent_dominator = idom current_node in
+        let instrs = Procdesc.Node.get_instrs parent_dominator in
+  
+        L.d_printfln "[guard-check] >> Visiting dominator %a for node %a."
+          Procdesc.Node.pp parent_dominator Procdesc.Node.pp current_node;
+  
+        (*
+          THIS IS THE FINAL FIX:
+          Both the temp-finding and the prune-checking must happen in the same scope,
+          as a single, self-contained check on the instructions of the dominator node.
+        *)
+        let found_guard =
+          (* First, find all temporary identifiers in this node that hold one of our aliases. *)
+          let idents_holding_aliases =
+            Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc instr ->
+                match instr with
+                | Sil.Load {id; e; _} when List.exists all_ptrs_to_guard ~f:(fun ptr -> Exp.equal e ptr) ->
+                    L.d_printfln "[guard-check]    - Found alias temp: `%a`" Ident.pp id;
+                    Ident.Set.add id acc
+                | _ -> acc )
+          in
+          
+          (* If we didn't find any temps, there's nothing more to check in this node. *)
+          if Ident.Set.is_empty idents_holding_aliases then false
+          else
+            (* Now, check for a Prune instruction in this same node that uses one of those temps. *)
+            Instrs.exists instrs ~f:(fun instr ->
+                match instr with
+                | Sil.Prune (condition, _, true, _) ->
+                    L.d_printfln "[guard-check]    - Found Prune(true branch) with condition: %a" Exp.pp condition;
+                    let is_match =
+                      match condition with
+                      (* Case 1: Prune(tmp != NULL) *)
+                      | Exp.BinOp (Binop.Ne, Exp.Var id, e_null)
+                        when Ident.Set.mem id idents_holding_aliases && Exp.is_null_literal e_null ->
+                          L.d_printfln "[guard-check]      - SUCCESS: Condition matches `tmp != NULL`.";
+                          true
+                      (* Case 2: Prune(tmp) *)
+                      | Exp.Var id when Ident.Set.mem id idents_holding_aliases ->
+                          L.d_printfln "[guard-check]      - SUCCESS: Condition matches `tmp`.";
+                          true
+                      | _ ->
+                          L.d_printfln "[guard-check]      - FAILED: Prune condition does not use a relevant temp.";
+                          false
+                    in
+                    is_match
+                | _ ->
+                    false )
+        in
+  
+        if found_guard then (
+          L.d_printfln "[transformation-log]      - Pruning node %a as it is syntactically guarded by dominator %a."
+            Procdesc.Node.pp node Procdesc.Node.pp parent_dominator;
+          true )
+        else if Procdesc.Node.equal parent_dominator current_node then
+          false
+        else
+          find_guard_in_dominators parent_dominator
+    in
+    find_guard_in_dominators node
+  in
   let unified_crash_slice =
     match bug.diag_trace with
     | Trace.ViaCall {location= crash_loc; _} ->
@@ -802,13 +870,22 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
         let all_syntactic_dereferences =
           List.concat_map all_ptrs_to_guard ~f:get_crash_nodes
         in
+
+        (*Prune the list by removing dereferences that are already guarded. *)
+        L.d_printfln "[transformation-log]   Pruning the slice by checking for existing semantic guards...";
+        let unguarded_syntactic_dereferences =
+          List.filter all_syntactic_dereferences ~f:(fun node ->
+            not (is_syntactically_guarded proc_desc idom node all_ptrs_to_guard)
+          )
+        in
+        
         (* In the multi-alias case, the trace only blames one site. We must keep all
             syntactic sites for the other aliases. A simple union is the most robust approach. *)
         let final_crash_node =
           List.find all_syntactic_dereferences ~f:(fun node -> is_the_final_crash_site node bug.diag_trace)
         in
         List.dedup_and_sort ~compare:Procdesc.Node.compare
-          (Option.to_list final_crash_node @ all_syntactic_dereferences)
+          (Option.to_list final_crash_node @ unguarded_syntactic_dereferences)
   in
   
   L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d crash node(s)."
@@ -1136,7 +1213,7 @@ let report_transformation_plan proc_desc plan =
       L.d_printfln "[transformation-plan]--------------------------"
 
 | Evade {proc_start_node; pointer_expr} ->
-    L.d_printfln "[transformation-plan]--- PULSE transformation PLAN ---" ;
+    L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
     L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
     L.d_printfln "[transformation-plan]STRATEGY: EVADE" ;
     L.d_printfln "[transformation-plan]ACTION: At the start of the function (node %d), insert an early return." (Procdesc.Node.get_id proc_start_node :> int);
@@ -1144,7 +1221,7 @@ let report_transformation_plan proc_desc plan =
     L.d_printfln "[transformation-plan]--------------------------"
 | Replace {def_site_node; pvar; pvar_typ; reuse_info} ->
     let def_line = (Procdesc.Node.get_loc def_site_node).line in
-    L.d_printfln "[transformation-plan]--- PULSE transformation PLAN ---" ;
+    L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
     L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
     L.d_printfln "[transformation-plan]STRATEGY: REPLACE" ;
     L.d_printfln "[transformation-plan]TARGET POINTER: %a" (Pvar.pp Pp.text) pvar;
@@ -1194,7 +1271,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
     Step 1: Perform the complete alias analysis ONCE, at the top level.
   *)
 
-  (* Step 1a. Get the initial abstract value for the bug. This is the correct logic you already had. *)
+  (* Step 1a. Get the initial abstract value for the bug *)
   let av_opt =
     match bug.ptr_var with
     | None ->

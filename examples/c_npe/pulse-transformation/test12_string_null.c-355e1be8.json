@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 6,
+      "target_pvar": "str",
+      "pvar_type": "char*",
+      "reuse_candidate": null
+    }
+  }
+]

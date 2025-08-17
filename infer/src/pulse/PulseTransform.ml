@@ -37,7 +37,7 @@ type transformation_plan =
 let logged_transformations_cache : transformation_plan list ref = ref []
 let last_proc_name = ref (Procname.from_string_c_fun "")
 
-(* This function clears the cache when we start a new procedure *)
+(* This function clears the cache when we start a new procedure - used for LOGGING*)
 let clear_cache_if_new_proc (current_proc_name : Procname.t) =
   if not (Procname.equal !last_proc_name current_proc_name) then (
     L.d_printfln "[transformation] New procedure %a, clearing transformation cache." Procname.pp current_proc_name;
@@ -46,6 +46,9 @@ let clear_cache_if_new_proc (current_proc_name : Procname.t) =
     last_proc_name := current_proc_name
   )
 
+(* This function clears the cache when we start a new procedure - used for FILE-SAVING*)  
+let clear_cache_for_proc () =
+  logged_transformations_cache := []
 (** A record containing all necessary information about a given bug report from Pulse. *)
 type 'payload bug_info = {
   ptr_expr   : Exp.t;
@@ -786,75 +789,67 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   (* Stage 1: Seed the Compaction Algorithm (Hybrid Approach)                    *)
   (*********************************************************************************)
 
-  (** A robust, syntactic check to see if a dereference at a given [node] is protected
+  (** A syntactic check to see if a dereference at a given [node] is protected
     by an explicit null check. It works by searching the dominator tree of the node
     for a Prune instruction that enforces a non-null condition on any of the known aliases. *)
+
   let is_syntactically_guarded proc_desc idom (node : Procdesc.Node.t) (all_ptrs_to_guard : Exp.t list) : bool =
     let start_node = Procdesc.get_start_node proc_desc in
-    let rec find_guard_in_dominators current_node =
+  
+    (* This is a new, stateful recursive helper function.
+        It carries the set of found temporary variables up the dominator tree. *)
+    let rec find_guard_in_dominators_stateful (current_node : Procdesc.Node.t) (temps_found_in_children : Ident.Set.t) : bool =
       if Procdesc.Node.equal current_node start_node then false
       else
         let parent_dominator = idom current_node in
         let instrs = Procdesc.Node.get_instrs parent_dominator in
   
-        L.d_printfln "[guard-check] >> Visiting dominator %a for node %a."
+        L.d_printfln "[transformation-guard-check] >> Visiting dominator %a for node %a."
           Procdesc.Node.pp parent_dominator Procdesc.Node.pp current_node;
+        (* L.d_printfln "[transformation-guard-check]    - Temps carried up from children: [%a]" (Ident.pp) temps_found_in_children; *)
   
-        (*
-          THIS IS THE FINAL FIX:
-          Both the temp-finding and the prune-checking must happen in the same scope,
-          as a single, self-contained check on the instructions of the dominator node.
-        *)
-        let found_guard =
-          (* First, find all temporary identifiers in this node that hold one of our aliases. *)
-          let idents_holding_aliases =
-            Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc instr ->
-                match instr with
-                | Sil.Load {id; e; _} when List.exists all_ptrs_to_guard ~f:(fun ptr -> Exp.equal e ptr) ->
-                    L.d_printfln "[guard-check]    - Found alias temp: `%a`" Ident.pp id;
-                    Ident.Set.add id acc
-                | _ -> acc )
-          in
-          
-          (* If we didn't find any temps, there's nothing more to check in this node. *)
-          if Ident.Set.is_empty idents_holding_aliases then false
-          else
-            (* Now, check for a Prune instruction in this same node that uses one of those temps. *)
-            Instrs.exists instrs ~f:(fun instr ->
-                match instr with
-                | Sil.Prune (condition, _, true, _) ->
-                    L.d_printfln "[guard-check]    - Found Prune(true branch) with condition: %a" Exp.pp condition;
-                    let is_match =
-                      match condition with
-                      (* Case 1: Prune(tmp != NULL) *)
-                      | Exp.BinOp (Binop.Ne, Exp.Var id, e_null)
-                        when Ident.Set.mem id idents_holding_aliases && Exp.is_null_literal e_null ->
-                          L.d_printfln "[guard-check]      - SUCCESS: Condition matches `tmp != NULL`.";
-                          true
-                      (* Case 2: Prune(tmp) *)
-                      | Exp.Var id when Ident.Set.mem id idents_holding_aliases ->
-                          L.d_printfln "[guard-check]      - SUCCESS: Condition matches `tmp`.";
-                          true
-                      | _ ->
-                          L.d_printfln "[guard-check]      - FAILED: Prune condition does not use a relevant temp.";
-                          false
-                    in
-                    is_match
-                | _ ->
-                    false )
+        (* Step 1: Check if this dominator contains a Prune that uses one of the temps we've already found. *)
+        let found_guard_using_child_temps =
+          Instrs.exists instrs ~f:(fun instr ->
+            match instr with
+            | Sil.Prune (condition, _, true, _) ->
+                let is_match =
+                  match condition with
+                  | Exp.BinOp (Binop.Ne, Exp.Var id, e_null)
+                    when Ident.Set.mem id temps_found_in_children && Exp.is_null_literal e_null -> true
+                  | Exp.Var id when Ident.Set.mem id temps_found_in_children -> true
+                  | _ -> false
+                in
+                if is_match then
+                  L.d_printfln "[transformation-guard-check]      - SUCCESS: Found Prune `%a` that uses a temp from a child node."
+                    (Sil.pp_instr ~print_types:false Pp.text) instr;
+                is_match
+            | _ -> false
+          )
         in
   
-        if found_guard then (
-          L.d_printfln "[transformation-log]      - Pruning node %a as it is syntactically guarded by dominator %a."
-            Procdesc.Node.pp node Procdesc.Node.pp parent_dominator;
-          true )
-        else if Procdesc.Node.equal parent_dominator current_node then
-          false
+        if found_guard_using_child_temps then true
         else
-          find_guard_in_dominators parent_dominator
+          (* Step 2: If no guard was found, find any NEW temps in this node and add them to our set. *)
+          let temps_in_this_node =
+            Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc instr ->
+              match instr with
+              | Sil.Load {id; e; _} when List.exists all_ptrs_to_guard ~f:(fun ptr -> Exp.equal e ptr) ->
+                  L.d_printfln "[transformation-guard-check]    - Found new alias temp in this node: `%a`" Ident.pp id;
+                  Ident.Set.add id acc
+              | _ -> acc )
+          in
+          
+          let combined_temps = Ident.Set.union temps_found_in_children temps_in_this_node in
+  
+          (* Step 3: Recurse up to the parent, carrying the combined set of temps. *)
+          if Procdesc.Node.equal parent_dominator current_node then false
+          else
+            find_guard_in_dominators_stateful parent_dominator combined_temps
     in
-    find_guard_in_dominators node
-  in
+    (* Initial call starts the climb from the original node with an empty set of temps. *)
+    find_guard_in_dominators_stateful node Ident.Set.empty
+    in
   let unified_crash_slice =
     match bug.diag_trace with
     | Trace.ViaCall {location= crash_loc; _} ->
@@ -1189,9 +1184,89 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 
 (** {5. Main Entry Point & Reporting} *)
 
-(** A pure function that translates a `transformation_plan` record into a human-readable format for logging. *)
+(** Helper to save a single transformation plan to a file. *)
+
+let save_all_plans proc_desc plans =
+  (* Ensure the directory exists *)
+  let file_exists name = match Unix.access name ~perm:[Unix.F_OK] with
+  | exception Unix.Unix_error (Unix.ENOENT, _, _) -> false
+  | () -> true
+  in
+  (* Add a top-level try...with to catch any unexpected errors and prevent silent crashes. *)
+  try
+    L.d_printfln "[transformation-plan] Attempting to save plan.";
+    let proc_name = Procdesc.get_proc_name proc_desc in
+    (* Use the procedure's unique ID for a stable filename. *)
+    let filename =
+      let loc = Procdesc.get_loc proc_desc in
+      let source_file_str = SourceFile.to_string loc.Location.file in
+      let file_hash = Hashtbl.hash source_file_str in
+      (* Use a format like "main-a1b2c3d4.json" *)
+      Format.asprintf "%s-%x.json" source_file_str file_hash
+    in
+    let transformation_dir = Filename.concat Config.project_root "pulse-transformation" in
+    let filepath = Filename.concat transformation_dir filename in
+  
+    (* Ensure the directory exists *)
+    ( try if not (file_exists transformation_dir) then Unix.mkdir transformation_dir ~perm:0o755
+      with exn ->
+        L.d_printfln "[transformation-plan] ERROR: Could not create transformation directory. Exception: %s" (Exn.to_string exn) );
+    
+  (* Create a JSON representation of the plan. Yojson is a standard library used by Infer. *)
+  let plan_to_json plan =
+    `Assoc
+      [ ("procedure_name", `String (Procname.to_string proc_name))
+      ; ("procedure_id", `String (Procname.to_unique_id proc_name))
+      ; ( "plan_type"
+        , match plan with
+          | Skip _ ->
+              `String "Skip"
+          | Evade _ ->
+              `String "Evade"
+          | Replace _ ->
+              `String "Replace" )
+      ; ( "details"
+        , match plan with
+          | Skip {lca_node; join_node; pointer_exprs; _} ->
+              `Assoc
+                [ ("start_node", `Int (Procdesc.Node.get_id lca_node :> int))
+                ; ("end_node", `Int (Procdesc.Node.get_id join_node :> int))
+                ; ("start_line", `Int (Procdesc.Node.get_loc lca_node).line)
+                ; ("end_line", `Int (Procdesc.Node.get_loc join_node).line)
+                ; ("guard_with_pointer", `String (Format.asprintf "%a" Exp.pp (List.hd_exn pointer_exprs))) ]
+          | Evade {proc_start_node; pointer_expr} ->
+              `Assoc
+                [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
+                ; ("pointer_expr", `String (Format.asprintf "%a" Exp.pp pointer_expr)) ]
+          | Replace {def_site_node; pvar; pvar_typ; reuse_info; _} ->
+              `Assoc
+                [ ("def_site_node", `Int (Procdesc.Node.get_id def_site_node :> int))
+                ; ("def_site_line", `Int (Procdesc.Node.get_loc def_site_node).line)
+                ; ("target_pvar", `String (Pvar.to_string pvar))
+                ; ("pvar_type", `String (Typ.to_string pvar_typ))
+                ; ( "reuse_candidate"
+                  , match reuse_info with
+                    | None -> `Null
+                    | Some {reused_pvar} -> `String (Pvar.to_string reused_pvar) ) ] ) ]
+  in
+  let all_plans_json = `List (List.map plans ~f:plan_to_json) in
+  try
+    let out_chan = Out_channel.create filepath in
+    Yojson.Safe.pretty_to_channel out_chan all_plans_json;
+    Out_channel.close out_chan;
+    L.d_printfln "[transformation-plan] Saved %d repair plan(s) for %a to %s"
+      (List.length plans) Procname.pp proc_name filepath
+  with exn ->
+    L.d_printfln "[transformation-plan] ERROR: Failed to save repair plans for %a. Exception: %s"
+      Procname.pp proc_name (Exn.to_string exn)
+  with exn ->
+    L.d_printfln "[transformation-plan] ERROR: Top-level: Failed to save repair plans. Exception: %s"
+      (Exn.to_string exn)
+
+(** A pure function that translates a `transformation_plan` record into a human-readable format for logging, and calls the save-plan helper *)
 let report_transformation_plan proc_desc plan =
   let proc_name = Procdesc.get_proc_name proc_desc in
+  (* let (_:unit) = *)
   match plan with
   | Skip {lca_node; join_node; pointer_exprs; _} ->
       let guard_ptr_expr = List.hd_exn pointer_exprs in
@@ -1246,8 +1321,11 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]          (Reusing non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
     ) ;
     L.d_printfln "[transformation-plan]--------------------------"
+  (* in *)
 
-      
+  (* After logging to the console, also save the structured plan to a file. *)
+  (* save_plan_to_file proc_desc plan *)
+
 
 (** The top-level entry point called by the Pulse reporting engine.
     This function orchestrates the entire transformation planning process:

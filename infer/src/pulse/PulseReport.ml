@@ -340,7 +340,6 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
                 analysis = analysis_data;
             } in
             PulseTransform.plan_and_log_if_unique ~proc_desc ~bug;
-            (* let final_proc_analysis_hook proc_desc = *)
             let plans_to_save = !PulseTransform.logged_transformations_cache in
             if not (List.is_empty plans_to_save) then (
               (* The plans are in reverse order of discovery, so we reverse them back. *)
@@ -349,7 +348,6 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
             );
             (* CRITICAL: Clear the cache for the next procedure. *)
             PulseTransform.clear_cache_for_proc ();
-            (* in *)
             report analysis_data ~latent:false ~is_suppressed diagnostic;
             if Diagnostic.aborts_execution path diagnostic
             then Some (AbortProgram summary)

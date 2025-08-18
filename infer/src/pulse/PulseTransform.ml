@@ -321,7 +321,7 @@ let find_syntactic_aliases proc_desc (initial_ptrs : Exp.t list) : Exp.t list =
         | _ ->
             graph )
   in
-  (* Step 3: Find the transitive closure (all connected aliases) for our initial pointers. *)
+  (* Step 3: Find the transitive closure (all connected aliases) for the initial pointers. *)
   let initial_pvars =
     List.filter_map initial_ptrs ~f:(function Exp.Lvar pvar -> Some pvar | _ -> None)
   in
@@ -378,7 +378,7 @@ let is_local ~proc_desc ~(bug : 'payload bug_info) (all_aliases: Exp.t list) =
           else
             let instrs = Procdesc.Node.get_instrs node in
 
-            (* Step 1. In this node, find all temp IDs that are loaded with one of our aliased pointers. *)
+            (* Step 1. In this node, find all temp IDs that are loaded with one of the aliased pointers. *)
             let idents_holding_aliases =
               Instrs.fold instrs ~init:Ident.Map.empty ~f:(fun map instr ->
                   match instr with
@@ -413,7 +413,7 @@ let compute_dereference_slice pdesc ptr_exp =
   Procdesc.iter_nodes
     (fun node ->
       let instrs = Procdesc.Node.get_instrs node in
-      (* Step 1. ormatind all temporary variables (idents) that are loaded with the value of our pointer *)
+      (* Step 1. ormatind all temporary variables (idents) that are loaded with the value of the pointer *)
       let idents_holding_pointer_value =
         Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc instr ->
             match instr with
@@ -436,7 +436,7 @@ let compute_dereference_slice pdesc ptr_exp =
             in
             match address_exp_opt with
             | Some (Exp.Var id) when Ident.Set.mem id idents_holding_pointer_value ->
-                (* This is a dereference. The address is a temp that holds our pointer's value. *)
+                (* This is a dereference. The address is a temp that holds the pointer's value. *)
                 deref_nodes := Procdesc.NodeSet.add node !deref_nodes
             | _ ->
                 () ) )
@@ -447,7 +447,7 @@ let find_last_def_site ~proc_desc ~ptr_var =
   let ptr_pvar_str = Pvar.to_string ptr_var in
   L.d_printfln "[transformation-debug] find_last_def_site: Searching for definition of %s" ptr_pvar_str;
 
-  (* Step 1. Find the actual node where the dereference happens to use as our anchor. *)
+  (* Step 1. Find the actual node where the dereference happens to use as the anchor. *)
   let crashing_node_opt =
     compute_dereference_slice proc_desc (Exp.Lvar ptr_var) |> List.hd
   in
@@ -472,7 +472,7 @@ let find_last_def_site ~proc_desc ~ptr_var =
         is_dominated_by_rec use_node
       in
       
-      (* Step 3. Find all nodes that contain a definition of our variable. *)
+      (* Step 3. Find all nodes that contain a definition of the variable. *)
       let is_def_instr instr =
         match (instr : Sil.instr) with
         | Store {e1=Exp.Lvar pvar; _} when Pvar.equal pvar ptr_var -> true
@@ -536,7 +536,7 @@ let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
 
   (*
     Step 2: Iterate through the stack (the analysis's ground truth) and find the first
-    variable that is in our candidate set and is non-null.
+    variable that is in the candidate set and is non-null.
   *)
   L.d_printfln "[transformation-reuse] >> Searching for a viable local variable by iterating through the abstract stack...";
   AbductiveDomain.Stack.fold
@@ -547,7 +547,7 @@ let find_reuse_candidate proc_desc astate (pvar_to_fix, pvar_typ) =
         | None ->
             found_opt (* Not a program variable, skip *)
         | Some pvar_in_stack when Pvar.Set.mem pvar_in_stack local_pvar_candidates -> (
-            (* This variable from the stack is one of our local candidates. Now check it. *)
+            (* This variable from the stack is one of the local candidates. Now check it. *)
             L.d_printfln "[transformation-reuse-debug] >> Found candidate '%a' in stack. Checking its status..."
               (Pvar.pp Pp.text) pvar_in_stack;
             let addr, history = (ValueOrigin.value vo, ValueOrigin  .hist vo) in
@@ -681,55 +681,131 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   (* This is the version of the implementation that understands SIL's two-step dereference. *)
   let get_crash_nodes ptr_exp =
     L.d_printfln "\n[transformation-log] >> Running get_crash_nodes for pointer: %a" Exp.pp ptr_exp ;
+  
+    (* STAGE 1: Pre-computation.
+       Find all temporary identifiers that can carry the null value by tracking its propagation
+       through the procedure until a fixed point is reached. *)
+   let compute_null_carrying_idents () =
+    let rec find_tainted_idents_fixed_point current_tainted_idents =
+      let newly_tainted_idents =
+        (* The signature for fold_instrs includes the node, which we don't use. *)
+        Procdesc.fold_instrs proc_desc ~init:Ident.Set.empty ~f:(fun acc _node instr ->
+            match (instr : Sil.instr) with
+            (* Taint can only be propagated by instructions that assign to a new identifier.
+               In SIL for this purpose, that is primarily Sil.Load. *)
+            | Load {id= dest_id; e= src_exp; _} -> (
+              (* Recursive helper to check if the source expression is based on a tainted ident. *)
+              let rec is_source_tainted e =
+                match (e : Exp.t) with
+                | Var id ->
+                    Ident.Set.mem id current_tainted_idents
+                | Lfield ({exp= base_exp}, _, _) ->
+                    is_source_tainted base_exp
+                | Lindex (base_exp, _) ->
+                    is_source_tainted base_exp
+                | Cast (_, base_exp) ->
+                    is_source_tainted base_exp
+                (* NEW: Handle pointer arithmetic expressions *)
+                | BinOp (bop, e1, e2) -> (
+                  match bop with
+                  (* Taint propagates through pointer arithmetic. *)
+                  | Binop.PlusPI | Binop.MinusPI ->
+                      is_source_tainted e1 || is_source_tainted e2
+                  | _ ->
+                      false )
+                | _ ->
+                    false
+              in
+              if is_source_tainted src_exp then Ident.Set.add dest_id acc else acc )
+            (* Other instructions like Store, Prune, Call etc. do not create new tainted temporaries
+               in the way we are tracking here. *)
+            | _ ->
+                acc )
+      in
+      let all_tainted_idents = Ident.Set.union current_tainted_idents newly_tainted_idents in
+      if Ident.Set.equal current_tainted_idents all_tainted_idents then (
+        L.d_printfln "[transformation-log]    (Taint analysis fixed point reached)" ;
+        all_tainted_idents )
+      else find_tainted_idents_fixed_point all_tainted_idents
+    in
+
+    (* Initial taint: find the first temp(s) loaded from any expression ROOTED AT the pointer var.
+      This is now recursive to handle fields, indices, etc. from the very start. *)
+    let initial_idents =
+    Procdesc.fold_instrs proc_desc ~init:Ident.Set.empty ~f:(fun acc _node instr ->
+        match instr with
+        | Sil.Load {id; e= src_exp; _} ->
+            let rec is_rooted_at_ptr_exp e =
+              match (e : Exp.t) with
+              | e when Exp.equal e ptr_exp ->
+                  true
+              | Lfield ({exp= base_exp}, _, _) ->
+                  is_rooted_at_ptr_exp base_exp
+              | Lindex (base_exp, _) ->
+                  is_rooted_at_ptr_exp base_exp
+              | Cast (_, base_exp) ->
+                  is_rooted_at_ptr_exp base_exp
+              | _ ->
+                  false
+            in
+            if is_rooted_at_ptr_exp src_exp then Ident.Set.add id acc else acc
+        | _ ->
+            acc )
+    in
+    L.d_printfln "[transformation-log]    (Taint analysis initial idents: {%a})"
+      (Format.pp_print_list Ident.pp)
+      (Ident.Set.elements initial_idents) ;
+    find_tainted_idents_fixed_point initial_idents
+    in
+  
+    let null_carrying_idents = compute_null_carrying_idents () in
+    L.d_printfln "[transformation-log]    (Found %d total null-carrying idents: {%a})"
+      (Ident.Set.cardinal null_carrying_idents)
+      (Format.pp_print_list Ident.pp)
+      (Ident.Set.elements null_carrying_idents) ;
+  
+    (* STAGE 2: Crash Site Detection.
+       Walk the nodes again, but this time use the globally computed set of tainted idents
+       to find dereferences. *)
     let result_nodes =
       Procdesc.fold_nodes proc_desc ~init:[] ~f:(fun acc node ->
           let instrs = Procdesc.Node.get_instrs node in
           let node_loc = Procdesc.Node.get_loc node in
-
-          (* Step 1: Find all temporary identifiers that hold the value of our pointer. *)
-          let idents_holding_pointer_value =
-            Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun idents_acc instr ->
-                match instr with
-                | Sil.Load {id; e; _} when Exp.equal e ptr_exp ->
-                    L.d_printfln "[transformation-log]      Found temp ident %a loading our pointer." Ident.pp
-                      id ;
-                    Ident.Set.add id idents_acc
-                | _ ->
-                    idents_acc )
+          let rec is_base_of_dereference e =
+            match (e : Exp.t) with
+            | Var id ->
+                Ident.Set.mem id null_carrying_idents
+            | Lfield ({exp= base_exp}, _, _) | Lindex (base_exp, _) | Cast (_, base_exp) ->
+                is_base_of_dereference base_exp
+            | _ ->
+                false
           in
-
-          (* If we didn't load the pointer in this node, it can't be dereferenced here. *)
-          if Ident.Set.is_empty idents_holding_pointer_value then acc
-          else (
-            (* Step 2: Now, find where those identifiers are used as addresses. THIS is the dereference. *)
-            let has_dereference =
-              Instrs.exists instrs ~f:(fun instr ->
+          let has_dereference =
+            Instrs.exists instrs ~f:(fun instr ->
+                let is_deref, addr_exp_opt =
                   match instr with
-                  (* Dereference READ: x = *p (translated as x = Load(id)) *)
-                  | Sil.Load {e= Exp.Var id; _}
-                    when Ident.Set.mem id idents_holding_pointer_value ->
-                      L.d_printfln "[transformation-log]      !!! Found DEREFERENCE (Load) of temp ident %a."
-                        Ident.pp id ;
-                      true
-                  (* Dereference WRITE: *p = x (translated as Store(id, x)) *)
-                  | Sil.Store {e1= Exp.Var id; _}
-                    when Ident.Set.mem id idents_holding_pointer_value ->
-                      L.d_printfln "[transformation-log]      !!! Found DEREFERENCE (Store) of temp ident %a."
-                        Ident.pp id ;
-                      true
+                  | Sil.Load {e; _} ->
+                      (is_base_of_dereference e, Some e)
+                  | Sil.Store {e1; _} ->
+                      (is_base_of_dereference e1, Some e1)
                   | _ ->
-                      false )
-            in
-            if has_dereference then (
-              L.d_printfln "[transformation-log]    >>> Node %a (C line %d) MARKED as a crash site."
-                Procdesc.Node.pp node node_loc.line ;
-              node :: acc )
-            else acc ) )
+                      (false, None)
+                in
+                if is_deref then
+                  L.d_printfln "[transformation-log]      !!! Found DEREFERENCE via expression: %a" Exp.pp
+                    (Option.value_exn addr_exp_opt) ;
+                is_deref )
+          in
+          if has_dereference then (
+            L.d_printfln "[transformation-log]    >>> Node %a (C line %d) MARKED as a crash site."
+              Procdesc.Node.pp node node_loc.line ;
+            node :: acc )
+          else acc )
     in
     L.d_printfln "[transformation-log] << Finished get_crash_nodes for %a. Found %d crash nodes."
       Exp.pp ptr_exp (List.length result_nodes) ;
     result_nodes
-  in
+    in
 
   (*********************************************************************************)
   (* Stage 0: Cluster by Control-Flow Proximity                                  *)
@@ -789,67 +865,135 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   (* Stage 1: Seed the Compaction Algorithm (Hybrid Approach)                    *)
   (*********************************************************************************)
 
-  (** A syntactic check to see if a dereference at a given [node] is protected
-    by an explicit null check. It works by searching the dominator tree of the node
-    for a Prune instruction that enforces a non-null condition on any of the known aliases. *)
-
-  let is_syntactically_guarded proc_desc idom (node : Procdesc.Node.t) (all_ptrs_to_guard : Exp.t list) : bool =
-    let start_node = Procdesc.get_start_node proc_desc in
-  
-    (* This is a new, stateful recursive helper function.
-        It carries the set of found temporary variables up the dominator tree. *)
-    let rec find_guard_in_dominators_stateful (current_node : Procdesc.Node.t) (temps_found_in_children : Ident.Set.t) : bool =
-      if Procdesc.Node.equal current_node start_node then false
+  (** Pre-computes the complete set of temporary identifiers that are aliases of the given pointers.
+    It performs a fixed-point analysis to track aliases as they are copied between variables. *)
+  let get_all_alias_temps proc_desc (all_ptrs_to_guard : Exp.t list) : Ident.Set.t =
+    let rec find_temps_fixed_point current_temps =
+      let newly_found_temps =
+        Procdesc.fold_instrs proc_desc ~init:Ident.Set.empty ~f:(fun acc _node instr ->
+            match (instr : Sil.instr) with
+            (* Case 1: A temp is loaded directly from a pointer pvar. *)
+            | Load {id; e; _} when List.exists all_ptrs_to_guard ~f:(fun ptr -> Exp.equal e ptr) ->
+                if Ident.Set.mem id current_temps then acc else Ident.Set.add id acc
+            (* Case 2: A temp is loaded from another temp (alias propagation). *)
+            | Load {id; e= Exp.Var src_id; _} when Ident.Set.mem src_id current_temps ->
+                if Ident.Set.mem id current_temps then acc else Ident.Set.add id acc
+            | _ ->
+                acc )
+      in
+      if Ident.Set.is_empty newly_found_temps then current_temps
       else
-        let parent_dominator = idom current_node in
-        let instrs = Procdesc.Node.get_instrs parent_dominator in
-  
-        L.d_printfln "[transformation-guard-check] >> Visiting dominator %a for node %a."
-          Procdesc.Node.pp parent_dominator Procdesc.Node.pp current_node;
-        (* L.d_printfln "[transformation-guard-check]    - Temps carried up from children: [%a]" (Ident.pp) temps_found_in_children; *)
-  
-        (* Step 1: Check if this dominator contains a Prune that uses one of the temps we've already found. *)
-        let found_guard_using_child_temps =
-          Instrs.exists instrs ~f:(fun instr ->
-            match instr with
-            | Sil.Prune (condition, _, true, _) ->
-                let is_match =
-                  match condition with
-                  | Exp.BinOp (Binop.Ne, Exp.Var id, e_null)
-                    when Ident.Set.mem id temps_found_in_children && Exp.is_null_literal e_null -> true
-                  | Exp.Var id when Ident.Set.mem id temps_found_in_children -> true
-                  | _ -> false
-                in
-                if is_match then
-                  L.d_printfln "[transformation-guard-check]      - SUCCESS: Found Prune `%a` that uses a temp from a child node."
-                    (Sil.pp_instr ~print_types:false Pp.text) instr;
-                is_match
-            | _ -> false
-          )
+        let all_temps = Ident.Set.union current_temps newly_found_temps in
+        find_temps_fixed_point all_temps
+    in
+    find_temps_fixed_point Ident.Set.empty
+  in
+
+  (** A syntactic check that climbs the dominator tree to find a guarding Prune instruction.
+    It uses a pre-computed set of all temporary aliases. *)
+    let is_syntactically_guarded proc_desc idom (node : Procdesc.Node.t) (all_alias_temps : Ident.Set.t) : bool =
+      let start_node = Procdesc.get_start_node proc_desc in
+      L.d_printfln "[transformation-guard-check] Checking for guards for crash node %a (line %d)."
+        Procdesc.Node.pp node (Procdesc.Node.get_loc node).line;
+      L.d_printfln "[transformation-guard-check]    - Using pre-computed alias set: {%a}"
+        (Format.pp_print_list Ident.pp)
+        (Ident.Set.elements all_alias_temps);
+    
+      (* This is the heavily instrumented checker function. *)
+      let is_non_null_check_of_alias (condition : Exp.t) : bool =
+        L.d_printfln "[transformation-guard-check] --- Start Prune Check ---";
+        L.d_printfln "[transformation-guard-check] Condition: `%a`" Exp.pp condition;
+
+        let rec is_cast_of_null (e : Exp.t) : bool =
+          match e with
+          | e when Exp.is_null_literal e ->
+              true
+          | Exp.Cast (_, base_exp) ->
+              is_cast_of_null base_exp
+          | _ ->
+              false
+        in    
+    
+        (* Helper to robustly find a base variable, looking through casts. *)
+        let rec get_base_ident (e : Exp.t) : Ident.t option =
+          match e with
+          | Exp.Var id ->
+              Some id
+          | Exp.Cast (_, base_exp) ->
+              get_base_ident base_exp
+          | _ ->
+              None
         in
-  
-        if found_guard_using_child_temps then true
-        else
-          (* Step 2: If no guard was found, find any NEW temps in this node and add them to our set. *)
-          let temps_in_this_node =
-            Instrs.fold instrs ~init:Ident.Set.empty ~f:(fun acc instr ->
-              match instr with
-              | Sil.Load {id; e; _} when List.exists all_ptrs_to_guard ~f:(fun ptr -> Exp.equal e ptr) ->
-                  L.d_printfln "[transformation-guard-check]    - Found new alias temp in this node: `%a`" Ident.pp id;
-                  Ident.Set.add id acc
-              | _ -> acc )
+        let result =
+          match condition with
+          (* Case 1: if (ptr) *)
+          | e -> (
+            match get_base_ident e with
+            | Some id when Ident.Set.mem id all_alias_temps ->
+                L.d_printfln "[transformation-guard-check]   -> Matched simple guard: `if (%a)` is an alias." Ident.pp id;
+                true
+            | _ -> (
+              (* Case 2: if (ptr != NULL) or if (NULL != ptr) *)
+              match e with
+              | Exp.BinOp (Binop.Ne, e1, e2) ->
+                  L.d_printfln "[transformation-guard-check]   -> Found BinOp(Ne). Analyzing operands...";
+                  let id1_opt = get_base_ident e1 in
+                  let id2_opt = get_base_ident e2 in
+                  (* Check Case A: (alias != NULL) *)
+                  let is_e1_alias = Option.exists id1_opt ~f:(fun id -> Ident.Set.mem id all_alias_temps) in
+                  let is_e2_null = is_cast_of_null e2 in
+                  L.d_printfln "[transformation-guard-check]     - Checking (e1 != e2): Is e1 an alias? %b. Is e2 null? %b."
+                  is_e1_alias is_e2_null;
+                  if is_e1_alias && is_e2_null then true
+                  else (
+                    (* Check Case B: (NULL != alias) *)
+                    let is_e2_alias = Option.exists id2_opt ~f:(fun id -> Ident.Set.mem id all_alias_temps) in
+                    let is_e1_null = is_cast_of_null e1 in
+                    L.d_printfln "[transformation-guard-check]     - Checking (e1 != e2): Is e2 an alias? %b. Is e1 null? %b."
+                    is_e2_alias is_e1_null;
+                    if is_e2_alias && is_e1_null then true else false
+                  )
+              | _ ->
+                  false ) )
+        in
+        L.d_printfln "[transformation-guard-check] --- End Prune Check --- Result: %s"
+          (if result then "MATCH" else "NO MATCH");
+        result
+      in
+      let rec climb_dominators current_node =
+        if Procdesc.Node.equal current_node start_node then (
+          L.d_printfln "[transformation-guard-check] << Reached start node without finding a guard. Result: false.";
+          false )
+        else (
+          L.d_printfln "[transformation-guard-check] >> Visiting dominator %a." Procdesc.Node.pp current_node;
+          let instrs = Procdesc.Node.get_instrs current_node in
+          let found_guard =
+            Instrs.exists instrs ~f:(fun instr ->
+                match instr with
+                | Sil.Prune (condition, _, true, Sil.Ik_if) ->
+                    L.d_printfln "[transformation-guard-check]    - Found Prune in this node." ;
+                    let is_match = is_non_null_check_of_alias condition in
+                    if is_match then
+                      L.d_printfln "[transformation-guard-check]      - SUCCESS: This Prune is a valid guard."
+                    else
+                      L.d_printfln "[transformation-guard-check]      - INFO: This Prune does not match any known alias.";
+                    is_match
+                | _ ->
+                    false )
           in
-          
-          let combined_temps = Ident.Set.union temps_found_in_children temps_in_this_node in
-  
-          (* Step 3: Recurse up to the parent, carrying the combined set of temps. *)
-          if Procdesc.Node.equal parent_dominator current_node then false
+          if found_guard then (
+            L.d_printfln "[transformation-guard-check] << Found a valid guard. Result: true.";
+            true )
           else
-            find_guard_in_dominators_stateful parent_dominator combined_temps
-    in
-    (* Initial call starts the climb from the original node with an empty set of temps. *)
-    find_guard_in_dominators_stateful node Ident.Set.empty
-    in
+            let parent_dominator = idom current_node in
+            if Procdesc.Node.equal parent_dominator current_node then (
+              L.d_printfln "[transformation-guard-check] << Parent is same as current. Stopping climb. Result: false.";
+              false )
+            else climb_dominators parent_dominator
+        )
+      in
+      climb_dominators (idom node)
+  in
   let unified_crash_slice =
     match bug.diag_trace with
     | Trace.ViaCall {location= crash_loc; _} ->
@@ -868,9 +1012,13 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 
         (*Prune the list by removing dereferences that are already guarded. *)
         L.d_printfln "[transformation-log]   Pruning the slice by checking for existing semantic guards...";
+        let all_alias_temps = get_all_alias_temps proc_desc all_ptrs_to_guard in
+          L.d_printfln "[transformation-guard-check] Pre-computed all alias temps: {%a}"
+          (Format.pp_print_list Ident.pp)
+          (Ident.Set.elements all_alias_temps);
         let unguarded_syntactic_dereferences =
           List.filter all_syntactic_dereferences ~f:(fun node ->
-            not (is_syntactically_guarded proc_desc idom node all_ptrs_to_guard)
+            not (is_syntactically_guarded proc_desc idom node all_alias_temps)
           )
         in
         
@@ -944,7 +1092,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       | Load {e; _} | Store {e1= e; _} ->
         (* A load or store is an external side effect ONLY if the address `e`
             is NOT one of the pointers we are explicitly trying to guard.
-            If it *is* one of our pointers, we want to skip. *)
+            If it *is* one of the pointers, we want to skip. *)
         let is_aliased_access = List.exists all_aliases ~f:(fun alias -> Exp.equal e alias) in
         if is_aliased_access then
           (* Not an EXTERNAL side effect, it's part of the bug. Benign for merging purposes. *)
@@ -1200,9 +1348,9 @@ let save_all_plans proc_desc plans =
     let filename =
       let loc = Procdesc.get_loc proc_desc in
       let source_file_str = SourceFile.to_string loc.Location.file in
-      let file_hash = Hashtbl.hash source_file_str in
+      (* let file_hash = Hashtbl.hash source_file_str in *)
       (* Use a format like "main-a1b2c3d4.json" *)
-      Format.asprintf "%s-%x.json" source_file_str file_hash
+      Format.asprintf "%s.json" source_file_str
     in
     let transformation_dir = Filename.concat Config.project_root "pulse-transformation" in
     let filepath = Filename.concat transformation_dir filename in

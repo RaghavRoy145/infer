@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 6,
+      "end_node": 4,
+      "start_line": 15,
+      "end_line": 19,
+      "guard_with_pointer": "&ptr"
+    }
+  }
+]

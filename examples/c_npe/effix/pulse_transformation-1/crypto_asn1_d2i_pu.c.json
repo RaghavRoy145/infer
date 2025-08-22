@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "d2i_PublicKey",
+    "procedure_id": "d2i_PublicKey",
+    "source_file": "crypto/asn1/d2i_pu.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 26,
+      "end_node": 2,
+      "start_line": 120,
+      "end_line": 138,
+      "guard_with_pointer": "&ret",
+      "metrics": {
+        "cost_l_imprecision": 2,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 5,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
+        "total_aliases": 1
+      }
+    }
+  }
+]

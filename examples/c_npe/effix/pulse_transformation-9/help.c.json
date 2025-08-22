@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "list_commands",
+    "procedure_id": "list_commands",
+    "source_file": "help.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "help.c",
+      "npe_line": 244,
+      "original_pointer": "&exec_path"
+    }
+  }
+]

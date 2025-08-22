@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "AES_bi_ige_encrypt",
+    "procedure_id": "AES_bi_ige_encrypt",
+    "source_file": "crypto/aes/aes_ige.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "crypto/aes/aes_ige.c",
+      "npe_line": 213,
+      "original_pointer": "&n"
+    }
+  }
+]

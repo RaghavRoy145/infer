@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "BIO_debug_callback",
+    "procedure_id": "BIO_debug_callback",
+    "source_file": "crypto/bio/bio_cb.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 13,
+      "end_node": 13,
+      "start_line": 131,
+      "end_line": 131,
+      "guard_with_pointer": "&sbuffer",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

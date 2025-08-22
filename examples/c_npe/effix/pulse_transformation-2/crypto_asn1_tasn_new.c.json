@@ -1,0 +1,65 @@
+[
+  {
+    "procedure_name": "ASN1_primitive_new",
+    "procedure_id": "ASN1_primitive_new",
+    "source_file": "crypto/asn1/tasn_new.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 44,
+      "end_node": 9,
+      "start_line": 338,
+      "end_line": 342,
+      "guard_with_pointer": "&it",
+      "metrics": {
+        "cost_l_imprecision": 2,
+        "cost_g_overhead_final": 3,
+        "nodes_in_scope": 4,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "ASN1_primitive_new",
+    "procedure_id": "ASN1_primitive_new",
+    "source_file": "crypto/asn1/tasn_new.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 30,
+      "end_node": 30,
+      "start_line": 349,
+      "end_line": 349,
+      "guard_with_pointer": "&it",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 3,
+        "nodes_in_scope": 1,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "ASN1_primitive_new",
+    "procedure_id": "ASN1_primitive_new",
+    "source_file": "crypto/asn1/tasn_new.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 12,
+      "end_node": 12,
+      "start_line": 367,
+      "end_line": 367,
+      "guard_with_pointer": "&it",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 3,
+        "nodes_in_scope": 1,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  }
+]

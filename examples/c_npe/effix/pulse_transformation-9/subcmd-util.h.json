@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "xrealloc",
+    "procedure_id": "xrealloc{de19fb513f1a3679a81b8f2d486f7ead}",
+    "source_file": "subcmd-util.h",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "subcmd-util.h",
+      "npe_line": 50,
+      "original_pointer": "&ptr"
+    }
+  }
+]

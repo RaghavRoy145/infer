@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "ASN1_item_ex_i2d",
+    "procedure_id": "ASN1_item_ex_i2d",
+    "source_file": "crypto/asn1/tasn_enc.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 97,
+      "end_node": 97,
+      "start_line": 188,
+      "end_line": 188,
+      "guard_with_pointer": "&cf",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

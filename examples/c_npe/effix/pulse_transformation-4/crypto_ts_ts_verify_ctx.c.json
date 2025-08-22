@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "TS_VERIFY_CTX_init",
+    "procedure_id": "TS_VERIFY_CTX_init",
+    "source_file": "crypto/ts/ts_verify_ctx.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "crypto/ts/ts_verify_ctx.c",
+      "npe_line": 74,
+      "original_pointer": "&ctx"
+    }
+  }
+]

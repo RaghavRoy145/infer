@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "prepare_exec_cmd",
+    "procedure_id": "prepare_exec_cmd{18263ac40cb2d86491059c2ad47ddce7}",
+    "source_file": "exec-cmd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 14,
+      "end_node": 5,
+      "start_line": 165,
+      "end_line": 172,
+      "guard_with_pointer": "&nargv",
+      "metrics": {
+        "cost_l_imprecision": 10,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 13,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
+        "total_aliases": 2
+      }
+    }
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "rotate_serial",
+    "procedure_id": "rotate_serial",
+    "source_file": "apps/apps.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "apps/apps.c",
+      "npe_line": 1730,
+      "original_pointer": "&sbuffer"
+    }
+  }
+]

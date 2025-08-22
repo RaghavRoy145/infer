@@ -14,23 +14,49 @@ type reuse_candidate = {
     reused_pvar: Pvar.t; (* The variable to reuse, e.g., 'q' *)
   }
 
+type skip_metrics =
+  { total_aliases: int  (** Total number of aliased pointers found for the bug. *)
+  ; true_slice_size: int  (** Total number of unguarded dereferences (crash sites). *)
+  ; initial_candidate_plans: int  (** Number of guards before filtering and merging. *)
+  ; final_guard_count: int  (** Number of guards after compaction (Cost_G for the whole patch). *)
+  ; imprecision_cost: int  (** Nodes guarded besides the slice nodes (Cost_L for this specific plan). *)
+  ; nodes_in_scope: int  (** Total nodes in this plan's scope. *) }
+
+type replace_metrics =
+  { cost: int  (** Modification Cost (Cost_Rep). *)
+  ; total_aliases: int  (** Total number of aliased pointers found for the bug. *) }
+
+type intermediate_plan =
+| ISkip of
+    { lca_node: Procdesc.Node.t
+    ; join_node: Procdesc.Node.t
+    ; pointer_exprs: Exp.t list
+    ; slice_nodes: Procdesc.Node.t list }
+| IEvade of {proc_start_node: Procdesc.Node.t; pointer_expr: Exp.t}
+
 type transformation_plan =
 | Skip of { 
     lca_node : Procdesc.Node.t;
     join_node : Procdesc.Node.t;
     pointer_exprs : Exp.t list;
     slice_nodes : Procdesc.Node.t list;
-  }
+    metrics: skip_metrics }
 | Evade of {
     proc_start_node: Procdesc.Node.t;
     pointer_expr: Exp.t;
   }
-| Replace of
-    { def_site_node: Procdesc.Node.t
-    ; pvar: Pvar.t
-    ; pvar_typ: Typ.t
-    ; reuse_info: reuse_candidate option
-    ; all_aliases: Exp.t list }
+| Replace of {
+    def_site_node: Procdesc.Node.t;
+    pvar: Pvar.t;
+    pvar_typ: Typ.t;
+    reuse_info: reuse_candidate option;
+    all_aliases: Exp.t list;
+    metrics: replace_metrics }
+| NoPlanGenerated of {
+    reason: string;
+    npe_location: Location.t;
+    pointer_expr_str: string
+  }
 
 
 (** A simple cache to avoid reporting the same transformation plan multiple times for a single procedure. *)
@@ -245,6 +271,17 @@ let find_minimal_scope (slice : Procdesc.Node.t list) ipdom_fun proc_desc lca id
 
   (start_node, end_node)
 
+(** Counts the total number of CFG nodes within a given control-flow scope. *)
+let count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node ~end_node =
+  (* let ipdom = Lazy.force ipdom_fun in *)
+  let is_inside_scope node =
+    is_dominated_by ~dominator:start_node ~node idom
+    && is_post_dominated_by ~pdominator:end_node ~node ipdom_fun
+  in
+  let all_nodes = Procdesc.get_nodes proc_desc in
+  List.fold all_nodes ~init:0 ~f:(fun acc node ->
+      (* Change: Instead of counting instructions, just count the node itself. *)
+      if is_inside_scope node then acc + 1 else acc )
 
 (** {3. Alias & State Analysis} *)
 
@@ -603,7 +640,20 @@ let plan_replace_transformation proc_desc (bug : 'payload bug_info) (all_aliases
     let reuse_candidate_opt =
       find_reuse_candidate proc_desc bug.astate (pvar, pvar_typ)
     in
-    Replace {def_site_node= def_site; pvar; pvar_typ; reuse_info= reuse_candidate_opt; all_aliases}
+    (* Calculate the metrics for the Replace strategy directly. *)
+    let metrics =
+      { (* Cost_Rep is 1 (one new definition site) + 0 (zero new heap cells). *)
+        cost= 1
+      ; total_aliases= List.length all_aliases }
+    in
+    (* Construct the final transformation_plan record with the metrics included. *)
+    Replace
+      { def_site_node= def_site
+      ; pvar
+      ; pvar_typ
+      ; reuse_info= reuse_candidate_opt
+      ; all_aliases
+      ; metrics }
   in
   Option.to_list plan_opt
 
@@ -994,6 +1044,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       in
       climb_dominators (idom node)
   in
+  let total_aliases_in_proc = List.length all_ptrs_to_guard in
   let unified_crash_slice =
     match bug.diag_trace with
     | Trace.ViaCall {location= crash_loc; _} ->
@@ -1030,7 +1081,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
         List.dedup_and_sort ~compare:Procdesc.Node.compare
           (Option.to_list final_crash_node @ unguarded_syntactic_dereferences)
   in
-  
+  let true_slice_size = List.length unified_crash_slice in
   L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d crash node(s)."
     (List.length unified_crash_slice);
 
@@ -1046,16 +1097,16 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             Procdesc.Node.pp end_node (Procdesc.Node.get_loc end_node).line;
 
         if Procdesc.Node.equal start_node start then
-          Some (Evade {proc_start_node= start; pointer_expr= List.hd_exn all_ptrs_to_guard})
+          Some (IEvade {proc_start_node= start; pointer_expr= List.hd_exn all_ptrs_to_guard})
         else
           Some
-            (Skip
+            (ISkip
                 { lca_node= start_node
                 ; join_node= end_node
                 ; pointer_exprs= all_ptrs_to_guard
-                ; slice_nodes= slice_for_this_node } ) )
+                ; slice_nodes= [crash_node] } ) )
   in
-
+  let initial_candidate_plans = List.length candidate_plans in
   (*********************************************************************************)
   (* Stage 2 & 3: Filter and Merge                             *)
   (*********************************************************************************)
@@ -1155,10 +1206,10 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     result
   in
 
-  let merge_plans (plan1 : transformation_plan) (plan2 : transformation_plan) ipdom_fun : transformation_plan =
+  let merge_plans (plan1 : intermediate_plan) (plan2 : intermediate_plan) ipdom_fun : intermediate_plan =
     match (plan1, plan2) with
-    | ( Skip {lca_node=s1; join_node=e1; pointer_exprs=p1; slice_nodes=n1}
-      , Skip {lca_node=s2; join_node=e2; pointer_exprs=p2; slice_nodes=n2} ) ->
+    | ( ISkip {lca_node= s1; join_node= e1; pointer_exprs= p1; slice_nodes= n1}
+      , ISkip {lca_node= s2; join_node= e2; pointer_exprs= p2; slice_nodes= n2} ) ->
         let s1_loc, e1_loc = ((Procdesc.Node.get_loc s1).line, (Procdesc.Node.get_loc e1).line) in
         let s2_loc, e2_loc = ((Procdesc.Node.get_loc s2).line, (Procdesc.Node.get_loc e2).line) in
         L.d_printfln "\n[transformation-merge] >> Attempting to merge plan [lines %d-%d] with plan [lines %d-%d]"
@@ -1200,12 +1251,21 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             (Procdesc.Node.get_loc lcpd_node).line ;
           
           let ipdom = Lazy.force ipdom_fun in
-          let final_join_node = ipdom lcpd_node in
-
-          L.d_printfln
-            "[transformation-merge-join]    - The true join is the IPDOM of the LCPD. Result is node %a (line %d)."
-            Procdesc.Node.pp final_join_node
-            (Procdesc.Node.get_loc final_join_node).line ;
+          let final_join_node =
+            try
+              (* Attempt the potentially failing lookup. *)
+              let node = ipdom lcpd_node in
+              L.d_printfln
+                "[transformation-merge-join]    - The true join is the IPDOM of the LCPD. Result is node %a (line %d)."
+                Procdesc.Node.pp node (Procdesc.Node.get_loc node).line ;
+              node
+            with Stdlib.Not_found ->
+              (* If the lookup fails, it's because lcpd_node is the exit node.
+                 Safely fall back to using the lcpd_node itself. *)
+              L.d_printfln
+                "[transformation-merge-join-warning]    - Could not find IPDOM of the LCPD. This is expected if the rejoin point is the function exit. Using LCPD itself as the final join node." ;
+              lcpd_node
+          in
           final_join_node
         )
       in
@@ -1264,7 +1324,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       L.d_printfln "[transformation-merge] << Finished merge. Final scope: [%a -> %a]"
         Procdesc.Node.pp new_lca Procdesc.Node.pp new_join;
 
-      Skip {lca_node=new_lca; join_node=new_join; pointer_exprs=new_pointers; slice_nodes=new_slice}
+      ISkip {lca_node= new_lca; join_node= new_join; pointer_exprs= new_pointers; slice_nodes= new_slice}
   | _ -> plan1
   in
 
@@ -1276,8 +1336,8 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
               if phys_equal current_plan other_plan then false
               else
                 match (current_plan, other_plan) with
-                | ( Skip {lca_node= s_curr; join_node= e_curr; _}
-                  , Skip {lca_node= s_other; join_node= e_other; _} ) ->
+                | ( ISkip {lca_node= s_curr; join_node= e_curr; _}
+                  , ISkip {lca_node= s_other; join_node= e_other; _} ) ->
                     (* Pass scopes as two separate arguments *)
                     is_strictly_contained_within (s_other, e_other) (s_curr, e_curr)
                 | _ ->
@@ -1289,7 +1349,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 
   L.d_printfln "\n[transformation-log] STEP 3: Merging %d filtered plan(s) using a fixed-point algorithm." (List.length filtered_plans);
   
-  let final_plans =
+  let final_intermediate_plans =
     let rec merge_fixed_point plans_to_merge =
       let rec find_and_merge_pair worklist acc =
         match worklist with
@@ -1298,7 +1358,8 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             let found_merge =
               List.find_map rest ~f:(fun other_plan ->
                 match (current_plan, other_plan) with
-                | (Skip {lca_node=s1; join_node=e1; _}, Skip {lca_node=s2; join_node=e2; _}) ->
+                | ( ISkip {lca_node= s1; join_node= e1; _}
+                  , ISkip {lca_node= s2; join_node= e2; _} ) ->
                     if should_merge_scopes all_ptrs_to_guard (s1, e1) (s2, e2) then
                       let merged_plan = merge_plans current_plan other_plan ipdom_fun in
                       let remaining_plans = List.filter rest ~f:(fun p -> not (phys_equal p other_plan)) in
@@ -1326,8 +1387,34 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     merge_fixed_point filtered_plans
   in
   
-  L.d_printfln "\n[transformation-log] <<< Generated %d final plan(s)." (List.length final_plans);
-  final_plans
+  L.d_printfln "\n[transformation-log] <<< Generated %d final plan(s)." (List.length final_intermediate_plans);
+
+  let final_guard_count = List.length final_intermediate_plans in
+  (* Final step: Map over the generated plans to compute and attach metrics. *)
+  List.map final_intermediate_plans ~f:(fun iplan ->
+    match iplan with
+    | ISkip {lca_node; join_node; pointer_exprs; slice_nodes} ->
+      let nodes_in_scope =
+        (* Change: Call the new node-counting function. *)
+        count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node:lca_node
+          ~end_node:join_node
+      in
+      (* The rest of the logic remains the same, but the numbers will be different. *)
+      let imprecision_cost = nodes_in_scope - List.length slice_nodes in
+      let metrics =
+        { total_aliases= total_aliases_in_proc
+        ; true_slice_size
+        ; initial_candidate_plans
+        ; final_guard_count
+        ; imprecision_cost
+        ; nodes_in_scope }
+      in
+      Skip {lca_node; join_node; pointer_exprs; slice_nodes; metrics}
+    | IEvade {proc_start_node; pointer_expr} ->
+        (* Convert from intermediate Evade to final Evade *)
+        Evade {proc_start_node; pointer_expr} )
+
+  (* final_plans *)
 
 
 (** {5. Main Entry Point & Reporting} *)
@@ -1335,70 +1422,87 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 (** Helper to save a single transformation plan to a file. *)
 
 let save_all_plans proc_desc plans =
-  (* Ensure the directory exists *)
-  let file_exists name = match Unix.access name ~perm:[Unix.F_OK] with
-  | exception Unix.Unix_error (Unix.ENOENT, _, _) -> false
-  | () -> true
-  in
-  (* Add a top-level try...with to catch any unexpected errors and prevent silent crashes. *)
+  let proc_name = Procdesc.get_proc_name proc_desc in
   try
     L.d_printfln "[transformation-plan] Attempting to save plan.";
-    let proc_name = Procdesc.get_proc_name proc_desc in
-    (* Use the procedure's unique ID for a stable filename. *)
-    let filename =
-      let loc = Procdesc.get_loc proc_desc in
-      let source_file_str = SourceFile.to_string loc.Location.file in
-      (* let file_hash = Hashtbl.hash source_file_str in *)
-      (* Use a format like "main-a1b2c3d4.json" *)
-      Format.asprintf "%s.json" source_file_str
-    in
+    let loc = Procdesc.get_loc proc_desc in
+    let source_file_str = SourceFile.to_string loc.Location.file in
+
+    (* Sanitize the filename to remove slashes and replace with a safe character.
+       This creates a flat file structure which is simpler and more robust.
+       e.g., "crypto/asn1/tasn_enc.c" becomes "crypto_asn1_tasn_enc.c" *)
+    let sanitized_source_file = String.tr ~target:'/' ~replacement:'_' source_file_str in
+    let filename = Format.asprintf "%s.json" sanitized_source_file in
+
+    (* The output directory remains the same top-level one. *)
     let transformation_dir = Filename.concat Config.project_root "pulse-transformation" in
     let filepath = Filename.concat transformation_dir filename in
-  
-    (* Ensure the directory exists *)
-    ( try if not (file_exists transformation_dir) then Unix.mkdir transformation_dir ~perm:0o755
-      with exn ->
-        L.d_printfln "[transformation-plan] ERROR: Could not create transformation directory. Exception: %s" (Exn.to_string exn) );
-    
-  (* Create a JSON representation of the plan. Yojson is a standard library used by Infer. *)
-  let plan_to_json plan =
-    `Assoc
-      [ ("procedure_name", `String (Procname.to_string proc_name))
-      ; ("procedure_id", `String (Procname.to_unique_id proc_name))
-      ; ( "plan_type"
-        , match plan with
-          | Skip _ ->
-              `String "Skip"
-          | Evade _ ->
-              `String "Evade"
-          | Replace _ ->
-              `String "Replace" )
-      ; ( "details"
-        , match plan with
-          | Skip {lca_node; join_node; pointer_exprs; _} ->
-              `Assoc
-                [ ("start_node", `Int (Procdesc.Node.get_id lca_node :> int))
-                ; ("end_node", `Int (Procdesc.Node.get_id join_node :> int))
-                ; ("start_line", `Int (Procdesc.Node.get_loc lca_node).line)
-                ; ("end_line", `Int (Procdesc.Node.get_loc join_node).line)
-                ; ("guard_with_pointer", `String (Format.asprintf "%a" Exp.pp (List.hd_exn pointer_exprs))) ]
-          | Evade {proc_start_node; pointer_expr} ->
-              `Assoc
-                [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
-                ; ("pointer_expr", `String (Format.asprintf "%a" Exp.pp pointer_expr)) ]
-          | Replace {def_site_node; pvar; pvar_typ; reuse_info; _} ->
-              `Assoc
-                [ ("def_site_node", `Int (Procdesc.Node.get_id def_site_node :> int))
-                ; ("def_site_line", `Int (Procdesc.Node.get_loc def_site_node).line)
-                ; ("target_pvar", `String (Pvar.to_string pvar))
-                ; ("pvar_type", `String (Typ.to_string pvar_typ))
-                ; ( "reuse_candidate"
-                  , match reuse_info with
-                    | None -> `Null
-                    | Some {reused_pvar} -> `String (Pvar.to_string reused_pvar) ) ] ) ]
-  in
-  let all_plans_json = `List (List.map plans ~f:plan_to_json) in
-  try
+
+    (* Ensure the single output directory exists. mkdir_p is safer as it doesn't
+       fail if the directory already exists. *)
+    IUnix.mkdir_p transformation_dir;
+
+    let plan_to_json plan =
+      `Assoc
+        [ ("procedure_name", `String (Procname.to_string proc_name))
+        ; ("procedure_id", `String (Procname.to_unique_id proc_name))
+        ; ("source_file", `String source_file_str) (* Also save the original source file path *)
+        ; ( "plan_type"
+          , match plan with
+            | Skip _ -> `String "Skip"
+            | Evade _ -> `String "Evade"
+            | Replace _ -> `String "Replace"
+            | NoPlanGenerated _ -> `String "NoPlanGenerated" )
+        ; ( "details"
+          , match plan with
+          | Skip {lca_node; join_node; pointer_exprs; metrics; _} ->
+            `Assoc
+              [ ("start_node", `Int (Procdesc.Node.get_id lca_node :> int))
+              ; ("end_node", `Int (Procdesc.Node.get_id join_node :> int))
+              ; ("start_line", `Int (Procdesc.Node.get_loc lca_node).line)
+              ; ("end_line", `Int (Procdesc.Node.get_loc join_node).line)
+              ; ( "guard_with_pointer"
+                , match pointer_exprs with
+                  | [] ->
+                      `String "unknown_pointer_due_to_empty_list"
+                  | hd :: _ ->
+                      `String (Format.asprintf "%a" Exp.pp hd) )
+              ; ( "metrics"
+                , `Assoc
+                    [ ("cost_l_imprecision", `Int metrics.imprecision_cost)
+                    ; ("cost_g_overhead_final", `Int metrics.final_guard_count)
+                    ; ("nodes_in_scope", `Int metrics.nodes_in_scope)
+                    ; ("true_slice_size", `Int metrics.true_slice_size)
+                    ; ("initial_candidate_plans", `Int metrics.initial_candidate_plans)
+                    ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
+            | Evade {proc_start_node; pointer_expr} ->
+                `Assoc
+                  [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
+                  ; ("pointer_expr", `String (Format.asprintf "%a" Exp.pp pointer_expr)) ]
+                  | Replace {def_site_node; pvar; pvar_typ; reuse_info; metrics; _} ->
+                    `Assoc
+                      [ ("def_site_node", `Int (Procdesc.Node.get_id def_site_node :> int))
+                      ; ("def_site_line", `Int (Procdesc.Node.get_loc def_site_node).line)
+                      ; ("target_pvar", `String (Pvar.to_string pvar))
+                      ; ("pvar_type", `String (Typ.to_string pvar_typ))
+                      ; ( "reuse_candidate"
+                        , match reuse_info with
+                          | None ->
+                              `Null
+                          | Some {reused_pvar} ->
+                              `String (Pvar.to_string reused_pvar) )
+                      ; ( "metrics"
+                        , `Assoc
+                            [ ("cost_rep_modification", `Int metrics.cost)
+                            ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
+            | NoPlanGenerated {reason; npe_location; pointer_expr_str} ->
+                `Assoc
+                  [ ("reason", `String reason)
+                  ; ("npe_file", `String (SourceFile.to_string npe_location.file))
+                  ; ("npe_line", `Int npe_location.line)
+                  ; ("original_pointer", `String pointer_expr_str) ] ) ]
+    in
+    let all_plans_json = `List (List.map plans ~f:plan_to_json) in
     let out_chan = Out_channel.create filepath in
     Yojson.Safe.pretty_to_channel out_chan all_plans_json;
     Out_channel.close out_chan;
@@ -1407,33 +1511,37 @@ let save_all_plans proc_desc plans =
   with exn ->
     L.d_printfln "[transformation-plan] ERROR: Failed to save repair plans for %a. Exception: %s"
       Procname.pp proc_name (Exn.to_string exn)
-  with exn ->
-    L.d_printfln "[transformation-plan] ERROR: Top-level: Failed to save repair plans. Exception: %s"
-      (Exn.to_string exn)
 
 (** A pure function that translates a `transformation_plan` record into a human-readable format for logging, and calls the save-plan helper *)
 let report_transformation_plan proc_desc plan =
   let proc_name = Procdesc.get_proc_name proc_desc in
   (* let (_:unit) = *)
   match plan with
-  | Skip {lca_node; join_node; pointer_exprs; _} ->
-      let guard_ptr_expr = List.hd_exn pointer_exprs in
-      (* Get the line numbers from the calculated scope boundaries. *)
-      let line1 = (Procdesc.Node.get_loc lca_node).line in
-      let line2 = (Procdesc.Node.get_loc join_node).line in
-      let start_line = min line1 line2 in
-      let end_line = max line1 line2 in
-
-      L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
-      L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
-      L.d_printfln "[transformation-plan]STRATEGY: SKIP" ;
-      L.d_printfln "[transformation-plan]ACTION: Guard the code block from line ~%d to ~%d."
-        start_line end_line;
-      L.d_printfln "[transformation-plan]        (Scope starts at node %d and ends at node %d)"
-        (Procdesc.Node.get_id lca_node :> int) (Procdesc.Node.get_id join_node :> int);
-      L.d_printfln "[transformation-plan]        with the condition: if (%a != NULL) { ... }" Exp.pp guard_ptr_expr;
-      L.d_printfln "[transformation-plan]        This guard protects pointers: [%a]" (Pp.seq ~sep:", " Exp.pp) pointer_exprs;
-      L.d_printfln "[transformation-plan]--------------------------"
+| Skip {lca_node; join_node; pointer_exprs; _} -> (
+    (* --- START OF FIX 1A --- *)
+    match pointer_exprs with
+    | [] ->
+        (* This case should ideally not happen, but we handle it defensively. *)
+        L.d_printfln "[transformation-plan-warning] A SKIP plan was generated with an empty pointer list." ;
+        L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
+        L.d_printfln "[transformation-plan]STRATEGY: SKIP (malformed)"
+    | guard_ptr_expr :: _ ->
+        (* This is the normal, expected case. *)
+        let line1 = (Procdesc.Node.get_loc lca_node).line in
+        let line2 = (Procdesc.Node.get_loc join_node).line in
+        let start_line = min line1 line2 in
+        let end_line = max line1 line2 in
+        L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
+        L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
+        L.d_printfln "[transformation-plan]STRATEGY: SKIP" ;
+        L.d_printfln "[transformation-plan]ACTION: Guard the code block from line ~%d to ~%d." start_line end_line ;
+        L.d_printfln "[transformation-plan]        (Scope starts at node %d and ends at node %d)"
+          (Procdesc.Node.get_id lca_node :> int)
+          (Procdesc.Node.get_id join_node :> int) ;
+        L.d_printfln "[transformation-plan]        with the condition: if (%a != NULL) { ... }" Exp.pp guard_ptr_expr ;
+        L.d_printfln "[transformation-plan]        This guard protects pointers: [%a]"
+          (Pp.seq ~sep:", " Exp.pp) pointer_exprs ;
+        L.d_printfln "[transformation-plan]--------------------------" )
 
 | Evade {proc_start_node; pointer_expr} ->
     L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
@@ -1467,8 +1575,15 @@ let report_transformation_plan proc_desc plan =
             (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) pvar
             (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) reused_pvar;
         L.d_printfln "[transformation-plan]          (Reusing non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
-    ) ;
-    L.d_printfln "[transformation-plan]--------------------------"
+    ) 
+| NoPlanGenerated {reason; npe_location; pointer_expr_str} ->
+  L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
+  L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
+  L.d_printfln "[transformation-plan]STRATEGY: NO PLAN GENERATED" ;
+  L.d_printfln "[transformation-plan]REASON: %s" reason ;
+  L.d_printfln "[transformation-plan]ORIGINAL NPE LOCATION: %a" Location.pp npe_location ;
+  L.d_printfln "[transformation-plan]ORIGINAL POINTER: %s" pointer_expr_str ;
+  L.d_printfln "[transformation-plan]--------------------------"
   (* in *)
 
   (* After logging to the console, also save the structured plan to a file. *)
@@ -1520,26 +1635,68 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
     find_syntactic_aliases proc_desc seed_pointers
   in
   L.d_printfln "[transformation-plan] Found %d total pointers in alias set." (List.length all_ptrs_to_guard);
+  if List.is_empty all_ptrs_to_guard then
+    L.d_printfln
+      "[transformation-warning] Alias analysis found no pointers to guard for procedure %a. Aborting plan generation for this bug."
+      Procname.pp (Procdesc.get_proc_name proc_desc)
+  else (
+    (*
+      Step 2: Now that we have the complete alias set, dispatch to the correct planner.
+    *)
+    (* let plans : transformation_plan list =
+      if is_local ~proc_desc ~bug all_ptrs_to_guard then (
+        let replace_plans = plan_replace_transformation proc_desc bug all_ptrs_to_guard in
+        if not (List.is_empty replace_plans) then replace_plans
+        else (
+          L.d_printfln "[transformation-plan] REPLACE planning failed. Falling back to SKIP/EVADE.";
+          plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard ) )
+      else
+        plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard
+    in *)
 
-  (*
-    Step 2: Now that we have the complete alias set, dispatch to the correct planner.
-  *)
-  let plans : transformation_plan list =
-    if is_local ~proc_desc ~bug all_ptrs_to_guard then (
-      let replace_plans = plan_replace_transformation proc_desc bug all_ptrs_to_guard in
-      if not (List.is_empty replace_plans) then replace_plans
-      else (
-        L.d_printfln "[transformation-plan] REPLACE planning failed. Falling back to SKIP/EVADE.";
-        plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard ) )
-    else
-      plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard
+  (* Step 2: Generate plans OR a "NoPlanGenerated" reason. *)
+  let final_plans : transformation_plan list =
+    if List.is_empty all_ptrs_to_guard then (
+      (* SCENARIO 1: Alias analysis found no pointers. *)
+      L.d_printfln
+        "[transformation-warning] Alias analysis found no pointers to guard for procedure %a. Logging as NoPlanGenerated."
+        Procname.pp (Procdesc.get_proc_name proc_desc) ;
+      [ NoPlanGenerated
+          { reason= "Alias analysis found no pointers to guard."
+          ; npe_location= Trace.get_start_location bug.diag_trace
+          ; pointer_expr_str= Format.asprintf "%a" Exp.pp bug.ptr_expr } ] )
+    else (
+      (* Alias analysis succeeded, now run the actual planners. *)
+      let generated_plans =
+        if is_local ~proc_desc ~bug all_ptrs_to_guard then (
+          let replace_plans = plan_replace_transformation proc_desc bug all_ptrs_to_guard in
+          if not (List.is_empty replace_plans) then replace_plans
+          else (
+            L.d_printfln "[transformation-plan] REPLACE planning failed. Falling back to SKIP/EVADE." ;
+            plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard ) )
+        else plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard
+      in
+
+      if List.is_empty generated_plans then (
+        (* SCENARIO 2: Planners ran but produced no plans (e.g., all sites guarded). *)
+        L.d_printfln
+          "[transformation-warning] Planners generated ZERO plans for procedure %a. Logging as NoPlanGenerated."
+          Procname.pp (Procdesc.get_proc_name proc_desc) ;
+        [ NoPlanGenerated
+            { reason= "All potential crash sites were found to be already syntactically guarded."
+            ; npe_location= Trace.get_start_location bug.diag_trace
+            ; pointer_expr_str= Format.asprintf "%a" Exp.pp bug.ptr_expr } ] )
+      else (* Success! We have one or more valid repair plans. *)
+        generated_plans
+    )
   in
-  
-  (* The rest of the function iterates through the generated list of plans. *)
-  List.iter plans ~f:(fun plan ->
-    if not (List.mem !logged_transformations_cache plan ~equal:equal_transformation_plan) then (
-      L.d_printfln "[transformation] Found new unique plan.";
-      report_transformation_plan proc_desc plan;
-      logged_transformations_cache := plan :: !logged_transformations_cache
+    
+    (* The rest of the function iterates through the generated list of plans. *)
+    List.iter final_plans ~f:(fun plan ->
+      if not (List.mem !logged_transformations_cache plan ~equal:equal_transformation_plan) then (
+        L.d_printfln "[transformation] Found new unique plan.";
+        report_transformation_plan proc_desc plan;
+        logged_transformations_cache := plan :: !logged_transformations_cache
+      )
     )
   )

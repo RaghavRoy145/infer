@@ -2,13 +2,22 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
+    "source_file": "test09_linked_list_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 11,
       "end_node": 5,
       "start_line": 14,
       "end_line": 18,
-      "guard_with_pointer": "&current"
+      "guard_with_pointer": "&current",
+      "metrics": {
+        "cost_l_imprecision": 4,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 7,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
+        "total_aliases": 2
+      }
     }
   }
 ]

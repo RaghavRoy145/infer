@@ -2,13 +2,22 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
+    "source_file": "test19_union_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 6,
       "end_node": 4,
       "start_line": 15,
       "end_line": 19,
-      "guard_with_pointer": "&ptr"
+      "guard_with_pointer": "&ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 3,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
+        "total_aliases": 1
+      }
     }
   }
 ]

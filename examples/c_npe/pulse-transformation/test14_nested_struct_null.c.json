@@ -2,13 +2,22 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
+    "source_file": "test14_nested_struct_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 5,
       "end_node": 4,
       "start_line": 18,
       "end_line": 20,
-      "guard_with_pointer": "&acc"
+      "guard_with_pointer": "&acc",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 2,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
     }
   }
 ]

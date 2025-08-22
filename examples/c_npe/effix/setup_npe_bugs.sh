@@ -389,9 +389,9 @@ main() {
     # Download each NPE bug
     local total=${#NPE_BUGS[@]}
     local current=0
-    
-    for bug_id in "${!NPE_BUGS[@]}"; do
-        ((current++))
+    for bug_id in "${!NPE_BUGS[@]}"; do    
+        #((current++))
+        echo -e "${#NPE_BUGS[@]}, ${current}"; 
         echo "[$current/$total] Downloading $bug_id"
         echo "----------------------------------------"
         download_bug "$bug_id" "${NPE_BUGS[$bug_id]}"

@@ -1,0 +1,9 @@
+Bug ID: null-ptr-2-openssl-1
+Project: openssl-1
+Bug Type: Null Pointer Dereference
+Source File: crypto/dh/dh_check.c
+NPE Source Line: 128
+NPE Sink Line: 132
+Configure Command: CC=gcc ./config
+Build Command: make
+Status: Source extracted, not built

@@ -2,13 +2,22 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
+    "source_file": "test04_array_index_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 7,
       "end_node": 4,
       "start_line": 8,
       "end_line": 12,
-      "guard_with_pointer": "&array"
+      "guard_with_pointer": "&array",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 4,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
     }
   }
 ]

@@ -1,0 +1,11 @@
+--- /output/d1_both.c.backup	2023-09-24 15:25:28.531959141 +0000
++++ /experiment/efffix/openssl-1/null-ptr-5/src/ssl/d1_both.c	2023-09-24 15:44:54.458170428 +0000
+@@ -1180,7 +1180,7 @@
+ 
+ 	frag = dtls1_hm_fragment_new(s->init_num, 0);
+ 
+-	memcpy(frag->fragment, s->init_buf->data, s->init_num);
++if ( s->init_buf != s->init_buf->data ) { return 1; }  	memcpy(frag->fragment, s->init_buf->data, s->init_num);
+ 
+ 	if ( is_ccs)
+ 		{

@@ -1,0 +1,11 @@
+--- /output/x509_vpm.c.backup	2023-09-24 13:39:47.493528739 +0000
++++ /experiment/efffix/openssl-1/null-ptr-1/src/crypto/x509/x509_vpm.c	2023-09-24 13:51:07.378420565 +0000
+@@ -89,7 +89,7 @@
+ 	{
+ 	X509_VERIFY_PARAM *param;
+ 	param = OPENSSL_malloc(sizeof(X509_VERIFY_PARAM));
+-	memset(param, 0, sizeof(X509_VERIFY_PARAM));
++if ( ! ( param != NULL ) ) { return param; }  	memset(param, 0, sizeof(X509_VERIFY_PARAM));
+ 	x509_verify_param_zero(param);
+ 	return param;
+ 	}

@@ -1,0 +1,140 @@
+L_local_norm,bug_id,cost_g_overhead,cost_l_local_imprecision,cost_rep_modification,efffix_params,function_name,patch_filename,patch_folder,patch_type,source_file,structural_impact,tool_name,total_aliases,total_function_nodes
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-35.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-9.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-13.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-28.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-10.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-11.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-39.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-17.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-15.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1a-openssl,1,0,N/A,Learning-on,X509_VERIFY_PARAM_new,rep_cluster-L92-26.patch,efffix_openssl-1/openssl-1-null-ptr-1-original/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-31.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-5.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-22.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-9.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-21.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-13.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-14.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-32.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-12.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-1b-openssl,1,0,N/A,Learning-off,X509_VERIFY_PARAM_new,rep_cluster-L92-17.patch,efffix_openssl-1/openssl-1-null-ptr-1-disabled-learn/,Early Exit,crypto/x509/x509_vpm.c ,3,efffix,N/A,4
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-19.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-12.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-20.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-8.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-18.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-7.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-11.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-15.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-21.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-17.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-13.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2a-openssl,1,0,N/A,Learning-on,OCSP_sendreq_new,rep_cluster-L161-10.patch,efffix_openssl-1/openssl-1-null-ptr-3-original/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-26.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-20.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-16.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-24.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-23.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Guarded Block,crypto/ocsp/ocsp_ht.c,0,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-11.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Guarded Block,crypto/ocsp/ocsp_ht.c,0,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-14.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-15.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-21.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Guarded Block,crypto/ocsp/ocsp_ht.c,0,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-17.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Guarded Block,crypto/ocsp/ocsp_ht.c,0,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-25.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-13.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-10.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Guarded Block,crypto/ocsp/ocsp_ht.c,0,efffix,N/A,19
+0.0,efffix-2b-openssl,1,0,N/A,Learning-off,OCSP_sendreq_new,rep_cluster-L161-1.patch,efffix_openssl-1/openssl-1-null-ptr-3-disabled-learn/,Early Exit,crypto/ocsp/ocsp_ht.c,12,efffix,N/A,19
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-37.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-34.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-0.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-6.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-7.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-61.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-23.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-98.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-2.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-71.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-16.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-15.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-3.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-4.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3a-openssl,1,0,N/A,Learning-on,CRYPTO_strdup,rep_cluster-L331-12.patch,efffix_openssl-1/openssl-1-null-ptr-4-original,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-0.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-38.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-18.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-6.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-7.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-5.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-2.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-24.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-71.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-1.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-92.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-66.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-102.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-3.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-4.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-40.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-13.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-3b-openssl,1,0,N/A,Learning-off,CRYPTO_strdup,rep_cluster-L331-32.patch,efffix_openssl-1/openssl-1-null-ptr-4-disabled-learn,Early Exit,crypto/mem.c,3,efffix,N/A,7
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-47.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-40.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-85.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-31.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-45.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-41.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-64.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-38.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-1.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-57.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-54.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-19.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4a-openssl,1,0,N/A,Learning-on,dtls1_buffer_message,rep_cluster-L1183-46.patch,efffix_openssl-1/openssl-1-null-ptr-5-original,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-48.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-47.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-3.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-9.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-88.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-52.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-68.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-113.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-91.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-70.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-37.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-93.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Guarded Block,ssl/d1_both.c,0,efffix,N/A,13
+0.0,efffix-4b-openssl,1,0,N/A,Learning-off,dtls1_buffer_message,rep_cluster-L1183-99.patch,efffix_openssl-1/openssl-1-null-ptr-5-disabled-learn,Early Exit,ssl/d1_both.c,4,efffix,N/A,13
+0.0,footpatch-1a-openssl,1,0,N/A,N/A,BIO_new_file,bss_file_184_0.patch,footpatch_openssl-1/patches,Guarded Block,crypto/bio/bss_file.c,0,footpatch,N/A,13
+0.0,Monobrow-1a-openssl,1,0,N/A,N/A,main,apps_crl2p7.c.json,monobrow_openssl-1/pulse_transformation-1/apps_crl2p7.c.json,Guarded Block,apps/crl2p7.c,0,monobrow,5,3
+0.0,Monobrow-2a-openssl,1,0,N/A,N/A,create_cert_store,apps_ts.c.json,monobrow_openssl-1/pulse_transformation-1/apps_ts.c.json,Guarded Block,apps/ts.c,0,monobrow,2,3
+0.0,Monobrow-3a-openssl,1,0,N/A,N/A,asn1_collate_primitive,crypto_asn1_a_bytes.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_asn1_a_bytes.c.json,Guarded Block,crypto/asn1/a_bytes.c,0,monobrow,1,3
+0.28125,Monobrow-4a-openssl,1,9,N/A,N/A,d2i_PublicKey,crypto_asn1_d2i_pu.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_asn1_d2i_pu.c.json,Guarded Block,crypto/asn1/d2i_pu.c,0,monobrow,1,32
+0.0,Monobrow-5a-openssl,1,0,N/A,N/A,ASN1_item_ex_d2i,crypto_asn1_tasn_dec.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_asn1_tasn_dec.c.json,Guarded Block,crypto/asn1/tasn_dec.c,0,monobrow,1,159
+0.0,Monobrow-6a-openssl,1,0,N/A,N/A,ASN1_item_ex_i2d,crypto_asn1_tasn_enc.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_asn1_tasn_enc.c.json,Guarded Block,crypto/asn1/tasn_enc.c,0,monobrow,1,85
+0.03125,Monobrow-7a-openssl,3,1,N/A,N/A,ASN1_primitive_new,crypto_asn1_tasn_new.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_asn1_tasn_new.c.json,Guarded Block,crypto/asn1/tasn_new.c,0,monobrow,1,32
+0.0,Monobrow-8a-openssl,1,0,N/A,N/A,BIO_debug_callback,crypto_bio_bio_cb.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_bio_bio_cb.c.json,Guarded Block,crypto/bio/bio_cb.c,0,monobrow,1,47
+0.14285714285714285,Monobrow-9a-openssl,4,5,N/A,N/A,BN_bin2bn,crypto_bn_bn_lib.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_bn_bn_lib.c.json,Guarded Block,crypto/bn/bn_lib.c,0,monobrow,4,35
+0.0,Monobrow-10a-openssl,1,0,N/A,N/A,dsa_builtin_paramgen,crypto_dsa_dsa_gen.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_dsa_dsa_gen.c.json,Guarded Block,crypto/dsa/dsa_gen.c,0,monobrow,1,153
+0.0,Monobrow-11a-openssl,2,0,N/A,N/A,dsa_sign_setup,crypto_dsa_dsa_ossl.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_dsa_dsa_ossl.c.json,Guarded Block,crypto/dsa/dsa_ossl.c,0,monobrow,3,5
+0.0,Monobrow-12a-openssl,1,0,N/A,N/A,EVP_PBE_alg_add_type,crypto_evp_evp_pbe.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_evp_evp_pbe.c.json,Guarded Block,crypto/evp/evp_pbe.c,0,monobrow,2,16
+0.0,Monobrow-14a-openssl,1,0,N/A,N/A,print_leak_doall_arg,crypto_mem_dbg.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_mem_dbg.c.json,Guarded Block,crypto/mem_dbg.c,0,monobrow,1,27
+0.0,Monobrow-15a-openssl,1,0,N/A,N/A,UI_set_result,crypto_ui_ui_lib.c.json,monobrow_openssl-1/pulse_transformation-1/crypto_ui_ui_lib.c.json,Guarded Block,crypto/ui/ui_lib.c,0,monobrow,1,35
+0.23076923076923078,Monobrow-16a-openssl,1,3,N/A,N/A,dtls1_buffer_message,ssl_d1_both.c.json,monobrow_openssl-1/pulse_transformation-1/ssl_d1_both.c.json,Guarded Block,ssl/d1_both.c,0,monobrow,1,13
+0.36363636363636365,Monobrow-17a-openssl,1,8,N/A,N/A,ssl3_send_server_hello,ssl_s3_srvr.c.json,monobrow_openssl-1/pulse_transformation-1/ssl_s3_srvr.c.json,Guarded Block,ssl/s3_srvr.c,0,monobrow,3,22
+0.0,Monobrow-18a-openssl,1,0,N/A,N/A,tls_decrypt_ticket,ssl_t1_lib.c.json,monobrow_openssl-1/pulse_transformation-1/ssl_t1_lib.c.json,Guarded Block,ssl/t1_lib.c,0,monobrow,1,7
+0.06060606060606061,Monobrow-19a-openssl,5,2,N/A,N/A,run_test_vectors,test_igetest.c.json,monobrow_openssl-1/pulse_transformation-1/test_igetest.c.json,Guarded Block,test/igetest.c,0,monobrow,1,33
+0.0,Monobrow-1a-generated,N/A,N/A,1,N/A,main,test01_simple_null.c.json,monobrow_generated/test01_simple_null.c.json,Replace,test01_simple_null.c,0,monobrow,1,4
+0.0,Monobrow-2a-generated,2,0,N/A,N/A,main,test02_conditional_null.c.json,monobrow_generated/test02_conditional_null.c.json,Guarded Block,test02_conditional_null.c,0,monobrow,1,7
+0.0,Monobrow-3a-generated,1,0,N/A,N/A,main,test03_struct_field_null.c.json,monobrow_generated/test03_struct_field_null.c.json,Guarded Block,test03_struct_field_null.c,0,monobrow,1,4
+0.0,Monobrow-4a-generated,1,0,N/A,N/A,main,test04_array_index_null.c.json,monobrow_generated/test04_array_index_null.c.json,Guarded Block,test04_array_index_null.c,0,monobrow,1,4
+0.0,Monobrow-5a-generated,1,0,N/A,N/A,main,test05_function_return_null.c.json,monobrow_generated/test05_function_return_null.c.json,Guarded Block,test05_function_return_null.c,0,monobrow,1,4
+0.0,Monobrow-6a-generated,N/A,N/A,1,N/A,main,test07_double_pointer_null.c.json,monobrow_generated/test07_double_pointer_null.c.json,Replace,test07_double_pointer_null.c,0,monobrow,1,6
+0.2857142857142857,Monobrow-7a-generated,1,2,N/A,N/A,main,test09_linked_list_null.c.json,monobrow_generated/test09_linked_list_null.c.json,Guarded Block,test09_linked_list_null.c,0,monobrow,2,7
+0.0,Monobrow-8a-generated,3,0,N/A,N/A,main,test10_switch_case_null.c.json,monobrow_generated/test10_switch_case_null.c.json,Guarded Block,test10_switch_case_null.c,0,monobrow,1,13
+0.0,Monobrow-9a-generated,N/A,N/A,1,N/A,main,test12_string_null.c.json,monobrow_generated/test12_string_null.c.json,Replace,test12_string_null.c,0,monobrow,1,7
+0.0,Monobrow-10a-generated,1,0,N/A,N/A,main,test13_callback_null.c.json,monobrow_generated/test13_callback_null.c.json,Guarded Block,test13_callback_null.c,0,monobrow,1,4
+0.0,Monobrow-11a-generated,1,0,N/A,N/A,main,test14_nested_struct_null.c.json,monobrow_generated/test14_nested_struct_null.c.json,Guarded Block,test14_nested_struct_null.c,0,monobrow,1,4
+0.0,Monobrow-12a-generated,1,0,N/A,N/A,main,test16_ternary_null.c.json,monobrow_generated/test16_ternary_null.c.json,Guarded Block,test16_ternary_null.c,0,monobrow,1,6
+0.0,Monobrow-13a-generated,N/A,N/A,1,N/A,main,test17_macro_null.c.json,monobrow_generated/test17_macro_null.c.json,Replace,test17_macro_null.c,0,monobrow,1,6
+0.0,Monobrow-14a-generated,1,0,N/A,N/A,main,test19_union_null.c.json,monobrow_generated/test19_union_null.c.json,Guarded Block,test19_union_null.c,0,monobrow,1,4
+0.0,Monobrow-15a-generated,N/A,N/A,1,N/A,main,test20_cast_null.c.json,monobrow_generated/test20_cast_null.c.json,Replace,test20_cast_null.c,0,monobrow,1,8

@@ -1,0 +1,11 @@
+--- /output/d1_both.c.backup	2023-09-24 13:41:38.891087955 +0000
++++ /experiment/efffix/openssl-1/null-ptr-5/src/ssl/d1_both.c	2023-09-24 13:50:09.847695528 +0000
+@@ -1180,7 +1180,7 @@
+ 
+ 	frag = dtls1_hm_fragment_new(s->init_num, 0);
+ 
+-	memcpy(frag->fragment, s->init_buf->data, s->init_num);
++if ( ! ( s->init_num <= s->init_num + s->init_num ) ) { s = malloc ( sizeof ( * frag->fragment ) ) ; }  	memcpy(frag->fragment, s->init_buf->data, s->init_num);
+ 
+ 	if ( is_ccs)
+ 		{

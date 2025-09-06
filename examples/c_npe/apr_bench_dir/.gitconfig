@@ -1,0 +1,5 @@
+[user]
+	email = raghavroy145@gmail.com
+	name = RaghavRoy145
+[safe]
+	directory = /home/ubuntu/infer/examples/c_npe/effix/npe_bugs_workspace/null-ptr-9-linux-kernel-5/src

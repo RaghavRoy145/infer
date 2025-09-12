@@ -1,6 +1,6 @@
 FROM debian:bullseye-slim AS compilator
 
-LABEL maintainer "Infer team"
+LABEL maintainer = "Infer team"
 
 # mkdir the man/man1 directory due to Debian bug #863199
 RUN apt-get update && \

@@ -38,14 +38,16 @@ echo ""
 
 # Set path to local infer binary BEFORE changing directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-INFER_DIR="$SCRIPT_DIR/infer/bin"
-export PATH="$INFER_DIR:$PATH"
+INFER_BIN="$SCRIPT_DIR/infer/bin/infer"
 
-if [ ! -f "$INFER_DIR/infer" ]; then
-    echo -e "${RED}Error: Infer not found at $INFER_DIR/infer${NC}"
-    echo "Please ensure Infer is built and installed in the infer/bin directory"
+if [ ! -f "$INFER_BIN" ]; then
+    echo -e "${RED}Error: Infer not found at $INFER_BIN${NC}"
+    echo "Please ensure Infer is built in the infer/bin directory"
     exit 1
 fi
+
+echo -e "${GREEN}Using Infer from:${NC} $INFER_BIN"
+export PATH="$SCRIPT_DIR/infer/bin:$PATH"
 
 # Create a temporary working directory
 WORK_DIR=$(mktemp -d -t infer-repair-XXXXXX)
@@ -63,6 +65,7 @@ INFER_DEBUG=1 infer run \
     --pulse-only \
     --debug-level 2 \
     --no-progress-bar \
+    --no-clang-biniou-ast \
     -- clang -c "$FILENAME" 2>&1 | tee analysis.log
 
 echo ""

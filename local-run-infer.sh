@@ -46,16 +46,14 @@ echo ""
 WORK_DIR=$(mktemp -d -t infer-analysis-XXXXXX)
 echo -e "${YELLOW}Working directory:${NC} $WORK_DIR"
 
-# Set path to local infer binary BEFORE changing directory
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-INFER_DIR="$SCRIPT_DIR/infer/bin"
-export PATH="$INFER_DIR:$PATH"
-
-if [ ! -f "$INFER_DIR/infer" ]; then
-    echo -e "${RED}Error: Infer not found at $INFER_DIR/infer${NC}"
-    echo "Please ensure Infer is built and installed in the infer/bin directory"
+# Check if infer is available
+if ! command -v infer &> /dev/null; then
+    echo -e "${RED}Error: Infer not found in PATH${NC}"
+    echo "Please ensure Infer is installed (found at: $(which infer 2>/dev/null || echo 'not found'))"
     exit 1
 fi
+
+echo -e "${GREEN}Using Infer from:${NC} $(which infer)"
 
 # Copy the input file to working directory
 cp "$INPUT_FILE_ABS" "$WORK_DIR/$FILENAME"

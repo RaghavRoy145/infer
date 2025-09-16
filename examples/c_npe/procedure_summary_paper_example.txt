@@ -1,0 +1,991 @@
+void foo18()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= 
+void foo1()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+void foo14()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= 
+void foo3(int y)
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 3 pre/post(s)
+#0: ContinueProgram
+    Current post: y=- 
+    Inferred pre: y=- ∧ {y ≤ 0}
+    &y: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    y: { UsedAsBranchCond(foo3, line 22, column 6, ) } 
+Raw state: conditions: {v3 ≤ 0}
+           phi: term_eqs: [-a2]=v3 && atoms: {is_int([-a2]) = 1}
+           { roots={ &y|foo3=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &y|foo3=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { UsedAsBranchCond(foo3, line 22, column 6, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post: y=- 
+    Inferred pre: y=- ∧ {y ≤ 0}
+    &y: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    y: { UsedAsBranchCond(foo3, line 22, column 6, ) } 
+Raw state: conditions: {v3 ≤ 0}
+           phi: term_eqs: [-a2]=v3 && atoms: {is_int([-a2]) = 1}
+           { roots={ &y|foo3=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &y|foo3=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { UsedAsBranchCond(foo3, line 22, column 6, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#2: ContinueProgram
+    Current post: y=- 
+    Inferred pre: y=- ∧ {0 < y}
+    &y: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    y: { UsedAsBranchCond(foo3, line 22, column 6, ) } 
+Raw state: conditions: {0 < v3}
+           phi: term_eqs: [a1 +1]=v3 && atoms: {is_int([a1 +1]) = 1}
+           { roots={ &y|foo3=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &y|foo3=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { UsedAsBranchCond(foo3, line 22, column 6, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= 
+void foo2()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= 
+void foo6b(int val)
+ERRORS: Null Dereference Memory Leak 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo6b=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo6b=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo6b=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo6b=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= malloc
+type environments from sources= 
+void foo13(int val)
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo13=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo13=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo13=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo13=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= 
+recursion_edges= { }
+other_proc_names= malloc
+type environments from sources= locTests.c
+void foo8(int* v)
+ERRORS: 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post: v->- 
+    Inferred pre: v->- ∧ {1 < v->}
+    &v: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    v: { MustBeInitialized(, t=3), MustBeValid(, None, t=3) }
+    v->: { UsedAsBranchCond(foo8, line 125, column 8, ) } 
+Raw state: conditions: {1 < v5}
+           phi: term_eqs: [a1 +2]=v5 && atoms: {is_int([a1 +2]) = 1}
+           { roots={ &v|foo8=v1 };
+             mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+             attrs={ };}
+           PRE=[{ roots={ &v|foo8=v1 };
+                  mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { MustBeInitialized(, t=3),
+                                  MustBeValid(, None, t=3) },
+                          v5 -> { UsedAsBranchCond(foo8, line 125, column 8, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: ContinueProgram
+    Current post: v->- 
+    Inferred pre: v->- ∧ {v-> ≤ 1}
+    &v: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    v: { MustBeInitialized(, t=3), MustBeValid(, None, t=3) }
+    v->: { UsedAsBranchCond(foo8, line 125, column 8, ) } 
+Raw state: conditions: {v5 ≤ 1}
+           phi: term_eqs: [-a2 +1]=v5 && atoms: {is_int([-a2 +1]) = 1}
+           { roots={ &v|foo8=v1 };
+             mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+             attrs={ };}
+           PRE=[{ roots={ &v|foo8=v1 };
+                  mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { MustBeInitialized(, t=3),
+                                  MustBeValid(, None, t=3) },
+                          v5 -> { UsedAsBranchCond(foo8, line 125, column 8, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+void foo6a(int val)
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post: val=- val: { Initialized } 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo6a=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ v3 -> { Initialized } };}
+           PRE=[{ roots={ &val|foo6a=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo6a=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo6a=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= locTests.c
+void foo4(int val)
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo4=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo4=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+int* foo16()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post: return->- ∧ return:int, SourceFile [None]
+    return: { Allocated, Initialized, WrittenTo (6, ) }
+    return->: { Invalid ConstantDereference(is assigned to the constant 42) }
+    &return: { Initialized, WrittenTo (11, ) } 
+    Inferred pre:  
+Raw state: conditions: (empty)
+           phi: type_constraints: v5:int, SourceFile [None]
+                && term_eqs: 42=v7∧[a1 +1]=v5
+           { roots={ &return|foo16=v8 };
+             mem  ={ v5 -> { * -> v7 }, v8 -> { * -> v5 } };
+             attrs={ v5 -> { Allocated, Initialized, WrittenTo (6, ) },
+                     v7 -> { Invalid ConstantDereference(is assigned to the constant 42) },
+                     v8 -> { Initialized, WrittenTo (11, ) } };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= malloc
+type environments from sources= 
+void set(int* y)
+ERRORS: 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: ContinueProgram
+    Current post: y->- y: { Initialized, WrittenTo (2, ) }
+    y->: { Invalid ConstantDereference(is assigned to the constant 42) }
+    
+    Inferred pre: y=-
+    &y: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    y: { MustBeValid(, None, t=2) } 
+Raw state: conditions: (empty) phi: term_eqs: 42=v3
+           { roots={ &y|set=v1 };
+             mem  ={ v1 -> { * -> v2 }, v2 -> { * -> v3 } };
+             attrs={ v2 -> { Initialized, WrittenTo (2, ) },
+                     v3 -> { Invalid ConstantDereference(is assigned to the constant 42) } };}
+           PRE=[{ roots={ &y|set=v1 };
+                  mem  ={ v1 -> { * -> v2 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v2 -> { MustBeValid(, None, t=2) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+int* foo17()
+ERRORS: Memory Leak Memory Leak 
+WARNINGS: 
+Pulse: 4 pre/post(s)
+#0: ContinueProgram
+    Current post: return=-
+    return: { Invalid ConstantDereference(is assigned to the null pointer) }
+    &return: { Initialized, WrittenTo (20, ) } 
+    Inferred pre:  
+Raw state: conditions: (empty) phi: term_eqs: 0=v29
+           { roots={ &return|foo17=v34 };
+             mem  ={ v34 -> { * -> v29 } };
+             attrs={ v29 -> { Invalid ConstantDereference(is assigned to the null pointer) },
+                     v34 -> { Initialized, WrittenTo (20, ) } };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: ContinueProgram
+    Current post: return=-
+    return: { Invalid ConstantDereference(is assigned to the null pointer) }
+    &return: { Initialized, WrittenTo (20, ) } 
+    Inferred pre:  
+Raw state: conditions: (empty) phi: term_eqs: 0=v12
+           { roots={ &return|foo17=v33 };
+             mem  ={ v33 -> { * -> v12 } };
+             attrs={ v12 -> { Invalid ConstantDereference(is assigned to the null pointer) },
+                     v33 -> { Initialized, WrittenTo (20, ) } };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#2: ContinueProgram
+    Current post: return=-
+    return: { Invalid ConstantDereference(is assigned to the null pointer) }
+    &return: { Initialized, WrittenTo (20, ) } 
+    Inferred pre:  
+Raw state: conditions: (empty) phi: term_eqs: 0=v6
+           { roots={ &return|foo17=v32 };
+             mem  ={ v32 -> { * -> v6 } };
+             attrs={ v6 -> { Invalid ConstantDereference(is assigned to the null pointer) },
+                     v32 -> { Initialized, WrittenTo (20, ) } };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#3: ContinueProgram
+    Current post: return=-
+    return: { Invalid ConstantDereference(is assigned to the null pointer) }
+    &return: { Initialized, WrittenTo (20, ) } 
+    Inferred pre:  
+Raw state: conditions: (empty) phi: term_eqs: 0=v6
+           { roots={ &return|foo17=v31 };
+             mem  ={ v31 -> { * -> v6 } };
+             attrs={ v6 -> { Invalid ConstantDereference(is assigned to the null pointer) },
+                     v31 -> { Initialized, WrittenTo (20, ) } };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= malloc
+type environments from sources= 
+void foo9(int** arr)
+ERRORS: 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: ContinueProgram
+    Current post: arr[-]->->- arr: { Initialized }
+    arr[&arr]->: { s&temp (variable `temp` declared here at line 136 :t1) at line 137, column 18,
+                   Initialized,
+                   Invalid is the address of a stack variable `temp` whose lifetime has ended,
+                   WrittenTo (2, ) }
+    arr[&arr]->->: { Invalid ConstantDereference(is assigned to the constant 42) }
+    &arr: { Invalid ConstantDereference(is assigned to the null pointer) }
+    arr[&arr]: { Initialized, WrittenTo (12, ) } 
+    Inferred pre: arr[-]=-
+    &arr: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    arr: { MustBeValid(, None, t=12) }
+    arr[&arr]: { MustBeValid(, None, t=12) } 
+Raw state: conditions: (empty) phi: term_eqs: 0=v8∧42=v6
+           { roots={ &arr|foo9=v1 };
+             mem  ={ v1 -> { * -> v4 },
+                     v4 -> { [v8] -> v11 },
+                     v5 -> { * -> v6 },
+                     v11 -> { * -> v5 } };
+             attrs={ v4 -> { Initialized },
+                     v5 -> { s&temp (variable `temp` declared here at line 136 :t1) at line 137, column 18,
+                             Initialized,
+                             Invalid is the address of a stack variable `temp` whose lifetime has ended,
+                             WrittenTo (2, ) },
+                     v6 -> { Invalid ConstantDereference(is assigned to the constant 42) },
+                     v8 -> { Invalid ConstantDereference(is assigned to the null pointer) },
+                     v11 -> { Initialized, WrittenTo (12, ) } };}
+           PRE=[{ roots={ &arr|foo9=v1 };
+                  mem  ={ v1 -> { * -> v4 }, v4 -> { [v8] -> v11 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v4 -> { MustBeValid(, None, t=12) },
+                          v11 -> { MustBeValid(, None, t=12) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+void foo5(int val)
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post: val=- val: { Initialized } 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo5=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ v3 -> { Initialized } };}
+           PRE=[{ roots={ &val|foo5=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo5=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo5=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= locTests.c
+void foo7(int* v)
+ERRORS: 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post: v->- 
+    Inferred pre: v->- ∧ {1 < v->}
+    &v: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    v: { MustBeInitialized(, t=3), MustBeValid(, None, t=3) }
+    v->: { UsedAsBranchCond(foo7, line 103, column 8, ) } 
+Raw state: conditions: {1 < v5}
+           phi: term_eqs: [a1 +2]=v5 && atoms: {is_int([a1 +2]) = 1}
+           { roots={ &v|foo7=v1 };
+             mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+             attrs={ };}
+           PRE=[{ roots={ &v|foo7=v1 };
+                  mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { MustBeInitialized(, t=3),
+                                  MustBeValid(, None, t=3) },
+                          v5 -> { UsedAsBranchCond(foo7, line 103, column 8, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: ContinueProgram
+    Current post: v->- 
+    Inferred pre: v->- ∧ {v-> ≤ 1}
+    &v: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) }
+    v: { MustBeInitialized(, t=3), MustBeValid(, None, t=3) }
+    v->: { UsedAsBranchCond(foo7, line 103, column 8, ) } 
+Raw state: conditions: {v5 ≤ 1}
+           phi: term_eqs: [-a2 +1]=v5 && atoms: {is_int([-a2 +1]) = 1}
+           { roots={ &v|foo7=v1 };
+             mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+             attrs={ };}
+           PRE=[{ roots={ &v|foo7=v1 };
+                  mem  ={ v1 -> { * -> v3 }, v3 -> { * -> v5 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) },
+                          v3 -> { MustBeInitialized(, t=3),
+                                  MustBeValid(, None, t=3) },
+                          v5 -> { UsedAsBranchCond(foo7, line 103, column 8, ) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+void foo11()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+void foo12(int val)
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo12=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo12=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post: val=- 
+    Inferred pre: val=-
+    &val: { MustBeInitialized(, t=0), MustBeValid(, None, t=0) } 
+Raw state: conditions: (empty) phi: atoms: {is_int(v3) = 1}
+           { roots={ &val|foo12=v1 };
+             mem  ={ v1 -> { * -> v3 } };
+             attrs={ };}
+           PRE=[{ roots={ &val|foo12=v1 };
+                  mem  ={ v1 -> { * -> v3 } };
+                  attrs={ v1 -> { MustBeInitialized(, t=0),
+                                  MustBeValid(, None, t=0) } };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= 
+recursion_edges= { }
+other_proc_names= malloc
+type environments from sources= locTests.c
+No summary found: printf
+void foo10()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= 
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+int main()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 1 pre/post(s)
+#0: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  ⊤ (some disjuncts dropped)
+summary_loads= set
+recursion_edges= { }
+other_proc_names= 
+type environments from sources= 
+void foo15()
+ERRORS: Null Dereference 
+WARNINGS: 
+Pulse: 2 pre/post(s)
+#0: ContinueProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+#1: AbortProgram
+    Current post:  
+    Inferred pre:  
+Raw state: conditions: (empty) phi: (empty)
+           { roots={ };
+             mem  ={ };
+             attrs={ };}
+           PRE=[{ roots={ };
+                  mem  ={ };
+                  attrs={ };}]
+           need_dynamic_type_specialization={ }
+           transitive_info=accesses: { }, callees: { }, direct_callees: { },
+                           direct_missed captures: { },
+                           has_transitive_missed_captures: false
+           recursive_calls={ }
+           skipped_calls={ }
+           Topl={empty}
+Non-disjunctive state: over-approx:⊥
+  accesses: { }, callees: { }, direct_callees: { },
+  direct_missed captures: { }, has_transitive_missed_captures: false
+summary_loads= 
+recursion_edges= { }
+other_proc_names= free, malloc
+type environments from sources= 
+No summary found: malloc
+No summary found: free

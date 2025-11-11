@@ -396,15 +396,21 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
             (* CRITICAL: Clear the cache for the next procedure. *)
             PulseTransform.clear_cache_for_proc ();
             report analysis_data ~latent:false ~is_suppressed diagnostic;
-            if Diagnostic.aborts_execution path diagnostic
-            then Some (AbortProgram summary)
+            if Diagnostic.aborts_execution path diagnostic then
+              let trace_to_issue =
+                Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
+              in
+              Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
             else None
           | _ ->
           report analysis_data ~latent:false ~is_suppressed diagnostic ;
           (* 3. Proceed with the original, unmodified reporting logic for this path. *)
-          if Diagnostic.aborts_execution path diagnostic
-          then Some (AbortProgram summary)
-          else None(* Not an NPE, so no plans *)
+          if Diagnostic.aborts_execution path diagnostic then 
+            let trace_to_issue =
+              Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
+            in
+            Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
+          else None (* Not an NPE, so no plans *)
           end
       | `DelayReport latent_issue ->
           if is_suppressed then L.d_printfln "DelayReport suppressed error" ;

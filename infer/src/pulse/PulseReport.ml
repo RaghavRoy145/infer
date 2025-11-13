@@ -357,7 +357,7 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
         (* if is_suppressed then L.d_printfln "ReportNow suppressed error" ;
         report analysis_data ~latent:false ~is_suppressed diagnostic ;
         if Diagnostic.aborts_execution path diagnostic then Some (AbortProgram summary) else None *)
-        if is_suppressed then L.d_printfln "ReportNow suppressed error" ;
+        (* if is_suppressed then L.d_printfln "ReportNow suppressed error" ; *)
         let astate =
           match access_error with
           | AccessResult.ReportableError {astate; _} -> astate
@@ -366,52 +366,65 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
                  this should never happen; but make it total *)
               assert false
         in
-        begin
-          match diagnostic with
-          | AccessToInvalidAddress na ->
-            let ptr_exp, ptr_var =
-              match na.invalid_address with
-              | PulseDecompilerExpr.SourceExpr ((PVar pvar, _), _) -> (Exp.Lvar pvar, Some (Var.of_pvar pvar))
-              | _ -> (Exp.null, None)
-            in
-            let err_node =
-              List.find (Procdesc.get_nodes proc_desc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) (Trace.get_start_location na.access_trace))
-              |> Option.value ~default:(Procdesc.get_start_node proc_desc)
-            in
-            let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
-            let bug : _ PulseTransform.bug_info = {
-                PulseTransform.ptr_expr = ptr_exp;
-                ptr_var;
-                diag_trace = na.access_trace;
-                err_node; astate; av_opt;
-                analysis = analysis_data;
-            } in
-            PulseTransform.plan_and_log_if_unique ~proc_desc ~bug;
-            let plans_to_save = !PulseTransform.logged_transformations_cache in
-            if not (List.is_empty plans_to_save) then (
-              (* The plans are in reverse order of discovery, so we reverse them back. *)
-              let ordered_plans = List.rev plans_to_save in
-              PulseTransform.save_all_plans proc_desc ordered_plans
-            );
-            (* CRITICAL: Clear the cache for the next procedure. *)
-            PulseTransform.clear_cache_for_proc ();
-            report analysis_data ~latent:false ~is_suppressed diagnostic;
-            if Diagnostic.aborts_execution path diagnostic then
+        if not is_suppressed then (
+          begin
+            match diagnostic with
+            | AccessToInvalidAddress na ->
+              let ptr_exp, ptr_var =
+                match na.invalid_address with
+                | PulseDecompilerExpr.SourceExpr ((PVar pvar, _), _) -> (Exp.Lvar pvar, Some (Var.of_pvar pvar))
+                | _ -> (Exp.null, None)
+              in
+              let err_node =
+                List.find (Procdesc.get_nodes proc_desc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) (Trace.get_start_location na.access_trace))
+                |> Option.value ~default:(Procdesc.get_start_node proc_desc)
+              in
+              let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
+              let bug : _ PulseTransform.bug_info = {
+                  PulseTransform.ptr_expr = ptr_exp;
+                  ptr_var;
+                  diag_trace = na.access_trace;
+                  err_node; astate; av_opt;
+                  analysis = analysis_data;
+              } in
+              PulseTransform.plan_and_log_if_unique ~proc_desc ~bug;
+              let plans_to_save = !PulseTransform.logged_transformations_cache in
+              if not (List.is_empty plans_to_save) then (
+                (* The plans are in reverse order of discovery, so we reverse them back. *)
+                let ordered_plans = List.rev plans_to_save in
+                PulseTransform.save_all_plans proc_desc ordered_plans
+              );
+              (* CRITICAL: Clear the cache for the next procedure. *)
+              PulseTransform.clear_cache_for_proc ();
+              (* report analysis_data ~latent:false ~is_suppressed diagnostic;
+              if Diagnostic.aborts_execution path diagnostic then
+                let trace_to_issue =
+                  Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
+                in
+                Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
+              else None *)
+            | _ ->
+              ()
+            (* report analysis_data ~latent:false ~is_suppressed diagnostic ; *)
+            (* 3. Proceed with the original, unmodified reporting logic for this path. *)
+            (* if Diagnostic.aborts_execution path diagnostic then 
               let trace_to_issue =
                 Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
               in
               Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
-            else None
-          | _ ->
-          report analysis_data ~latent:false ~is_suppressed diagnostic ;
-          (* 3. Proceed with the original, unmodified reporting logic for this path. *)
-          if Diagnostic.aborts_execution path diagnostic then 
+            else None *)
+            end
+          );
+          if is_suppressed then L.d_printfln "ReportNow suppressed error";
+          report analysis_data ~latent:false ~is_suppressed diagnostic;
+          if Diagnostic.aborts_execution path diagnostic then
             let trace_to_issue =
               Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
             in
             Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
-          else None (* Not an NPE, so no plans *)
-          end
+          else 
+            None
+      
       | `DelayReport latent_issue ->
           if is_suppressed then L.d_printfln "DelayReport suppressed error" ;
           if Config.pulse_report_latent_issues then

@@ -1107,7 +1107,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                 ; slice_nodes= [crash_node] } ) )
   in
   let initial_candidate_plans = List.length candidate_plans in
-  (*********************************************************************************)
+  (* *******************************************************************************
   (* Stage 2 & 3: Filter and Merge                             *)
   (*********************************************************************************)
   
@@ -1385,8 +1385,261 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     in
     
     merge_fixed_point filtered_plans
+  in *)
+
+  (*********************************************************************************)
+  (* Stage 2 & 3: A "Greedy with Guardrails" Compaction Algorithm                *)
+  (*********************************************************************************)
+  let is_strictly_contained_within scope1_raw scope2_raw =
+    let start1, end1 = normalize_scope scope1_raw idom in
+    let start2, end2 = normalize_scope scope2_raw idom in
+    if Procdesc.Node.equal start1 start2 && Procdesc.Node.equal end1 end2 then false
+    else
+      is_dominated_by ~dominator:start1 ~node:start2 idom
+      && is_post_dominated_by ~pdominator:end1 ~node:end2 ipdom_fun
   in
-  
+
+  (** [NEW LOGIC]
+      A configurable threshold for the proximity heuristic. This is our first guardrail.
+      We will not even consider merging two candidate plans if their closest boundaries
+      are more than this many lines of code apart. This prevents "absurd" merges
+      and dramatically prunes the search space for performance. *)
+  let max_line_distance_for_merge = 50 in
+
+  (** [NEW LOGIC]
+      Checks if two plans are "proximate" enough to be worth considering for a merge.
+      This is a fast, cheap check that runs before the more expensive semantic validation.
+      @return true if the plans are overlapping, adjacent, or within the configured line distance. *)
+
+  let are_plans_proximate plan1 plan2 =
+    match (plan1, plan2) with
+    | ( ISkip {lca_node= s1; join_node= e1; _}
+      , ISkip {lca_node= s2; join_node= e2; _} ) ->
+        let l1_start = (Procdesc.Node.get_loc s1).line in
+        let l1_end = (Procdesc.Node.get_loc e1).line in
+        let l2_start = (Procdesc.Node.get_loc s2).line in
+        let l2_end = (Procdesc.Node.get_loc e2).line in
+        (* Ensure start is before end for comparison *)
+        let l1_min, l1_max = (min l1_start l1_end, max l1_start l1_end) in
+        let l2_min, l2_max = (min l2_start l2_end, max l2_start l2_end) in
+        (* Calculate the distance between the two scopes' closest points *)
+        let distance =
+          if l1_max < l2_min then l2_min - l1_max (* P1 is entirely before P2 *)
+          else if l2_max < l1_min then l1_min - l2_max (* P2 is entirely before P1 *)
+          else 0 (* Scopes are overlapping or adjacent *)
+        in
+        distance <= max_line_distance_for_merge
+    | _ ->
+        (* Don't merge different plan types, e.g., Skip and Evade *)
+        false
+    in
+
+  (** [MODIFIED LOGIC]
+      Checks an instruction for "external side-effects". The logic is updated to take
+      `all_aliases` as an argument. A memory access is now only considered a side-effect
+      if it's to a variable that is NOT part of the current bug's alias set. This prevents
+      the algorithm from incorrectly flagging a dereference of another buggy alias as a
+      reason not to merge. *)
+  let has_external_side_effects all_aliases (instr : Sil.instr) : Sil.instr option =
+  match instr with
+  | Prune _ | Metadata _ ->
+      None
+  | Load {e; _} | Store {e1= e; _} ->
+      let rec is_rooted_in_alias exp =
+        match exp with
+        | e when List.exists all_aliases ~f:(fun alias -> Exp.equal e alias) ->
+            true
+        
+        (*************************************************************************)
+        (* [FIX] The or-pattern has been separated into three distinct cases    *)
+        (* to handle the different types of the base expression.                *)
+        (*************************************************************************)
+
+        (* Case 1: Field access, e.g., p->f. The base expression is nested. *)
+        | Exp.Lfield ({exp= base_exp}, _, _) ->
+            is_rooted_in_alias base_exp
+        
+        (* Case 2: Array index, e.g., p[i]. The base expression is a direct component. *)
+        | Exp.Lindex (base_exp, _) ->
+            is_rooted_in_alias base_exp
+
+        (* Case 3: Type cast, e.g., (T* )p. The base expression is a direct component. *)
+        | Exp.Cast (_, base_exp) ->
+            is_rooted_in_alias base_exp
+
+        | _ ->
+            false
+      in
+      if is_rooted_in_alias e then (* This is part of the bug, not a side effect. *)
+        None
+      else (* This is a memory access to an unrelated variable. It is a side effect. *)
+        Some instr
+  | Call (_, _, args, _, _) ->
+      if List.exists args ~f:(fun (arg_exp, _) -> not (Exp.is_const arg_exp)) then Some instr
+      else None
+    in
+  (** [NEW LOGIC]
+      Proposes a merge, validates its safety, and returns the merged plan if valid.
+      This is our second, more powerful guardrail. It correctly handles `goto` and other
+      complex control flow by validating the final "delta" region of the proposed merge.
+      @return Some merged_plan if the merge is semantically safe, None otherwise. *)
+  let propose_and_validate_merge proc_desc idom ipdom_fun lca all_aliases plan1 plan2 =
+    match (plan1, plan2) with
+    | ( ISkip {slice_nodes= slice1; pointer_exprs= ptrs1; _}
+      , ISkip {slice_nodes= slice2; pointer_exprs= ptrs2; _} ) -> (
+        (* 1. Propose the new, merged scope from the combined set of crash sites. *)
+        let merged_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare (slice1 @ slice2) in
+        let new_lca, new_join = find_minimal_scope merged_slice ipdom_fun proc_desc lca idom in
+        (* 2. Identify the "delta" region: nodes in the new scope that weren't in either old scope. *)
+        let is_in_scope s e n =
+          is_dominated_by ~dominator:s ~node:n idom && is_post_dominated_by ~pdominator:e ~node:n ipdom_fun
+        in
+        let s1, e1 = find_minimal_scope slice1 ipdom_fun proc_desc lca idom in
+        let s2, e2 = find_minimal_scope slice2 ipdom_fun proc_desc lca idom in
+        let delta_nodes =
+          List.filter (Procdesc.get_nodes proc_desc) ~f:(fun n ->
+              is_in_scope new_lca new_join n
+              && not (is_in_scope s1 e1 n)
+              && not (is_in_scope s2 e2 n) )
+        in
+        (* 3. Validate the delta: Is it safe to guard this newly covered code? *)
+        let is_delta_benign =
+          not
+            (List.exists delta_nodes ~f:(fun node ->
+                Instrs.exists (Procdesc.Node.get_instrs node) ~f:(fun instr ->
+                    Option.is_some (has_external_side_effects all_aliases instr) ) ) )
+        in
+        if is_delta_benign then
+        (* 4. If safe, calculate the imprecision cost and create the new merged plan. *)
+        let nodes_in_merged_scope =
+          count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node:new_lca ~end_node:new_join
+        in
+        let imprecision_cost = nodes_in_merged_scope - List.length merged_slice in
+        let merged_plan =
+          ISkip
+            { lca_node= new_lca
+            ; join_node= new_join
+            ; pointer_exprs= List.dedup_and_sort ~compare:Exp.compare (ptrs1 @ ptrs2)
+            ; slice_nodes= merged_slice }
+        in
+
+        Some (imprecision_cost, merged_plan)
+      else 
+        None )
+  | _ ->
+      None
+
+  in
+  L.d_printfln "\n[transformation-log] STEP 2: Filtering %d candidate plan(s)." (List.length candidate_plans);
+  let filtered_plans =
+    List.filter candidate_plans ~f:(fun current_plan ->
+      let is_enveloped =
+        List.exists candidate_plans ~f:(fun other_plan ->
+          if phys_equal current_plan other_plan then false
+          else
+            match (current_plan, other_plan) with
+            | ( ISkip {lca_node= s_curr; join_node= e_curr; _}
+              , ISkip {lca_node= s_other; join_node= e_other; _} ) ->
+                let scope1 = (s_curr, e_curr) in
+                let scope2 = (s_other, e_other) in
+                (* The original is_strictly_contained_within is correct and can be reused here *)
+                is_strictly_contained_within scope2 scope1
+            | _ -> false
+        )
+      in
+      if is_enveloped then L.d_printfln "[transformation-log]   Filtering one enveloped plan.";
+      not is_enveloped
+    )
+  in
+
+  L.d_printfln "\n[transformation-log] STEP 3: Merging %d filtered plan(s) using a 'Greedy with Guardrails' fixed-point algorithm." (List.length filtered_plans);
+  (* let final_intermediate_plans = *)
+    (** [NEW] A configurable threshold to switch between optimal and greedy strategies. *)
+  let optimal_merge_threshold = 4 in
+
+  (** [FINAL VERSION]
+      This is the main "Hybrid Compaction" loop. It intelligently switches between
+      a best-first (optimal) strategy for small sets of plans and a greedy-with-guardrails
+      (performant) strategy for large sets. *)
+  let rec merge_fixed_point current_plans =
+    L.d_printfln "[transformation-merge] Starting new merge pass with %d plans." (List.length current_plans);
+    if List.length current_plans <= optimal_merge_threshold then (
+      (*************************************************************************)
+      (*  OPTIMAL (BEST-FIRST) PATH for small N                                *)
+      (*************************************************************************)
+      L.d_printfln "[transformation-merge] Using BEST-FIRST strategy (plan count <= %d)." optimal_merge_threshold;
+
+      (* 1. Find ALL possible valid merges and their associated "Decision-Making Cost".
+        
+        PHILOSOPHY: The goal is to optimize the full (Imprecision, Overhead) cost vector.
+        A merge always reduces Overhead by 1. Therefore, when comparing two potential
+        merges, the change in Overhead is identical. The ONLY differentiating factor
+        is the change in Imprecision. The "best" merge is the one that introduces the
+        least new imprecision, as it achieves the same overhead reduction for less
+        collateral damage.
+        
+        Therefore, we use the `imprecision_cost` calculated in `propose_and_validate_merge`
+        as the direct, single-integer key for our optimization. *)
+      let all_possible_merges =
+        List.cartesian_product current_plans current_plans
+        |> List.filter ~f:(fun (p1, p2) -> not (phys_equal p1 p2) && are_plans_proximate p1 p2)
+        |> List.filter_map ~f:(fun (p1, p2) ->
+            propose_and_validate_merge proc_desc idom ipdom_fun lca all_ptrs_to_guard p1 p2
+            |> Option.map ~f:(fun (cost, merged_plan) -> (cost, p1, p2, merged_plan)) )
+      in
+
+      (* 2. Find the single BEST merge by finding the minimum of the Decision-Making Cost. *)
+      let best_merge_opt =
+        List.min_elt all_possible_merges ~compare:(fun (c1, _, _, _) (c2, _, _, _) -> Int.compare c1 c2)
+      in
+
+      match best_merge_opt with
+      | None ->
+          L.d_printfln "[transformation-merge] Best-first fixed-point reached.";
+          current_plans
+      | Some (cost, p1_to_remove, p2_to_remove, new_merged_plan) ->
+          L.d_printfln "[transformation-merge] Found best merge with imprecision cost %d. Merging plans." cost;
+          let new_list =
+            new_merged_plan
+            :: List.filter current_plans ~f:(fun p -> not (phys_equal p p1_to_remove || phys_equal p p2_to_remove))
+          in
+          merge_fixed_point new_list
+    ) else (
+      (*************************************************************************)
+      (*  PERFORMANCE (GREEDY) PATH for large N                                *)
+      (*************************************************************************)
+      L.d_printfln "[transformation-merge] Using GREEDY-WITH-GUARDRAILS strategy (plan count > %d)." optimal_merge_threshold;
+
+      let rec find_and_perform_first_merge worklist acc =
+        match worklist with
+        | [] -> None
+        | current_plan :: rest ->
+            let potential_partners = rest @ acc in
+            let found_merge_result =
+              List.find_map potential_partners ~f:(fun other_plan ->
+                  if are_plans_proximate current_plan other_plan then
+                    match propose_and_validate_merge proc_desc idom ipdom_fun lca all_ptrs_to_guard current_plan other_plan with
+                    | Some (_, merged_plan) -> (* We ignore the cost in the greedy path *)
+                        let remaining_plans = List.filter potential_partners ~f:(fun p -> not (phys_equal p other_plan)) in
+                        Some (merged_plan :: remaining_plans)
+                    | None -> None
+                  else None )
+            in
+            match found_merge_result with
+            | Some new_plan_list -> Some new_plan_list
+            | None -> find_and_perform_first_merge rest (current_plan :: acc)
+      in
+
+      match find_and_perform_first_merge current_plans [] with
+      | None ->
+          L.d_printfln "[transformation-merge] Greedy fixed-point reached.";
+          current_plans
+      | Some new_list_after_merge ->
+          L.d_printfln "[transformation-merge] Greedy merge successful. Restarting merge pass.";
+          merge_fixed_point new_list_after_merge
+    )
+      in
+  let final_intermediate_plans = merge_fixed_point filtered_plans in
   L.d_printfln "\n[transformation-log] <<< Generated %d final plan(s)." (List.length final_intermediate_plans);
 
   let final_guard_count = List.length final_intermediate_plans in

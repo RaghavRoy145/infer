@@ -32,7 +32,7 @@ type intermediate_plan =
     ; join_node: Procdesc.Node.t
     ; pointer_exprs: Exp.t list
     ; slice_nodes: Procdesc.Node.t list }
-| IEvade of {proc_start_node: Procdesc.Node.t; pointer_expr: Exp.t}
+| IEvade of {proc_start_node: Procdesc.Node.t; pointer_expr: Exp.t; return_typ_str: string}
 
 type transformation_plan =
 | Skip of { 
@@ -44,6 +44,7 @@ type transformation_plan =
 | Evade of {
     proc_start_node: Procdesc.Node.t;
     pointer_expr: Exp.t;
+    return_typ_str: string;
   }
 | Replace of {
     def_site_node: Procdesc.Node.t;
@@ -1096,9 +1097,21 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             Procdesc.Node.pp start_node (Procdesc.Node.get_loc start_node).line
             Procdesc.Node.pp end_node (Procdesc.Node.get_loc end_node).line;
 
-        if Procdesc.Node.equal start_node start then
-          Some (IEvade {proc_start_node= start; pointer_expr= List.hd_exn all_ptrs_to_guard})
-        else
+        (* Check if Evade is the chosen strategy for this slice *)
+        if Procdesc.Node.equal start_node start then (
+          (* This is a candidate for an Evade plan. It is always applicable. *)
+          
+          (* 1. Get the return type from the procedure description. *)
+          let ret_type = Procdesc.get_ret_type proc_desc in
+          
+          (* 2. Convert the type to a human-readable string. *)
+          let ret_typ_str = Typ.to_string ret_type in
+          
+          (* 3. Generate the Evade plan with the new type information. *)
+          Some (IEvade { proc_start_node = start;
+                        pointer_expr = List.hd_exn all_ptrs_to_guard;
+                        return_typ_str = ret_typ_str })
+        )else
           Some
             (ISkip
                 { lca_node= start_node
@@ -1107,286 +1120,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                 ; slice_nodes= [crash_node] } ) )
   in
   let initial_candidate_plans = List.length candidate_plans in
-  (* *******************************************************************************
-  (* Stage 2 & 3: Filter and Merge                             *)
-  (*********************************************************************************)
   
-  let is_strictly_contained_within scope1_raw scope2_raw =
-    let start1, end1 = normalize_scope scope1_raw idom in
-    let start2, end2 = normalize_scope scope2_raw idom in
-    if Procdesc.Node.equal start1 start2 && Procdesc.Node.equal end1 end2 then false
-    else
-      is_dominated_by ~dominator:start1 ~node:start2 idom
-      && is_post_dominated_by ~pdominator:end1 ~node:end2 ipdom_fun
-  in
-        
-  let should_merge_scopes all_aliases scope1_raw scope2_raw =
-    let s1_loc, e1_loc = ((Procdesc.Node.get_loc (fst scope1_raw)).line, (Procdesc.Node.get_loc (snd scope1_raw)).line) in
-    let s2_loc, e2_loc = ((Procdesc.Node.get_loc (fst scope2_raw)).line, (Procdesc.Node.get_loc (snd scope2_raw)).line) in
-    L.d_printfln "\n[transformation-merge-check] >> Checking if scopes [lines ~%d-%d] and [~%d-%d] should merge."
-      (min s1_loc e1_loc) (max s1_loc e1_loc) (min s2_loc e2_loc) (max s2_loc e2_loc);
-
-    let s1, e1 = normalize_scope scope1_raw idom in
-    let s2, e2 = normalize_scope scope2_raw idom in
-
-    (* Condition 1: Partial Overlap *)
-    let partial_overlap =
-      (is_dominated_by ~dominator:s1 ~node:s2 idom && is_post_dominated_by ~pdominator:e1 ~node:s2 ipdom_fun)
-      || (is_dominated_by ~dominator:s2 ~node:s1 idom && is_post_dominated_by ~pdominator:e2 ~node:s1 ipdom_fun)
-    in
-    L.d_printfln "[transformation-merge-check]    - Partial overlap? %b" partial_overlap;
-
-    (* Helper to find external side effects *)
-    let has_external_side_effects (instr : Sil.instr) =
-      match instr with
-      | Prune _ | Metadata _ -> None
-      | Load {e; _} | Store {e1= e; _} ->
-        (* A load or store is an external side effect ONLY if the address `e`
-            is NOT one of the pointers we are explicitly trying to guard.
-            If it *is* one of the pointers, we want to skip. *)
-        let is_aliased_access = List.exists all_aliases ~f:(fun alias -> Exp.equal e alias) in
-        if is_aliased_access then
-          (* Not an EXTERNAL side effect, it's part of the bug. Benign for merging purposes. *)
-          Some instr
-        else
-          (* This is a memory access to an unrelated pointer. It's a side effect. *)
-          None
-      | Call (_, _, args, _, _) ->
-        if List.exists args ~f:(fun (arg_exp, _) -> not (Exp.is_const arg_exp)) then Some instr else None
-    in
-
-    (* Helper to check if all nodes BETWEEN a start and end node are benign. *)
-    let is_path_benign ~from_node ~to_node =
-      L.d_printfln "[transformation-merge-check]      - Checking for benign path from node %a to node %a."
-        Procdesc.Node.pp from_node Procdesc.Node.pp to_node;
-      let all_proc_nodes = Procdesc.get_nodes proc_desc in
-      let nodes_between =
-        List.filter all_proc_nodes ~f:(fun n ->
-          not (Procdesc.Node.equal n from_node) && not (Procdesc.Node.equal n to_node) &&
-          is_dominated_by ~dominator:from_node ~node:n idom && is_post_dominated_by ~pdominator:to_node ~node:n ipdom_fun
-        )
-      in
-      L.d_printfln "[transformation-merge-check]      - Found %d node(s) between the two scopes." (List.length nodes_between);
-      
-      (* Check if ANY of these intermediate nodes have a side effect. *)
-      let offending_node_and_instr =
-        List.find_map nodes_between ~f:(fun node ->
-          let offending_instr_opt =
-            Instrs.find_map (Procdesc.Node.get_instrs node) ~f:has_external_side_effects
-          in
-          match offending_instr_opt with
-          | None -> None
-          | Some instr -> Some (node, instr)
-        )
-      in
-
-      match offending_node_and_instr with
-      | Some (node, instr) ->
-          L.d_printfln "[transformation-merge-check]      - Path NOT benign. Found external side-effect in node %a: %a"
-            Procdesc.Node.pp node (Sil.pp_instr ~print_types:false Pp.text) instr;
-          false
-      | None ->
-          L.d_printfln "[transformation-merge-check]      - Path is benign. No external side-effects found between scopes.";
-          true
-    in
-
-    (* Condition 2: Principled Adjacency (Sequentiality). *)
-    let are_sequential =
-      L.d_printfln "[transformation-merge-check]    - Checking for sequentiality...";
-      if is_dominated_by ~dominator:e1 ~node:s2 idom then
-        is_path_benign ~from_node:e1 ~to_node:s2
-      else if is_dominated_by ~dominator:e2 ~node:s1 idom then
-        is_path_benign ~from_node:e2 ~to_node:s1
-      else false
-    in
-    L.d_printfln "[transformation-merge-check]    - Are sequential? %b" are_sequential;
-
-    let result = partial_overlap || are_sequential in
-    L.d_printfln "[transformation-merge-check] << Should merge? %b" result;
-    result
-  in
-
-  let merge_plans (plan1 : intermediate_plan) (plan2 : intermediate_plan) ipdom_fun : intermediate_plan =
-    match (plan1, plan2) with
-    | ( ISkip {lca_node= s1; join_node= e1; pointer_exprs= p1; slice_nodes= n1}
-      , ISkip {lca_node= s2; join_node= e2; pointer_exprs= p2; slice_nodes= n2} ) ->
-        let s1_loc, e1_loc = ((Procdesc.Node.get_loc s1).line, (Procdesc.Node.get_loc e1).line) in
-        let s2_loc, e2_loc = ((Procdesc.Node.get_loc s2).line, (Procdesc.Node.get_loc e2).line) in
-        L.d_printfln "\n[transformation-merge] >> Attempting to merge plan [lines %d-%d] with plan [lines %d-%d]"
-          (min s1_loc e1_loc) (max s1_loc e1_loc) (min s2_loc e2_loc) (max s2_loc e2_loc);
-
-        let new_slice = List.dedup_and_sort ~compare:Procdesc.Node.compare (n1 @ n2) in
-        let new_pointers = List.dedup_and_sort ~compare:Exp.compare (p1 @ p2) in
-        
-        (*
-          Step 1: Calculate the initial merged scope from the UNION of crash sites, not the old boundaries.
-        *)
-        let initial_lca = lca s1 s2 in
-
-        (* The new join node is the one that is post-dominated by the other (i.e., the "latest" join). *)
-        let new_join =
-          L.d_printfln "[transformation-merge-join] -- Deciding join node between e1=%a (line %d) and e2=%a (line %d)"
-            Procdesc.Node.pp e1 (Procdesc.Node.get_loc e1).line
-            Procdesc.Node.pp e2 (Procdesc.Node.get_loc e2).line;
-
-        let e1_postdoms_e2 = is_post_dominated_by ~pdominator:e1 ~node:e2 ipdom_fun in
-        L.d_printfln "[transformation-merge-join]    - Does e1 post-dominate e2? %b" e1_postdoms_e2;
-
-        let e2_postdoms_e1 = is_post_dominated_by ~pdominator:e2 ~node:e1 ipdom_fun in
-        L.d_printfln "[transformation-merge-join]    - Does e2 post-dominate e1? %b" e2_postdoms_e1;
-
-        if e1_postdoms_e2 then (
-          L.d_printfln "[transformation-merge-join]    - Decision: e1 is the latest join. Using e1.";
-          e1 )
-        else if e2_postdoms_e1 then (
-          L.d_printfln "[transformation-merge-join]    - Decision: e2 is the latest join. Using e2.";
-          e2 )
-          (*COULD BE A POTENTIAL PROBLEM*) 
-        else (* Fallback: Parallel branches. The true join is the IPDOM of the LCPD. *)
-        (
-          let lcpd_node = lcpd (Lazy.force ipdom_fun) e1 e2 in
-          L.d_printfln "[transformation-merge-join]    - Fallback: Nodes are in parallel branches." ;
-          L.d_printfln "[transformation-merge-join]    - Earliest rejoin point (LCPD) is node %a (line %d)."
-            Procdesc.Node.pp lcpd_node
-            (Procdesc.Node.get_loc lcpd_node).line ;
-          
-          let ipdom = Lazy.force ipdom_fun in
-          let final_join_node =
-            try
-              (* Attempt the potentially failing lookup. *)
-              let node = ipdom lcpd_node in
-              L.d_printfln
-                "[transformation-merge-join]    - The true join is the IPDOM of the LCPD. Result is node %a (line %d)."
-                Procdesc.Node.pp node (Procdesc.Node.get_loc node).line ;
-              node
-            with Stdlib.Not_found ->
-              (* If the lookup fails, it's because lcpd_node is the exit node.
-                 Safely fall back to using the lcpd_node itself. *)
-              L.d_printfln
-                "[transformation-merge-join-warning]    - Could not find IPDOM of the LCPD. This is expected if the rejoin point is the function exit. Using LCPD itself as the final join node." ;
-              lcpd_node
-          in
-          final_join_node
-        )
-      in
-
-      L.d_printfln "[transformation-merge]    - Initial merged scope from old boundaries: LCA node %a, Join node %a"
-        Procdesc.Node.pp initial_lca Procdesc.Node.pp new_join;
-      (*
-        Step 2: The existing, correct data-flow-awareness logic now runs on a sound initial scope.
-      *)
-      let is_inside_scope node =
-        is_dominated_by ~dominator:initial_lca ~node idom
-        && is_post_dominated_by ~pdominator:new_join ~node ipdom_fun
-      in
-      let trapped_decls =
-        Procdesc.fold_instrs proc_desc ~init:[] ~f:(fun acc node instr ->
-          if is_inside_scope node then
-            match instr with
-            | Sil.Store {e1=Exp.Lvar pvar; _} when Pvar.is_local pvar ->
-                (* Find the FIRST time this local is assigned. *)
-                if not (List.exists acc ~f:(Pvar.equal pvar)) then (
-                  L.d_printfln "[transformation-merge]    - Found trapped local variable declaration: %a in node %a"                           
-                  (Pvar.pp Pp.text) pvar Procdesc.Node.pp node;
-                  pvar :: acc
-        ) else acc
-            | _ -> acc
-          else acc
-        )
-      in
-      let earliest_decl_node =
-        List.fold trapped_decls ~init:initial_lca ~f:(fun current_lca pvar ->
-          let all_nodes = Procdesc.get_nodes proc_desc in
-          let decl_node_opt =
-            List.find all_nodes ~f:(fun node ->
-              Instrs.exists (Procdesc.Node.get_instrs node) ~f:(function
-                | Sil.Store {e1=Exp.Lvar p; _} -> Pvar.equal p pvar
-                | _ -> false ) )
-          in
-
-          match decl_node_opt with
-          | None ->
-              L.d_printfln "[transformation-merge]    - WARNING: Could not find decl node for %a. This should not happen."
-                (Pvar.pp Pp.text) pvar;
-              current_lca
-          | Some decl_node ->
-              L.d_printfln "[transformation-merge]    - Declaration of %a is at node %a. Recalculating LCA."
-                (Pvar.pp Pp.text) pvar Procdesc.Node.pp decl_node;
-              lca current_lca decl_node
-        )
-      in
-      let new_lca = earliest_decl_node in
-
-      if not (Procdesc.Node.equal new_lca new_lca) then
-        L.d_printfln "[transformation-merge]    - Scope expanded! New LCA is node %a (line %d) to include declarations."
-          Procdesc.Node.pp new_lca (Procdesc.Node.get_loc new_lca).line;
-      
-      L.d_printfln "[transformation-merge] << Finished merge. Final scope: [%a -> %a]"
-        Procdesc.Node.pp new_lca Procdesc.Node.pp new_join;
-
-      ISkip {lca_node= new_lca; join_node= new_join; pointer_exprs= new_pointers; slice_nodes= new_slice}
-  | _ -> plan1
-  in
-
-  L.d_printfln "\n[transformation-log] STEP 2: Filtering %d candidate plan(s)." (List.length candidate_plans);
-  let filtered_plans =
-    List.filter candidate_plans ~f:(fun current_plan ->
-        let is_enveloped =
-          List.exists candidate_plans ~f:(fun other_plan ->
-              if phys_equal current_plan other_plan then false
-              else
-                match (current_plan, other_plan) with
-                | ( ISkip {lca_node= s_curr; join_node= e_curr; _}
-                  , ISkip {lca_node= s_other; join_node= e_other; _} ) ->
-                    (* Pass scopes as two separate arguments *)
-                    is_strictly_contained_within (s_other, e_other) (s_curr, e_curr)
-                | _ ->
-                    false )
-        in
-        if is_enveloped then L.d_printfln "[transformation-log]   Filtering one enveloped plan.";
-        not is_enveloped )
-  in
-
-  L.d_printfln "\n[transformation-log] STEP 3: Merging %d filtered plan(s) using a fixed-point algorithm." (List.length filtered_plans);
-  
-  let final_intermediate_plans =
-    let rec merge_fixed_point plans_to_merge =
-      let rec find_and_merge_pair worklist acc =
-        match worklist with
-        | [] -> None (* No merge found in this pass *)
-        | current_plan :: rest ->
-            let found_merge =
-              List.find_map rest ~f:(fun other_plan ->
-                match (current_plan, other_plan) with
-                | ( ISkip {lca_node= s1; join_node= e1; _}
-                  , ISkip {lca_node= s2; join_node= e2; _} ) ->
-                    if should_merge_scopes all_ptrs_to_guard (s1, e1) (s2, e2) then
-                      let merged_plan = merge_plans current_plan other_plan ipdom_fun in
-                      let remaining_plans = List.filter rest ~f:(fun p -> not (phys_equal p other_plan)) in
-                      Some (merged_plan, acc @ remaining_plans)
-                    else None
-                | _ -> None
-              )
-            in
-            match found_merge with
-            | Some (new_plan, new_worklist) -> Some (new_plan :: new_worklist)
-            | None -> find_and_merge_pair rest (current_plan :: acc)
-      in
-
-      match find_and_merge_pair plans_to_merge [] with
-      | None ->
-          (* BASE CASE: No merges possible in a full pass. *)
-          L.d_printfln "[transformation-log]   - Fixed-point reached. No more merges possible.";
-          plans_to_merge
-      | Some new_list ->
-          (* RECURSIVE STEP: A merge happened. Restart with the new list. *)
-          L.d_printfln "[transformation-log]   - Merge successful. Restarting merge pass.";
-          merge_fixed_point new_list
-    in
-    
-    merge_fixed_point filtered_plans
-  in *)
-
   (*********************************************************************************)
   (* Stage 2 & 3: A "Greedy with Guardrails" Compaction Algorithm                *)
   (*********************************************************************************)
@@ -1663,9 +1397,9 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
         ; nodes_in_scope }
       in
       Skip {lca_node; join_node; pointer_exprs; slice_nodes; metrics}
-    | IEvade {proc_start_node; pointer_expr} ->
+    | IEvade {proc_start_node; pointer_expr; return_typ_str} ->
         (* Convert from intermediate Evade to final Evade *)
-        Evade {proc_start_node; pointer_expr} )
+        Evade {proc_start_node; pointer_expr; return_typ_str} )
 
   (* final_plans *)
 
@@ -1728,32 +1462,33 @@ let save_all_plans proc_desc plans =
                     ; ("true_slice_size", `Int metrics.true_slice_size)
                     ; ("initial_candidate_plans", `Int metrics.initial_candidate_plans)
                     ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
-            | Evade {proc_start_node; pointer_expr} ->
-                `Assoc
-                  [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
-                  ; ("pointer_expr", `String (Format.asprintf "%a" Exp.pp pointer_expr)) ]
-                  | Replace {def_site_node; pvar; pvar_typ; reuse_info; metrics; _} ->
-                    `Assoc
-                      [ ("def_site_node", `Int (Procdesc.Node.get_id def_site_node :> int))
-                      ; ("def_site_line", `Int (Procdesc.Node.get_loc def_site_node).line)
-                      ; ("target_pvar", `String (Pvar.to_string pvar))
-                      ; ("pvar_type", `String (Typ.to_string pvar_typ))
-                      ; ( "reuse_candidate"
-                        , match reuse_info with
-                          | None ->
-                              `Null
-                          | Some {reused_pvar} ->
-                              `String (Pvar.to_string reused_pvar) )
-                      ; ( "metrics"
-                        , `Assoc
-                            [ ("cost_rep_modification", `Int metrics.cost)
-                            ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
-            | NoPlanGenerated {reason; npe_location; pointer_expr_str} ->
-                `Assoc
-                  [ ("reason", `String reason)
-                  ; ("npe_file", `String (SourceFile.to_string npe_location.file))
-                  ; ("npe_line", `Int npe_location.line)
-                  ; ("original_pointer", `String pointer_expr_str) ] ) ]
+          | Evade {proc_start_node; pointer_expr; return_typ_str} ->
+            `Assoc
+              [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
+              ; ("pointer_expr", `String (Format.asprintf "%a" Exp.pp pointer_expr))
+              ; ("return_type", `String return_typ_str) ]
+          | Replace {def_site_node; pvar; pvar_typ; reuse_info; metrics; _} ->
+            `Assoc
+              [ ("def_site_node", `Int (Procdesc.Node.get_id def_site_node :> int))
+              ; ("def_site_line", `Int (Procdesc.Node.get_loc def_site_node).line)
+              ; ("target_pvar", `String (Pvar.to_string pvar))
+              ; ("pvar_type", `String (Typ.to_string pvar_typ))
+              ; ( "reuse_candidate"
+                , match reuse_info with
+                  | None ->
+                      `Null
+                  | Some {reused_pvar} ->
+                      `String (Pvar.to_string reused_pvar) )
+              ; ( "metrics"
+                , `Assoc
+                    [ ("cost_rep_modification", `Int metrics.cost)
+                    ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
+          | NoPlanGenerated {reason; npe_location; pointer_expr_str} ->
+              `Assoc
+                [ ("reason", `String reason)
+                ; ("npe_file", `String (SourceFile.to_string npe_location.file))
+                ; ("npe_line", `Int npe_location.line)
+                ; ("original_pointer", `String pointer_expr_str) ] ) ]
     in
     let all_plans_json = `List (List.map plans ~f:plan_to_json) in
     let out_chan = Out_channel.create filepath in

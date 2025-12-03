@@ -1,0 +1,44 @@
+[
+  {
+    "procedure_name": "array_init_bad",
+    "procedure_id": "array_init_bad",
+    "source_file": "initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 12,
+      "def_site_line": 13,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "array_init_bad",
+    "procedure_id": "array_init_bad",
+    "source_file": "initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 12,
+      "def_site_line": 13,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "array_init_bad",
+    "procedure_id": "array_init_bad",
+    "source_file": "initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 12,
+      "def_site_line": 13,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

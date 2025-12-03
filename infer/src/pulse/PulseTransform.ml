@@ -5,7 +5,7 @@ open PulseDomainInterface
 
 module L = Logging
 module CFG = ProcCfg.Normal
-
+module U = Unix
 
 (** {1. Core Data Structures & State Management} *)
 
@@ -32,7 +32,9 @@ type intermediate_plan =
     ; join_node: Procdesc.Node.t
     ; pointer_exprs: Exp.t list
     ; slice_nodes: Procdesc.Node.t list }
-| IEvade of {proc_start_node: Procdesc.Node.t; pointer_expr: Exp.t; return_typ_str: string}
+| IEvade of {proc_start_node: Procdesc.Node.t
+    ; pointer_expr: Exp.t
+    ; return_typ_str: string}
 
 type transformation_plan =
 | Skip of { 
@@ -1490,9 +1492,28 @@ let save_all_plans proc_desc plans =
                 ; ("npe_line", `Int npe_location.line)
                 ; ("original_pointer", `String pointer_expr_str) ] ) ]
     in
-    let all_plans_json = `List (List.map plans ~f:plan_to_json) in
+    let new_plans_json = List.map plans ~f:plan_to_json in
+    (* let all_plans_json = `List (List.map plans ~f:plan_to_json) in *)
+
+    let final_json_list =
+      if ISys.file_exists filepath then
+        try
+          match Yojson.Safe.from_file filepath with
+          | `List existing_plans ->
+              (* Success: Append new plans to the existing list *)
+              `List (existing_plans @ new_plans_json)
+          | _ ->
+              (* File exists but isn't a list (corrupt?). Overwrite safely. *)
+              `List new_plans_json
+        with _ ->
+          (* Parse error. Overwrite safely. *)
+          `List new_plans_json
+      else
+        (* File doesn't exist. Create new list. *)
+        `List new_plans_json
+    in
     let out_chan = Out_channel.create filepath in
-    Yojson.Safe.pretty_to_channel out_chan all_plans_json;
+    Yojson.Safe.pretty_to_channel out_chan final_json_list;
     Out_channel.close out_chan;
     L.d_printfln "[transformation-plan] Saved %d repair plan(s) for %a to %s"
       (List.length plans) Procname.pp proc_name filepath

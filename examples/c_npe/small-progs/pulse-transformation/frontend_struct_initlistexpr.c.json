@@ -1,0 +1,100 @@
+[
+  {
+    "procedure_name": "point_coords_set_correctly_npe_bad",
+    "procedure_id": "point_coords_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 21,
+      "target_pvar": "pointer",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "implicit_expr_set_correctly_npe_bad",
+    "procedure_id": "implicit_expr_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 85,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "field_set_correctly_npe_bad",
+    "procedure_id": "field_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 49,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "point_coords_set_correctly_npe_bad",
+    "procedure_id": "point_coords_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 21,
+      "target_pvar": "pointer",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "field_set_correctly_npe_bad",
+    "procedure_id": "field_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 49,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "point_coords_set_correctly_npe_bad",
+    "procedure_id": "point_coords_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 21,
+      "target_pvar": "pointer",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "implicit_expr_set_correctly_npe_bad",
+    "procedure_id": "implicit_expr_set_correctly_npe_bad",
+    "source_file": "frontend_struct_initlistexpr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 85,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

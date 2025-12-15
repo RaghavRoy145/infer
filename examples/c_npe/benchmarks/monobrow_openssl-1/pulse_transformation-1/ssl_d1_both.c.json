@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "dtls1_buffer_message",
+    "procedure_id": "dtls1_buffer_message",
+    "source_file": "ssl/d1_both.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 52,
+      "end_node": 2,
+      "start_line": 1181,
+      "end_line": 1231,
+      "guard_with_pointer": "&s",
+      "metrics": {
+        "cost_l_imprecision": 36,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 51,
+        "true_slice_size": 15,
+        "initial_candidate_plans": 15,
+        "total_aliases": 1
+      }
+    }
+  }
+]

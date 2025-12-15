@@ -17,8 +17,8 @@ for i in {01..20}; do
         echo "-------------------"
         
         # Run infer and capture output
-        OUTPUT=$(../../docker/repair/run-infer.sh "../../examples/c_npe/$TEST_FILE" 2>&1)
-        
+        OUTPUT=$(sudo ~/repos/infer/infer/bin/infer --keep-going --debug --pulse-only -- cc -c "../../examples/c_npe/$TEST_FILE" 2>&1)
+        echo "$OUTPUT" 
         # Check if null dereference was detected
         if echo "$OUTPUT" | grep -q "Null Dereference"; then
             echo "✓ NULL DEREFERENCE DETECTED"

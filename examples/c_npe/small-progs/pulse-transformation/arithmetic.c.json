@@ -1,0 +1,65 @@
+[
+  {
+    "procedure_name": "call_if_negative_then_crash_with_local_bad",
+    "procedure_id": "call_if_negative_then_crash_with_local_bad",
+    "source_file": "arithmetic.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 55,
+      "end_line": 55,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "call_if_negative_then_crash_with_local_bad",
+    "procedure_id": "call_if_negative_then_crash_with_local_bad",
+    "source_file": "arithmetic.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 55,
+      "end_line": 55,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "call_if_negative_then_crash_with_local_bad",
+    "procedure_id": "call_if_negative_then_crash_with_local_bad",
+    "source_file": "arithmetic.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 55,
+      "end_line": 55,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

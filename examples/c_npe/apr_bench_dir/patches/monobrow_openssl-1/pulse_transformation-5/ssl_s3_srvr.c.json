@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "ssl3_send_server_hello",
+    "procedure_id": "ssl3_send_server_hello",
+    "source_file": "ssl/s3_srvr.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 60,
+      "end_node": 2,
+      "start_line": 1451,
+      "end_line": 1528,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 44,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 52,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 8,
+        "total_aliases": 3
+      }
+    }
+  }
+]

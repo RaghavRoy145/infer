@@ -1,0 +1,44 @@
+[
+  {
+    "procedure_name": "report_on_line_offset_6_bad",
+    "procedure_id": "report_on_line_offset_6_bad",
+    "source_file": "assert.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 18,
+      "target_pvar": "q",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "report_on_line_offset_6_bad",
+    "procedure_id": "report_on_line_offset_6_bad",
+    "source_file": "assert.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 18,
+      "target_pvar": "q",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "report_on_line_offset_6_bad",
+    "procedure_id": "report_on_line_offset_6_bad",
+    "source_file": "assert.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 18,
+      "target_pvar": "q",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

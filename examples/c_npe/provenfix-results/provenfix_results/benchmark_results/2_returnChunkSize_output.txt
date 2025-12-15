@@ -1,0 +1,38 @@
+Capturing in make/cc mode ...
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c:19:21: error: use of undeclared identifier 'srcBuf'
+    memcpy(destBuf, srcBuf, temp);
+                    ^
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c:34:7: error: unknown type name 'pthread_mutex_t'
+int f(pthread_mutex_t *mutex) {
+      ^
+2 errors generated.
+Arguments are 
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c
+annalysing main
+CallingFunction: returnChunkSize @17
+CallingFunction: memcpy @19
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c
+
+=====> Actual effects of function: main ======>
+(true /\ memcpy(destBuf)@19,0)
+Arguments are ,mutex
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c
+annalysing f
+CallingFunction: pthread_mutex_lock @36
+CallingFunction: pthread_mutex_unlock @40
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c
+
+=====> Actual effects of function: f ======>
+(.ret=0 /\ RET()@46,1)
+Arguments are ,output,filename
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c
+annalysing outputStringToFile
+CallingFunction: openFileToWrite @68
+CallingFunction: pthread_mutex_unlock_write_to_file @69
+CallingFunction: closeFile @70
+/home/infer_TempFix/my_benchmark/urv/2_returnChunkSize.c
+
+=====> Actual effects of function: outputStringToFile ======>
+(.ret=temp /\ CONSUME(temp)@71 · RET(temp)@71 · RET(temp)@71,1)
+<<<SYH:Clang.Capture.run_clang-ErrorN>>>
+

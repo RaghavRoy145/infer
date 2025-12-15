@@ -1,0 +1,12 @@
+Capturing in make/cc mode ...
+Arguments are ,type,recvd_type,buf,len,n
+/home/infer_TempFix/my_benchmark/1_peek.c
+annalysing ssl3_read_bytes
+CallingFunction: askForPeek @68
+CallingFunction: memcpy @70
+CallingFunction: OPENSSL_cleanse @82
+CallingFunction: ssl_release_record @86
+/home/infer_TempFix/my_benchmark/1_peek.c
+
+=====> Actual effects of function: ssl3_read_bytes ======>
+(true /\ memcpy(buf)@70 · deref(s)@81 · deref(rr)@85,0) \/ (true /\ memcpy(buf)@70,0)

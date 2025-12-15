@@ -36,10 +36,10 @@ type t =
   ; lang: Lang.t }
 
 let init sourcefile lang =
-  { globals= VarName.Hashtbl.create 17
-  ; procs= ProcSig.Hashtbl.create 17
-  ; variadic_procs= QualifiedProcName.Hashtbl.create 17
-  ; structs= TypeName.Hashtbl.create 17
+  { globals= VarName.Hashtbl.create 32
+  ; procs= ProcSig.Hashtbl.create 32
+  ; variadic_procs= QualifiedProcName.Hashtbl.create 32
+  ; structs= TypeName.Hashtbl.create 32
   ; sourcefile
   ; lang }
 
@@ -195,7 +195,8 @@ let is_defined_in_a_trait decls_env {Textual.QualifiedProcName.enclosing_class} 
 
 let is_trait_method decls_env procsig =
   is_defined_in_a_trait decls_env (Textual.ProcSig.to_qualified_procname procsig)
-  && (* The hack init methods does not have the [self] argument, unlike the other trait methods. So,
+  &&
+  (* The hack init methods does not have the [self] argument, unlike the other trait methods. So,
         we address them differenctly in the validtion. *)
   not (Textual.ProcSig.is_hack_init procsig)
 
@@ -325,7 +326,7 @@ let rec get_typ_name (typ : Typ.t) =
 
 
 let get_procdesc_referenced_types (pdesc : ProcDesc.t) =
-  let referenced = TypeName.HashSet.create 17 in
+  let referenced = TypeName.HashSet.create 32 in
   let add_to_referenced name = TypeName.HashSet.add name referenced in
   (* Helpers *)
   let rec from_exp (exp : Exp.t) =
@@ -341,6 +342,10 @@ let get_procdesc_referenced_types (pdesc : ProcDesc.t) =
     | Index (base, idx) ->
         from_exp base ;
         from_exp idx
+    | If {cond; then_; else_} ->
+        from_bexp cond ;
+        from_exp then_ ;
+        from_exp else_
     | Call {args} ->
         List.iter args ~f:from_exp
     | Closure {captured} ->
@@ -403,7 +408,7 @@ let get_procdesc_referenced_types (pdesc : ProcDesc.t) =
 
 let get_undefined_types decls =
   let referenced_tnames, defined_tnames =
-    (TypeName.HashSet.create 17, TypeName.HashSet.create 17)
+    (TypeName.HashSet.create 32, TypeName.HashSet.create 32)
   in
   (* Helpers *)
   let register_tname tname set = TypeName.HashSet.add tname set in

@@ -222,6 +222,11 @@ BUCK OPTIONS
            <bool> to control capture of Swift files. (Conversely:
            --no-buck-swift)
 
+       --buck-swift-keep-going
+           Activates: When using the BXL Clang integration, pass
+           --swift-keep-going <bool>. (Conversely:
+           --no-buck-swift-keep-going)
+
        --buck-targets-block-list +regex
            Skip capture of buck targets matched by the specified regular
            expression.
@@ -394,6 +399,11 @@ JAVA OPTIONS
        --no-read-java-modules
            Deactivates: Read java modules file using jimage. (Conversely:
            --read-java-modules)
+
+PULSE CHECKER OPTIONS
+       --llvm-translate-global-init
+           Activates: Translates the initializers of globals in the llvm
+           frontend. (Conversely: --no-llvm-translate-global-init)
 
 ENVIRONMENT
        INFER_ARGS, INFERCONFIG, INFER_STRICT_MODE

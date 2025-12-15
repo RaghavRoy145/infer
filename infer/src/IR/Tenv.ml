@@ -62,7 +62,9 @@ let lookup tenv name : Struct.t option =
   result
 
 
-let compare_fields {Struct.name= name1} {Struct.name= name2} = Fieldname.compare name1 name2
+let compare_fields ({name= name1} : Struct.field) ({name= name2} : Struct.field) =
+  Fieldname.compare name1 name2
+
 
 let equal_fields f1 f2 = Int.equal (compare_fields f1 f2) 0
 
@@ -149,7 +151,7 @@ let resolve_fieldname tenv name fieldname_str =
         | Some {Struct.fields} ->
             if List.exists fields ~f then Some name else None )
   in
-  let is_fld {Struct.name} = String.equal (Fieldname.get_field_name name) fieldname_str in
+  let is_fld ({name} : Struct.field) = String.equal (Fieldname.get_field_name name) fieldname_str in
   let is_non_abstract_fld ({Struct.annot} as x) = is_fld x && not (Annot.Item.is_abstract annot) in
   let resolved_fld =
     (match find ~f:is_non_abstract_fld with Some _ as fld -> fld | None -> find ~f:is_fld)
@@ -177,7 +179,7 @@ let get_fields_trans =
   let module Fields = Stdlib.Set.Make (struct
     type t = Struct.field
 
-    let compare {Struct.name= x} {Struct.name= y} =
+    let compare ({name= x} : Struct.field) ({name= y} : Struct.field) =
       String.compare (Fieldname.get_field_name x) (Fieldname.get_field_name y)
   end) in
   fun tenv name ->
@@ -305,6 +307,8 @@ module Global : sig
   val force_load : unit -> t option
 
   val store : normalize:bool -> t -> unit
+
+  val set : t option -> unit
 end = struct
   let global_tenv : t option Atomic.t = Atomic.make None
 
@@ -513,6 +517,7 @@ let resolve_method ?(is_virtual = false) ~method_exists tenv class_name proc_nam
                   0
           in
           let right_proc_name = Procname.replace_class ~arity_incr proc_name class_name in
+          let methods = List.map methods ~f:Struct.name_of_tenv_method in
           if method_exists right_proc_name methods then
             Some (MethodInfo.return ~kind right_proc_name)
           else
@@ -540,6 +545,8 @@ let resolve_method ?(is_virtual = false) ~method_exists tenv class_name proc_nam
               | PythonClass _ ->
                   (* We currently only support single inheritance for Python so this is straightforward *)
                   supers
+              | SwiftClass _ ->
+                  supers
             in
             List.find_map supers_to_search ~f:resolve_name )
   in
@@ -557,24 +564,47 @@ let resolve_method ?(is_virtual = false) ~method_exists tenv class_name proc_nam
       Ok method_info
 
 
+let resolve_method_with_offset tenv class_name offset =
+  if Language.curr_language_is Swift then
+    if not (Typ.Name.is_class class_name) then None
+    else
+      let struct_opt = lookup tenv class_name in
+      match struct_opt with
+      | None | Some {dummy= true} ->
+          None
+      | Some {Struct.methods} ->
+          let method_opt =
+            List.find
+              ~f:(fun m ->
+                match m.Struct.llvm_offset with
+                | Some llvm_offset ->
+                    Int.equal offset llvm_offset
+                | None ->
+                    false )
+              methods
+          in
+          Option.map ~f:(fun m -> m.Struct.name) method_opt
+  else L.die InternalError "resolve_method_with_offset only implemented for Swift"
+
+
 let find_cpp_destructor tenv class_name =
   let open IOption.Let_syntax in
   let* struct_ = lookup tenv class_name in
-  List.find struct_.Struct.methods ~f:(function
-    | Procname.ObjC_Cpp f ->
-        Procname.ObjC_Cpp.(is_destructor f && not (is_inner_destructor f))
-    | _ ->
-        false )
+  List.find struct_.Struct.methods ~f:(fun (m : Struct.tenv_method) ->
+      match m.name with
+      | Procname.ObjC_Cpp f ->
+          Procname.ObjC_Cpp.(is_destructor f && not (is_inner_destructor f))
+      | _ ->
+          false )
+  |> Option.map ~f:Struct.name_of_tenv_method
 
 
 let find_cpp_constructor tenv class_name =
   match lookup tenv class_name with
   | Some struct_ ->
-      List.filter struct_.Struct.methods ~f:(function
-        | Procname.ObjC_Cpp {kind= CPPConstructor _} ->
-            true
-        | _ ->
-            false )
+      List.filter struct_.Struct.methods ~f:(fun (m : Struct.tenv_method) ->
+          match m.name with Procname.ObjC_Cpp {kind= CPPConstructor _} -> true | _ -> false )
+      |> List.map ~f:Struct.name_of_tenv_method
   | None ->
       []
 

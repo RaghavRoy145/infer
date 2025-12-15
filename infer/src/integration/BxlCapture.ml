@@ -53,7 +53,7 @@ let run_capture buck2_build_cmd =
     buck2_build_cmd ;
   let infer_deps_lines =
     Buck.wrap_buck_call ~label:"build" ("buck2" :: buck2_build_cmd)
-    |> List.fold ~init:[] ~f:(traverse ~root:Config.buck2_root (Visited.create 11))
+    |> List.fold ~init:[] ~f:(traverse ~root:Config.buck2_root (Visited.create 16))
     |> List.dedup_and_sort ~compare:String.compare
   in
   let infer_deps = ResultsDir.get_path CaptureDependencies in
@@ -98,6 +98,7 @@ let capture build_cmd =
             ["--inferconfig"; target] )
       @ (if Config.keep_going then ["--keep-going=true"] else [])
       @ (if Config.buck_swift then ["--swift=true"] else [])
+      @ (if Config.buck_swift_keep_going then ["--swift-keep-going=true"] else [])
       @ block_files @ files_with_arg @ targets_with_arg
     in
     let buck2_build_cmd =

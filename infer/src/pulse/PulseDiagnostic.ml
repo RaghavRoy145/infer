@@ -33,6 +33,7 @@ type access_to_invalid_address =
   ; invalidation: Invalidation.t
   ; invalidation_trace: Trace.t
   ; access_trace: Trace.t
+  ; may_depend_on_an_unknown_value: bool
   ; must_be_valid_reason: Invalidation.must_be_valid_reason option }
 [@@deriving compare, equal]
 
@@ -44,7 +45,9 @@ let pp_access_to_invalid_address fmt
      ; invalidation
      ; invalidation_trace
      ; access_trace
-     ; must_be_valid_reason } [@warning "+missing-record-field-pattern"] ) =
+     ; may_depend_on_an_unknown_value
+     ; must_be_valid_reason }
+     [@warning "+missing-record-field-pattern"] ) =
   let pp_immediate fmt = F.pp_print_string fmt "immediate" in
   F.fprintf fmt
     "{@[calling_context=%a;@;\
@@ -52,11 +55,13 @@ let pp_access_to_invalid_address fmt
      invalidation=%a;@;\
      invalidation_trace=%a;@;\
      access_trace=%a;@;\
+     may_depend_on_an_unknown_value=%b;@;\
      must_be_valid_reason=%a;@;\
      @]}"
     pp_calling_context calling_context DecompilerExpr.pp_with_abstract_value invalid_address
     Invalidation.pp invalidation (Trace.pp ~pp_immediate) invalidation_trace
-    (Trace.pp ~pp_immediate) access_trace Invalidation.pp_must_be_valid_reason must_be_valid_reason
+    (Trace.pp ~pp_immediate) access_trace may_depend_on_an_unknown_value
+    Invalidation.pp_must_be_valid_reason must_be_valid_reason
 
 
 module ErlangError = struct
@@ -111,7 +116,7 @@ module ReadUninitialized = struct
       trace
 end
 
-type flow_kind = TaintedFlow | FlowToSink | FlowFromSource [@@deriving equal]
+type flow_kind = TaintedFlow | FlowToSink | FlowFromSource [@@deriving compare, equal]
 
 let pp_flow_kind fmt flow_kind =
   match flow_kind with
@@ -124,7 +129,7 @@ let pp_flow_kind fmt flow_kind =
 
 
 type retain_cycle_data = {expr: DecompilerExpr.t; location: Location.t option; trace: Trace.t option}
-[@@deriving equal]
+[@@deriving compare, equal]
 
 type resource =
   | CSharpClass of CSharpClassName.t
@@ -133,7 +138,7 @@ type resource =
   | Awaitable
   | HackBuilderResource of HackClassName.t
   | Memory of Attribute.allocator
-[@@deriving equal]
+[@@deriving compare, equal]
 
 let pp_resource fmt = function
   | CSharpClass class_name ->
@@ -205,6 +210,7 @@ type t =
   | ConstRefableParameter of {param: Var.t; typ: Typ.t; location: Location.t}
   | DynamicTypeMismatch of {location: Location.t}
   | ErlangError of ErlangError.t
+  | InfiniteLoopError of {location: Location.t}
   | HackCannotInstantiateAbstractClass of {type_name: Typ.Name.t; trace: Trace.t}
   | MutualRecursionCycle of
       {cycle: PulseMutualRecursion.t; location: Location.t; is_call_with_same_values: bool}
@@ -240,7 +246,9 @@ type t =
       ; copied_location: (Procname.t * Location.t) option
       ; location_instantiated: Location.t option
       ; from: PulseAttribute.CopyOrigin.t }
-[@@deriving equal]
+[@@deriving compare, equal]
+
+let yojson_of_t = [%yojson_of: _]
 
 let pp fmt diagnostic =
   let pp_immediate fmt = F.pp_print_string fmt "immediate" in
@@ -262,6 +270,8 @@ let pp fmt diagnostic =
       F.fprintf fmt "DynamicTypeMismatch {@[location:%a@]}" Location.pp location
   | ErlangError erlang_error ->
       ErlangError.pp fmt erlang_error
+  | InfiniteLoopError {location} ->
+      F.fprintf fmt "InfinitLoop {@[location:%a@]}" Location.pp location
   | HackCannotInstantiateAbstractClass {type_name; trace} ->
       F.fprintf fmt "HackCannotInstantiateAbstractClass {@[type_name:%a;@;trace:%a@]" Typ.Name.pp
         type_name (Trace.pp ~pp_immediate) trace
@@ -386,7 +396,8 @@ let get_location = function
   | StackVariableAddressEscape {location}
   | TaintFlow {location}
   | UninitMethod {location}
-  | UnnecessaryCopy {location} ->
+  | UnnecessaryCopy {location}
+  | InfiniteLoopError {location} ->
       location
 
 
@@ -421,7 +432,8 @@ let aborts_execution (path : PathContext.t) = function
       | Else_clause _
       | Function_clause _
       | If_clause _
-      | Try_clause _ ) ->
+      | Try_clause _ )
+  | InfiniteLoopError _ ->
       (* these errors either abort the whole program or, if they are false positives, mean that
          pulse is confused and the current abstract state has stopped making sense; either way,
          abort! *)
@@ -694,6 +706,8 @@ let get_message_and_suggestion diagnostic =
       F.asprintf "no true branch in if expression at %a" Location.pp location |> no_suggestion
   | ErlangError (Try_clause {calling_context= _; location}) ->
       F.asprintf "no matching branch in try at %a" Location.pp location |> no_suggestion
+  | InfiniteLoopError {location} ->
+      F.asprintf "potential infinite loop detected at %a" Location.pp location |> no_suggestion
   | HackCannotInstantiateAbstractClass {type_name; trace} ->
       let pp_trace fmt (trace : Trace.t) =
         match trace with
@@ -1185,6 +1199,8 @@ let get_trace = function
       ; Errlog.make_trace_element nesting copied_location
           (F.asprintf "%a here%a" PulseAttribute.CopyOrigin.pp from pp_copy_typ source_typ)
           [] ]
+  | InfiniteLoopError {location} ->
+      [Errlog.make_trace_element 0 location "in loop" []]
 
 
 let get_issue_type ~latent issue_type =
@@ -1193,6 +1209,8 @@ let get_issue_type ~latent issue_type =
       IssueType.pulse_assertion_error
   | AccessToInvalidAddress {invalidation; must_be_valid_reason}, _ ->
       Invalidation.issue_type_of_cause ~latent invalidation must_be_valid_reason
+  | InfiniteLoopError _, _ ->
+      IssueType.infinite_loop
   | ConfigUsage _, false ->
       IssueType.pulse_config_usage
   | ConstRefableParameter _, false ->
@@ -1244,10 +1262,11 @@ let get_issue_type ~latent issue_type =
         IssueType.pulse_memory_leak_cpp
     | FileDescriptor ->
         IssueType.pulse_resource_leak
-    | JavaResource _ | CSharpResource _ | HackBuilderResource _ | Awaitable | ObjCAlloc ->
+    | JavaResource _ | CSharpResource _ | HackBuilderResource _ | Awaitable | ObjCAlloc | SwiftAlloc
+      ->
         L.die InternalError
           "Memory leaks should not have a Java resource, Hack async, C sharp, or Objective-C alloc \
-           as allocator" )
+           or Swift alloc  as allocator" )
   | ResourceLeak {resource= CSharpClass _ | JavaClass _}, false ->
       IssueType.pulse_resource_leak
   | ResourceLeak {resource= Awaitable}, false ->

@@ -76,6 +76,16 @@ define unreachable_example(i: int) : void {
     unreachable
 }
 
+define pointer_arithmetic_int_ptr_ok(ptr: *int): *int {
+  #entry:
+    ret __sil_pluspi(ptr, 4)
+}
+
+define pointer_arithmetic_float_ptr_bad(ptr: *int): *float {
+  #entry:
+    ret __sil_pluspi(ptr, 4)
+}
+
 
 define type_as_expr() : void {
   #entry:
@@ -108,6 +118,19 @@ define if_then_else(x: int, y: float) : void {
     if n0 && n1 then ret null else jmp lab3
   #lab3:
     if [&y] then ret null else jmp lab2
+}
+
+define if_exp_not_declared(a: int, b: int, n:*node) : void {
+#b0:
+  n0 = (if b && b0 then x else 0)
+  ret null
+}
+
+define if_exp_typ(a: int, b: int) : float {
+#b0:
+  n0 = (if b then a else 0)
+  n1 = (if b then a else 0.)
+  ret n0
 }
 
 define use_mangled_names(): void {

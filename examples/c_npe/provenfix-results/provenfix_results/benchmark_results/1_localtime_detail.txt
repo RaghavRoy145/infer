@@ -1,0 +1,1097 @@
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/sfutil/acsmx.c:
+
+~~~~~~~~~ In function: acsmAddPattern ~~~~~~~~~
+Future-condition checking for 'AC_MALLOC @484': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(plist.udata!=0) /\ .ret=0 /\ plist.casepatrn=0 /\ memcpy(plist.casepatrn)@485 ~~~> (!_(plist.casepatrn))^*;
+[Patches]
+ @ line 485 can be inserted with code: if ((plist.udata!=0) /\ plist.casepatrn==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/output-plugins/spo_unified2.c:
+
+~~~~~~~~~ In function: Unified2PostConfig ~~~~~~~~~
+Future-condition checking for 'Unified2InitFile @274': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ config>0 /\ emp ~~~> (!close(config))^* · close(config) · (_)^*;
+[Patches]
+ @ line 276 can be inserted with code: if (config>0){close(config); }
+
+
+~~~~~~~~~ In function: Unified2RotateFile ~~~~~~~~~
+Future-condition checking for 'Unified2InitFile @355': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ config>0 /\ emp ~~~> (!close(config))^* · close(config) · (_)^*;
+[Patches]
+ @ line 351 can be inserted with code: if (config>0){close(config); }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/Stream6/snort_stream_tcp.c:
+
+~~~~~~~~~ In function: StreamTcpPolicyClone ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @1458': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=clone /\ config=0 /\ deref(config)@1459 ~~~> (!_(config))^*;
+[Patches]
+ @ line 1459 can be inserted with code: if (config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/Stream6/stream_common.c:
+
+~~~~~~~~~ In function: StreamActiveResponse ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @146': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ config=0 /\ deref(config)@147 ~~~> (!_(config))^*;
+[Patches]
+ @ line 147 can be inserted with code: if (config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/Session/session_common.c:
+
+~~~~~~~~~ In function: registerDirectionPortCallback ~~~~~~~~~
+Future-condition checking for 'getSessionPlugins @109': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ pfunks=0 /\ deref(pfunks)@114 ~~~> (!_(pfunks))^*;
+[Patches]
+ @ line 114 can be inserted with code: if (pfunks==0){ return; }
+
+
+~~~~~~~~~ In function: registerFlushStreamCallback ~~~~~~~~~
+Future-condition checking for 'getSessionPlugins @121': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ pfunks=0 /\ deref(pfunks)@126 ~~~> (!_(pfunks))^*;
+[Patches]
+ @ line 126 can be inserted with code: if (pfunks==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_arpspoof.c:
+
+~~~~~~~~~ In function: ARPspoofInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @216': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pCurrentPolicyConfig=0 /\ deref(pCurrentPolicyConfig)@243 · RET()@245 ~~~> (!_(pCurrentPolicyConfig))^*;
+[Patches]
+ @ line 243 can be inserted with code: if (pCurrentPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: ARPspoofInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @205': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pCurrentPolicyConfig!=0)) /\ pCurrentPolicyConfig=0 /\ arp_spoof_config=0 /\ deref(arp_spoof_config)@214 ~~~> (!_(arp_spoof_config))^*;
+[Patches]
+ @ line 214 can be inserted with code: if (!((pCurrentPolicyConfig!=0)) /\ pCurrentPolicyConfig==0 /\ arp_spoof_config==0){ return; }
+
+
+~~~~~~~~~ In function: ARPspoofHostInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @284': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pPolicyConfig=0 /\ deref(pPolicyConfig)@295 · deref(pPolicyConfig)@303 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 295 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: ARPspoofReload ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @719': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pPolicyConfig=0 /\ deref(pPolicyConfig)@739 · RET()@740 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 739 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: ARPspoofReload ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @713': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ arp_spoof_swap_config=0 /\ deref(arp_spoof_swap_config)@717 ~~~> (!_(arp_spoof_swap_config))^*;
+[Patches]
+ @ line 714 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ arp_spoof_swap_config==0){ return; }
+
+
+~~~~~~~~~ In function: ARPspoofReloadHost ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @764': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ pPolicyConfig=0 /\ deref(pPolicyConfig)@769 · deref(pPolicyConfig)@778 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 769 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_bo.c:
+
+~~~~~~~~~ In function: BoInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @252': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ bo_config=0 /\ deref(bo_config)@266 ~~~> (!_(bo_config))^*;
+[Patches]
+ @ line 266 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ bo_config==0){ return; }
+
+
+~~~~~~~~~ In function: BoReload ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @891': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ bo_swap_config=0 /\ deref(bo_swap_config)@895 ~~~> (!_(bo_swap_config))^*;
+[Patches]
+ @ line 892 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ bo_swap_config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_rpc_decode.c:
+
+~~~~~~~~~ In function: RpcDecodeInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @277': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ rpc_decode_config=0 /\ deref(rpc_decode_config)@296 ~~~> (!_(rpc_decode_config))^*;
+[Patches]
+ @ line 296 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ rpc_decode_config==0){ return; }
+
+
+~~~~~~~~~ In function: RpcDecodeReload ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @1461': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ rpc_decode_swap_config=0 /\ deref(rpc_decode_swap_config)@1464 ~~~> (!_(rpc_decode_swap_config))^*;
+[Patches]
+ @ line 1462 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ rpc_decode_swap_config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/perf.c:
+
+~~~~~~~~~ In function: sfRotateFile ~~~~~~~~~
+Future-condition checking for 'localtime @287': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(rotate_fh!=0) /\ (old_fh!=0) /\ (rotate_fh!=0) /\ (old_fh!=0) /\ .ret=0 /\ tm=0 /\ deref(tm)@289 ~~~> (!_(tm))^*;
+[Patches]
+ @ line 289 can be inserted with code: if ((rotate_fh!=0) /\ (old_fh!=0) /\ (rotate_fh!=0) /\ (old_fh!=0) /\ tm==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_httpinspect.c:
+
+~~~~~~~~~ In function: HttpInspectInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @586': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pPolicyConfig!=0) /\ hi_config=0 /\ deref(hi_config)@628 ~~~> (!_(hi_config))^*;
+[Patches]
+ @ line 587 can be inserted with code: if ((pPolicyConfig!=0) /\ hi_config==0){ return; }
+
+
+~~~~~~~~~ In function: HttpInspectReloadSwap ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @2147': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(configNew!=0) /\ .ret=old_config /\ configOld=0 /\ deref(configOld)@2179 ~~~> (!_(configOld))^*;
+[Patches]
+ @ line 2179 can be inserted with code: if ((configNew!=0) /\ configOld==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_sfportscan.c:
+
+~~~~~~~~~ In function: PortscanInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @1248': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pPolicyConfig=0 /\ deref(pPolicyConfig)@1268 · deref(pPolicyConfig)@1270 · deref(pPolicyConfig)@1277 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 1268 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: PortscanInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @1228': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ portscan_config=0 /\ deref(portscan_config)@1247 ~~~> (!_(portscan_config))^*;
+[Patches]
+ @ line 1247 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ portscan_config==0){ return; }
+
+
+~~~~~~~~~ In function: PortscanReload ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @1536': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pPolicyConfig=0 /\ deref(pPolicyConfig)@1563 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 1563 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: PortscanReload ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @1523': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pPolicyConfig!=0)) /\ pPolicyConfig=0 /\ portscan_swap_config=0 /\ deref(portscan_swap_config)@1534 ~~~> (!_(portscan_swap_config))^*;
+[Patches]
+ @ line 1524 can be inserted with code: if (!((pPolicyConfig!=0)) /\ pPolicyConfig==0 /\ portscan_swap_config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_frag3.c:
+
+~~~~~~~~~ In function: Frag3GlobalInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @1120': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pCurrentPolicyConfig!=0)) /\ pDefaultPolicyConfig=0 /\ deref(pDefaultPolicyConfig)@1149 · deref(pCurrentPolicyConfig)@1149 · deref(pDefaultPolicyConfig)@1150 · deref(pCurrentPolicyConfig)@1150 · deref(pDefaultPolicyConfig)@1151 · deref(pCurrentPolicyConfig)@1151 · deref(pDefaultPolicyConfig)@1152 · deref(pCurrentPolicyConfig)@1152 · deref(pDefaultPolicyConfig)@1153 ~~~> (!_(pDefaultPolicyConfig))^*;
+[Patches]
+ @ line 1142 can be inserted with code: if (!((pCurrentPolicyConfig!=0)) /\ pDefaultPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3GlobalInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @1119': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pCurrentPolicyConfig=0 /\ deref(pCurrentPolicyConfig)@1138 · deref(pCurrentPolicyConfig)@1139 · deref(pCurrentPolicyConfig)@1140 · deref(pCurrentPolicyConfig)@1141 · deref(pCurrentPolicyConfig)@1142 · deref(pCurrentPolicyConfig)@1202 ~~~> (!_(pCurrentPolicyConfig))^*;
+[Patches]
+ @ line 1138 can be inserted with code: if (pCurrentPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3GlobalInit ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @1097': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pCurrentPolicyConfig!=0)) /\ frag3_config=0 /\ deref(frag3_config)@1118 ~~~> (!_(frag3_config))^*;
+[Patches]
+ @ line 1118 can be inserted with code: if (!((pCurrentPolicyConfig!=0)) /\ frag3_config==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3CleanExit ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @4456': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ pDefaultPolicyConfig=0 /\ deref(pDefaultPolicyConfig)@4459 ~~~> (!_(pDefaultPolicyConfig))^*;
+[Patches]
+ @ line 4459 can be inserted with code: if (pDefaultPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3ReloadGlobal ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @4815': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pCurrentPolicyConfig=0 /\ deref(pCurrentPolicyConfig)@4833 · deref(pCurrentPolicyConfig)@4834 · deref(pCurrentPolicyConfig)@4835 · deref(pCurrentPolicyConfig)@4836 · deref(pCurrentPolicyConfig)@4848 · deref(pCurrentPolicyConfig)@4849 · deref(pCurrentPolicyConfig)@4866 ~~~> (!_(pCurrentPolicyConfig))^*;
+[Patches]
+ @ line 4833 can be inserted with code: if (pCurrentPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3ReloadGlobal ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @4814': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pCurrentPolicyConfig!=0)) /\ pDefaultPolicyConfig=0 /\ deref(pDefaultPolicyConfig)@4843 · deref(pCurrentPolicyConfig)@4843 · deref(pDefaultPolicyConfig)@4844 · deref(pCurrentPolicyConfig)@4844 · deref(pDefaultPolicyConfig)@4845 · deref(pCurrentPolicyConfig)@4845 · deref(pDefaultPolicyConfig)@4846 ~~~> (!_(pDefaultPolicyConfig))^*;
+[Patches]
+ @ line 4836 can be inserted with code: if (!((pCurrentPolicyConfig!=0)) /\ pDefaultPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3ReloadGlobal ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @4809': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((pCurrentPolicyConfig!=0)) /\ frag3_swap_config=0 /\ deref(frag3_swap_config)@4813 ~~~> (!_(frag3_swap_config))^*;
+[Patches]
+ @ line 4810 can be inserted with code: if (!((pCurrentPolicyConfig!=0)) /\ frag3_swap_config==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3MemReloadAdjust ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @4963': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=maxWork /\ newConfig=0 /\ deref(newConfig)@4966 · deref(newConfig)@4969 · deref(newConfig)@4987 · deref(newConfig)@5005 ~~~> (!_(newConfig))^*;
+[Patches]
+ @ line 4966 can be inserted with code: if (newConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3ReloadVerify ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @5077': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=0 /\ pSwapDefaultPolicyConfig=0 /\ deref(pSwapDefaultPolicyConfig)@5086 · deref(pCurrDefaultPolicyConfig)@5086 · deref(pSwapDefaultPolicyConfig)@5087 ~~~> (!_(pSwapDefaultPolicyConfig))^*;
+[Patches]
+ @ line 5086 can be inserted with code: if (pSwapDefaultPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: Frag3ReloadVerify ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @5076': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=0 /\ pCurrDefaultPolicyConfig=0 /\ deref(pCurrDefaultPolicyConfig)@5086 · deref(pSwapDefaultPolicyConfig)@5087 · deref(pCurrDefaultPolicyConfig)@5087 · RET()@5115 ~~~> (!_(pCurrDefaultPolicyConfig))^*;
+[Patches]
+ @ line 5086 can be inserted with code: if (pCurrDefaultPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_stream6.c:
+
+~~~~~~~~~ In function: initStreamPolicyConfig ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @379': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pCurrentPolicyConfig=0 /\ deref(pCurrentPolicyConfig)@386 · deref(pCurrentPolicyConfig)@387 · deref(pCurrentPolicyConfig)@394 · deref(pCurrentPolicyConfig)@395 · deref(pCurrentPolicyConfig)@396 ~~~> (!_(pCurrentPolicyConfig))^*;
+[Patches]
+ @ line 386 can be inserted with code: if (pCurrentPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: initStreamPolicyConfig ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @351': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pCurrentPolicyConfig!=0) /\ .ret=pCurrentPolicyConfig /\ stream_parsing_config=0 /\ deref(stream_parsing_config)@378 ~~~> (!_(stream_parsing_config))^*;
+[Patches]
+ @ line 378 can be inserted with code: if ((pCurrentPolicyConfig!=0) /\ stream_parsing_config==0){ return; }
+
+
+~~~~~~~~~ In function: StreamProcess ~~~~~~~~~
+Future-condition checking for 'updateMplsHeaders @911': Failed! because there is no handler ! 
+
+~~~~~~~~~ In function: StreamProcess ~~~~~~~~~
+Future-condition checking for 'updateMplsHeaders @911': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_session.c:
+
+~~~~~~~~~ In function: registerNapSelector ~~~~~~~~~
+Future-condition checking for 'getSessionPlugins @3833': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ pfunks=0 /\ deref(pfunks)@3836 ~~~> (!_(pfunks))^*;
+[Patches]
+ @ line 3836 can be inserted with code: if (pfunks==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/preprocessors/spp_normalize.c:
+
+~~~~~~~~~ In function: Init_GetContext ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @125': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pc=0 /\ deref(pc)@131 · deref(pc)@138 ~~~> (!_(pc))^*;
+[Patches]
+ @ line 131 can be inserted with code: if (pc==0){ return; }
+
+
+~~~~~~~~~ In function: Init_GetContext ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @118': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pc!=0) /\ .ret=pc /\ base_set=0 /\ deref(base_set)@124 ~~~> (!_(base_set))^*;
+[Patches]
+ @ line 122 can be inserted with code: if ((pc!=0) /\ base_set==0){ return; }
+
+
+~~~~~~~~~ In function: Reload_GetContext ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @783': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+pc=0 /\ deref(pc)@790 · deref(pc)@802 ~~~> (!_(pc))^*;
+[Patches]
+ @ line 790 can be inserted with code: if (pc==0){ return; }
+
+
+~~~~~~~~~ In function: Reload_GetContext ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @776': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pc!=0) /\ .ret=pc /\ swap_set=0 /\ deref(swap_set)@782 ~~~> (!_(swap_set))^*;
+[Patches]
+ @ line 780 can be inserted with code: if ((pc!=0) /\ swap_set==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/ssl_common/ssl_inspect.c:
+
+~~~~~~~~~ In function: SSLPP_is_encrypted ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @342': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=0 /\ config=0 /\ deref(config)@344 · RET()@370 ~~~> (!_(config))^*;
+[Patches]
+ @ line 344 can be inserted with code: if (config==0){ return; }
+
+
+~~~~~~~~~ In function: SSLPP_process_alert ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @378': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=ssn_flags /\ config=0 /\ deref(config)@389 ~~~> (!_(config))^*;
+[Patches]
+ @ line 389 can be inserted with code: if (config==0){ return; }
+
+
+~~~~~~~~~ In function: SSLPP_process_app ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @433': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ config=0 /\ deref(config)@437 · RET()@462 ~~~> (!_(config))^*;
+[Patches]
+ @ line 437 can be inserted with code: if (config==0){ return; }
+
+
+~~~~~~~~~ In function: SSLPP_process_other ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @470': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ config=0 /\ deref(config)@477 ~~~> (!_(config))^*;
+[Patches]
+ @ line 476 can be inserted with code: if (config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/ftptelnet/pp_ftp.c:
+
+~~~~~~~~~ In function: initialize_ftp ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @942': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=iRet /\ global_conf=0 /\ deref(global_conf)@957 ~~~> (!_(global_conf))^*;
+[Patches]
+ @ line 957 can be inserted with code: if (global_conf==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/pop/snort_pop.c:
+
+~~~~~~~~~ In function: POP_GetNewSession ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @283': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=ssn /\ pPolicyConfig=0 /\ deref(pPolicyConfig)@350 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 349 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/pop/spp_pop.c:
+
+~~~~~~~~~ In function: POPCheckConfig ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @510': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=0 /\ defaultConfig=0 /\ deref(defaultConfig)@534 · RET()@537 ~~~> (!_(defaultConfig))^*;
+[Patches]
+ @ line 534 can be inserted with code: if (defaultConfig==0){ return; }
+
+
+~~~~~~~~~ In function: POPReloadVerify ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @758': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+configNext=0 /\ deref(configNext)@776 · RET()@811 ~~~> (!_(configNext))^*;
+[Patches]
+ @ line 776 can be inserted with code: if (configNext==0){ return; }
+
+
+~~~~~~~~~ In function: POPReloadSwap ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @842': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(configNew!=0) /\ configOld=0 /\ deref(configOld)@862 ~~~> (!_(configOld))^*;
+[Patches]
+ @ line 862 can be inserted with code: if ((configNew!=0) /\ configOld==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/imap/snort_imap.c:
+
+~~~~~~~~~ In function: IMAP_GetNewSession ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @325': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=ssn /\ pPolicyConfig=0 /\ deref(pPolicyConfig)@393 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 392 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/imap/spp_imap.c:
+
+~~~~~~~~~ In function: IMAPReloadVerify ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @762': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+configNext=0 /\ deref(configNext)@779 · RET()@819 ~~~> (!_(configNext))^*;
+[Patches]
+ @ line 779 can be inserted with code: if (configNext==0){ return; }
+
+
+~~~~~~~~~ In function: IMAPReloadSwap ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @850': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(configNew!=0) /\ configOld=0 /\ deref(configOld)@870 ~~~> (!_(configOld))^*;
+[Patches]
+ @ line 870 can be inserted with code: if ((configNew!=0) /\ configOld==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/smtp/snort_smtp.c:
+
+~~~~~~~~~ In function: SMTP_GetNewSession ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @361': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=ssn /\ pPolicyConfig=0 /\ deref(pPolicyConfig)@363 · deref(p)@419 · deref(p)@431 · deref(ssn)@438 · deref(ssn)@439 · deref(ssn)@440 · deref(pPolicyConfig)@441 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 363 can be inserted with code: if (pPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/smtp/spp_smtp.c:
+
+~~~~~~~~~ In function: SMTPReloadVerify ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @788': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+configNext=0 /\ deref(configNext)@805 · RET()@836 ~~~> (!_(configNext))^*;
+[Patches]
+ @ line 805 can be inserted with code: if (configNext==0){ return; }
+
+
+~~~~~~~~~ In function: SMTPReloadSwap ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @867': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(configNew!=0) /\ configOld=0 /\ deref(configOld)@886 ~~~> (!_(configOld))^*;
+[Patches]
+ @ line 886 can be inserted with code: if ((configNew!=0) /\ configOld==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/dcerpc2/spp_dce2.c:
+
+~~~~~~~~~ In function: DCE2_InitGlobal ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @224': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+dce2_config=0 /\ deref(dce2_config)@300 ~~~> (!_(dce2_config))^*;
+[Patches]
+ @ line 300 can be inserted with code: if (dce2_config==0){ return; }
+
+
+~~~~~~~~~ In function: DCE2_InitServer ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @373': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+((dce2_config=0 \/ pPolicyConfig=0) \/ pPolicyConfig.gconfig=0) /\ pPolicyConfig=0 /\ deref(pPolicyConfig)@377 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 377 can be inserted with code: if (((dce2_config==0 \/ pPolicyConfig==0) \/ pPolicyConfig.gconfig==0) /\ pPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: DCE2_ReloadGlobal ~~~~~~~~~
+Future-condition checking for 'sfPolicyConfigCreate @1056': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+dce2_swap_config=0 /\ deref(dce2_swap_config)@1070 ~~~> (!_(dce2_swap_config))^*;
+[Patches]
+ @ line 1067 can be inserted with code: if (dce2_swap_config==0){ return; }
+
+
+~~~~~~~~~ In function: DCE2_ReloadServer ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @1146': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+((dce2_swap_config=0 \/ pPolicyConfig=0) \/ pPolicyConfig.gconfig=0) /\ pPolicyConfig=0 /\ deref(pPolicyConfig)@1150 ~~~> (!_(pPolicyConfig))^*;
+[Patches]
+ @ line 1150 can be inserted with code: if (((dce2_swap_config==0 \/ pPolicyConfig==0) \/ pPolicyConfig.gconfig==0) /\ pPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/sdf/spp_sdf.c:
+
+~~~~~~~~~ In function: ProcessSDF ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetCurrent @517': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ config=0 /\ deref(config)@550 ~~~> (!_(config))^*;
+[Patches]
+ @ line 550 can be inserted with code: if (config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/sdf/sdf_us_ssn.c:
+
+~~~~~~~~~ In function: ParseSSNGroups ~~~~~~~~~
+Future-condition checking for 'malloc @195': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+contents=0 /\ free(contents)@202 · RET()@203 ~~~> (!_(contents))^*;
+[Patches]
+ @ line 201 can be inserted with code: if (contents==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/sip/spp_sip.c:
+
+~~~~~~~~~ In function: SIPReloadVerify ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGet @977': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(current_default_config!=0) /\ .ret=0 /\ default_swap_config=0 /\ deref(default_swap_config)@991 ~~~> (!_(default_swap_config))^*;
+[Patches]
+ @ line 991 can be inserted with code: if ((current_default_config!=0) /\ default_swap_config==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/sip/sip_roptions.c:
+
+~~~~~~~~~ In function: SIP_MethodInit ~~~~~~~~~
+Future-condition checking for 'SIP_AddUserDefinedMethod @149': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(method!=0) /\ RET()@175 ~~~> (!free(method))^* · free(method) · (_)^*;
+[Patches]
+ @ line 175 can be inserted with code: if ((method!=0)){free(method); }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/reputation/spp_reputation.c:
+
+~~~~~~~~~ In function: ReputationCheckConfig ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @864': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=0 /\ pDefaultPolicyConfig=0 /\ deref(pDefaultPolicyConfig)@866 · RET()@871 ~~~> (!_(pDefaultPolicyConfig))^*;
+[Patches]
+ @ line 866 can be inserted with code: if (pDefaultPolicyConfig==0){ return; }
+
+
+~~~~~~~~~ In function: ReputationReloadSwap ~~~~~~~~~
+Future-condition checking for 'sfPolicyUserDataGetDefault @1074': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ pDefaultPolicyConfig=0 /\ deref(pDefaultPolicyConfig)@1075 · RET(NULL)@1086 ~~~> (!_(pDefaultPolicyConfig))^*;
+[Patches]
+ @ line 1075 can be inserted with code: if (pDefaultPolicyConfig==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/luaDetectorApi.c:
+
+~~~~~~~~~ In function: service_addPorts ~~~~~~~~~
+Future-condition checking for 'ServiceAddPort @926': Failed! because there is no handler ! 
+
+~~~~~~~~~ In function: client_registerPattern ~~~~~~~~~
+Future-condition checking for 'ClientAppRegisterPattern @1793': Failed! because there is no handler ! 
+
+~~~~~~~~~ In function: Detector_addAppUrl ~~~~~~~~~
+Future-condition checking for 'malloc @3120': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pattern!=0) /\ RET()@3158 ~~~> (!free(pattern))^* · free(pattern) · (_)^*;
+[Patches]
+ @ line 3158 can be inserted with code: if ((pattern!=0)){free(pattern); }
+
+
+~~~~~~~~~ In function: Detector_addRTMPUrl ~~~~~~~~~
+Future-condition checking for 'malloc @3267': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pattern!=0) /\ RET()@3306 ~~~> (!free(pattern))^* · free(pattern) · (_)^*;
+[Patches]
+ @ line 3306 can be inserted with code: if ((pattern!=0)){free(pattern); }
+
+
+~~~~~~~~~ In function: Detector_addSipUserAgent ~~~~~~~~~
+Future-condition checking for 'sipUaPatternAdd @3357': Failed! because there is no handler ! 
+
+~~~~~~~~~ In function: openAddUrlPattern ~~~~~~~~~
+Future-condition checking for 'malloc @3670': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pattern!=0) /\ RET()@3706 ~~~> (!free(pattern))^* · free(pattern) · (_)^*;
+[Patches]
+ @ line 3706 can be inserted with code: if ((pattern!=0)){free(pattern); }
+
+
+~~~~~~~~~ In function: Detector_addSipServer ~~~~~~~~~
+Future-condition checking for 'sipServerPatternAdd @4011': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/thirdparty_appid_utils.c:
+
+~~~~~~~~~ In function: getXffFields ~~~~~~~~~
+Future-condition checking for 'malloc @99': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+thirdpartyConfig.xffFields=0 /\ deref(thirdpartyConfig.xffFields)@105 ~~~> (!_(thirdpartyConfig.xffFields))^*;
+[Patches]
+ @ line 104 can be inserted with code: if (thirdpartyConfig.xffFields==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/client_plugins/client_app_base.c:
+
+~~~~~~~~~ In function: CClientAppRegisterPattern ~~~~~~~~~
+Future-condition checking for 'ClientAppRegisterPattern @240': Failed! because there is no handler ! 
+
+~~~~~~~~~ In function: CClientAppRegisterPatternNoCase ~~~~~~~~~
+Future-condition checking for 'ClientAppRegisterPattern @247': Failed! because there is no handler ! 
+
+~~~~~~~~~ In function: LuaClientAppRegisterPattern ~~~~~~~~~
+Future-condition checking for 'ClientAppRegisterPattern @254': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/service_plugins/service_base.c:
+
+~~~~~~~~~ In function: AppIdAddDHCP ~~~~~~~~~
+Future-condition checking for 'malloc @1177': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(rdd!=0) /\ RET()@1195 ~~~> (!free(rdd))^* · free(rdd) · (_)^*;
+[Patches]
+ @ line 1195 can be inserted with code: if ((rdd!=0)){free(rdd); }
+
+
+~~~~~~~~~ In function: AppIdAddDHCP ~~~~~~~~~
+Future-condition checking for 'malloc @1177': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(rdd!=0) /\ RET()@1184 ~~~> (!free(rdd))^* · free(rdd) · (_)^*;
+[Patches]
+ @ line 1184 can be inserted with code: if ((rdd!=0)){free(rdd); }
+
+
+~~~~~~~~~ In function: AppIdAddSMBData ~~~~~~~~~
+Future-condition checking for 'malloc @1269': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(sd!=0) /\ emp ~~~> (!free(sd))^* · free(sd) · (_)^*;
+[Patches]
+ @ line 1282 can be inserted with code: if ((sd!=0)){free(sd); }
+
+
+~~~~~~~~~ In function: AppIdAddSMBData ~~~~~~~~~
+Future-condition checking for 'malloc @1269': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(sd!=0) /\ RET()@1276 ~~~> (!free(sd))^* · free(sd) · (_)^*;
+[Patches]
+ @ line 1276 can be inserted with code: if ((sd!=0)){free(sd); }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/service_plugins/service_ssh.c:
+
+~~~~~~~~~ In function: ssh_validate ~~~~~~~~~
+Future-condition checking for 'malloc @510': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ss.version>0) /\ (ss.version!=0) /\ emp ~~~> (!free(ss.version))^* · free(ss.version) · (_)^*;
+[Patches]
+ @ line 511 can be inserted with code: if (!(ss.version>0) /\ (ss.version!=0)){free(ss.version); }
+
+
+~~~~~~~~~ In function: ssh_validate ~~~~~~~~~
+Future-condition checking for 'malloc @510': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(ss.version!=0) /\ emp ~~~> (!free(ss.version))^* · free(ss.version) · (_)^*;
+[Patches]
+ @ line 514 can be inserted with code: if ((ss.version!=0)){free(ss.version); }
+
+
+~~~~~~~~~ In function: ssh_validate ~~~~~~~~~
+Future-condition checking for 'malloc @499': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ss.vendor>0) /\ !(ss.version>0) /\ (ss.vendor!=0) /\ emp ~~~> (!free(ss.vendor))^* · free(ss.vendor) · (_)^*;
+[Patches]
+ @ line 511 can be inserted with code: if (!(ss.vendor>0) /\ !(ss.version>0) /\ (ss.vendor!=0)){free(ss.vendor); }
+
+
+~~~~~~~~~ In function: ssh_validate ~~~~~~~~~
+Future-condition checking for 'malloc @499': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ss.vendor>0) /\ ss.version>0 /\ (ss.vendor!=0) /\ emp ~~~> (!free(ss.vendor))^* · free(ss.vendor) · (_)^*;
+[Patches]
+ @ line 514 can be inserted with code: if (!(ss.vendor>0) /\ ss.version>0 /\ (ss.vendor!=0)){free(ss.vendor); }
+
+
+~~~~~~~~~ In function: ssh_validate ~~~~~~~~~
+Future-condition checking for 'malloc @523': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ss.version>0) /\ (ss.version!=0) /\ emp ~~~> (!free(ss.version))^* · free(ss.version) · (_)^*;
+[Patches]
+ @ line 524 can be inserted with code: if (!(ss.version>0) /\ (ss.version!=0)){free(ss.version); }
+
+
+~~~~~~~~~ In function: ssh_validate ~~~~~~~~~
+Future-condition checking for 'malloc @523': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(ss.version!=0) /\ emp ~~~> (!free(ss.version))^* · free(ss.version) · (_)^*;
+[Patches]
+ @ line 527 can be inserted with code: if ((ss.version!=0)){free(ss.version); }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/service_plugins/service_MDNS.c:
+
+~~~~~~~~~ In function: mdnsMatcherCreate ~~~~~~~~~
+Future-condition checking for 'AppIdAddGenericConfigItem @487': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/service_plugins/service_ssl.c:
+
+~~~~~~~~~ In function: ssl_validate ~~~~~~~~~
+Future-condition checking for 'parse_client_initiation @581': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/service_plugins/service_rtmp.c:
+
+~~~~~~~~~ In function: parse_rtmp_message ~~~~~~~~~
+Future-condition checking for 'malloc @348': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+body=0 /\ free(body)@434 ~~~> (!_(body))^*;
+[Patches]
+ @ line 413 can be inserted with code: if (body==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/detector_plugins/http_url_patterns.c:
+
+~~~~~~~~~ In function: addMlmpPattern ~~~~~~~~~
+Future-condition checking for 'malloc @93': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(detector!=0) /\ RET(r0)@162 ~~~> (!free(detector))^* · free(detector) · (_)^*;
+[Patches]
+ @ line 162 can be inserted with code: if ((detector!=0)){free(detector); }
+
+
+~~~~~~~~~ In function: addMlmpPattern ~~~~~~~~~
+Future-condition checking for 'malloc @93': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(detector!=0) /\ RET()@160 ~~~> (!free(detector))^* · free(detector) · (_)^*;
+[Patches]
+ @ line 160 can be inserted with code: if ((detector!=0)){free(detector); }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/detector_plugins/detector_imap.c:
+
+~~~~~~~~~ In function: init ~~~~~~~~~
+Future-condition checking for 'AppIdAddGenericConfigItem @296': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/dynamic-preprocessors/appid/detector_plugins/detector_pop3.c:
+
+~~~~~~~~~ In function: pop3_ca_init ~~~~~~~~~
+Future-condition checking for 'AppIdAddGenericConfigItem @260': Failed! because there is no handler ! 
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/util.c:
+
+~~~~~~~~~ In function: gmt2local ~~~~~~~~~
+Future-condition checking for 'localtime @311': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=dt /\ loc=0 /\ deref(loc)@313 · deref(gmt)@313 · deref(loc)@314 · deref(gmt)@314 · deref(loc)@316 ~~~> (!_(loc))^*;
+[Patches]
+ @ line 313 can be inserted with code: if (loc==0){ return; }
+
+
+In /home/benchmarks-RQ1N2/snort-2.9.13/src/fpdetect.c:
+
+~~~~~~~~~ In function: fpAddMatch ~~~~~~~~~
+Future-condition checking for 'getRuntimeRtnFromOtn @423': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=0 /\ rtn=0 /\ deref(rtn)@425 ~~~> (!_(rtn))^*;
+[Patches]
+ @ line 425 can be inserted with code: if (rtn==0){ return; }
+
+
+In /home/infer_TempFix/examples/fig3.c:
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @14': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ p.f=0 /\ free(p.f)@17 ~~~> (!_(p.f))^*;
+[Patches]
+ @ line 16 can be inserted with code: if (p.f==0){ return; }
+
+
+In /home/infer_TempFix/my_benchmark/6_fileIO.c:
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'fopen @24': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=r0 /\ f1>0 /\ (f1!=stdout) /\ (f1!=stdin) /\ RET(r0)@25 · RET(r0)@25 ~~~> (!fclose(f1))^* · fclose(f1) · (_)^*;
+[Patches]
+ @ line 25 can be inserted with code: if (f1>0 /\ (f1!=stdout) /\ (f1!=stdin)){fclose(f1); }
+
+
+In /home/infer_TempFix/my_benchmark/urv/1_localtime.c:
+
+~~~~~~~~~ In function: swLog_put ~~~~~~~~~
+Future-condition checking for 'localtime @19': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ p=0 /\ deref(p)@20 ~~~> (!_(p))^*;
+[Patches]
+ @ line 20 can be inserted with code: if (p==0){ return; }
+

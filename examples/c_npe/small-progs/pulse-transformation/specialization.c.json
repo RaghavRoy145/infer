@@ -1,0 +1,72 @@
+[
+  {
+    "procedure_name": "test_recursive_invoke_bad",
+    "procedure_id": "test_recursive_invoke_bad",
+    "source_file": "specialization.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 53,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "test_invoke_bad",
+    "procedure_id": "test_invoke_bad",
+    "source_file": "specialization.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 39,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "test_recursive_invoke_bad",
+    "procedure_id": "test_recursive_invoke_bad",
+    "source_file": "specialization.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 53,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "test_invoke_bad",
+    "procedure_id": "test_invoke_bad",
+    "source_file": "specialization.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 39,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "test_recursive_invoke_bad",
+    "procedure_id": "test_recursive_invoke_bad",
+    "source_file": "specialization.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 53,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

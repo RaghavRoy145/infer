@@ -33,6 +33,9 @@ type access_to_invalid_address =
   ; access_trace: Trace.t
         (** assuming we are in the calling context, the trace leads to an access to the value
             invalidated in [invalidation_trace] without further assumptions *)
+  ; may_depend_on_an_unknown_value: bool
+        (** the issue was detected in a symbolic state containing an unknown value (risk of false
+            positive) *)
   ; must_be_valid_reason: Invalidation.must_be_valid_reason option }
 [@@deriving compare, equal, yojson_of]
 
@@ -92,6 +95,7 @@ type t =
   | ConstRefableParameter of {param: Var.t; typ: Typ.t; location: Location.t}
   | DynamicTypeMismatch of {location: Location.t}
   | ErlangError of ErlangError.t
+  | InfiniteLoopError of {location: Location.t}
   | HackCannotInstantiateAbstractClass of {type_name: Typ.Name.t; trace: Trace.t}
   | MutualRecursionCycle of
       {cycle: PulseMutualRecursion.t; location: Location.t; is_call_with_same_values: bool}
@@ -129,7 +133,7 @@ type t =
                report: e.g. this is the case for returning copied values. *)
       ; location_instantiated: Location.t option
       ; from: PulseAttribute.CopyOrigin.t }
-[@@deriving equal]
+[@@deriving compare, equal, yojson_of]
 
 val pp : F.formatter -> t -> unit
 

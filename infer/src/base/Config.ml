@@ -109,7 +109,8 @@ let build_system_of_exe_name name =
        If this is an alias for another build system that infer supports, you can use@\n\
        `--force-integration <command>` where <command> is one of the following supported build \
        systems:@\n\
-       @[<v2>  %a@]" name
+       @[<v2>  %a@]"
+      name
       (Pp.seq ~print_env:Pp.text_break ~sep:"" F.pp_print_string)
       ( List.map ~f:fst build_system_exe_assoc
       |> List.map ~f:string_of_build_system
@@ -143,6 +144,8 @@ let fail_on_issue_exit_code = 2
 let java_lambda_marker_infix_generated_by_javalib = "$Lambda$"
 
 let java_lambda_marker_prefix_generated_by_javac = "lambda$"
+
+let manual_android = "ANDROID OPTIONS"
 
 let manual_buck = "BUCK OPTIONS"
 
@@ -470,7 +473,7 @@ let () =
     match cmd with
     | Report ->
         `Add
-    | Analyze | Capture | Compile | Debug | Explore | Help | ReportDiff | Run ->
+    | Analyze | Capture | Compile | Debug | Explore | Help | ReportDiff | Run | SemDiff ->
         `Reject
   in
   (* make sure we generate doc for all the commands we know about *)
@@ -557,6 +560,14 @@ and analysis_schedule_file =
     ~in_help:InferCommand.[(Analyze, manual_scheduler)]
     ( "The file where an analysis schedule is stored. The default is "
     ^ ResultsDirEntryName.get_path ~results_dir:"infer-out" AnalysisDependencyGraph )
+
+
+and android_view_class_list =
+  CLOpt.mk_string_list ~long:"android-view-class-list"
+    ~in_help:InferCommand.[(Analyze, manual_android)]
+    ~default:["android.view.View"]
+    "A class C is considered a view when it has a supertype that matches one of these classes. The \
+     default is [`android.view.View`]."
 
 
 and annotation_reachability_apply_superclass_annotations =
@@ -655,7 +666,7 @@ and ( bo_debug
         match command with
         | Debug | Explore | Help ->
             None
-        | (Analyze | Capture | Compile | Report | ReportDiff | Run) as command ->
+        | (Analyze | Capture | Compile | Report | ReportDiff | Run | SemDiff) as command ->
             Some (command, manual_generic) )
   in
   let bo_debug =
@@ -964,6 +975,12 @@ and buck_swift =
      files."
 
 
+and buck_swift_keep_going =
+  CLOpt.mk_bool ~long:"buck-swift-keep-going" ~default:false
+    ~in_help:InferCommand.[(Capture, manual_buck)]
+    "When using the BXL Clang integration, pass $(b, --swift-keep-going <bool>)."
+
+
 and buck_targets_block_list =
   CLOpt.mk_string_list ~long:"buck-targets-block-list"
     ~in_help:InferCommand.[(Run, manual_buck); (Capture, manual_buck)]
@@ -1122,9 +1139,10 @@ and compaction_if_heap_greater_equal_to_GB =
 
 
 and compaction_if_heap_greater_equal_to_GB_multicore =
-  CLOpt.mk_int ~long:"compaction-if-heap-greater-equal-to-GB-multicore" ~default:40 ~meta:"int"
+  CLOpt.mk_int_opt ~long:"compaction-if-heap-greater-equal-to-GB-multicore"
     "Multicore analysis will trigger compaction if the total heap size is equal or great to this \
-     value in Gigabytes. Defaults to 40"
+     value in Gigabytes. Defaults to the amount of available memory on startup, or 40Gb if that \
+     can not be determined."
 
 
 and compilation_database =
@@ -1408,6 +1426,13 @@ and dump_textual =
   CLOpt.mk_bool ~long:"dump-textual"
     "Generate a SIL program from the captured target. A $(i,filename.sil) file is generated for \
      each $(i,filename.java) file in the target."
+
+
+and dump_json_summaries =
+  CLOpt.mk_bool ~long:"dump-json-summaries"
+    ~in_help:InferCommand.[(Debug, manual_debug_procedures)]
+    "Directly output the json export of each analyzed procedures in <output-dir>/all_summaries.json"
+    ~default:false
 
 
 and dynamic_dispatch_json_file_path =
@@ -1960,6 +1985,12 @@ and llvm_bitcode_sources =
     ~in_help:InferCommand.[(Capture, manual_generic)]
 
 
+and llvm_translate_global_init =
+  CLOpt.mk_bool ~long:"llvm-translate-global-init" ~default:false
+    ~in_help:InferCommand.[(Capture, manual_pulse)]
+    "Translates the initializers of globals in the llvm frontend."
+
+
 and lock_model =
   CLOpt.mk_json ~long:"lock-model"
     ~in_help:InferCommand.[(Analyze, manual_clang)]
@@ -2054,7 +2085,8 @@ and merge_summaries =
 
 and minor_heap_size_mb =
   CLOpt.mk_int ~long:"minor-heap-size-mb" ~default:8
-    "Set minor heap size (in Mb) for each process/domain. Defaults to 8"
+    "Set minor heap size (in Mb) for each process/domain. Defaults to 8, unless in multicore mode \
+     where it defaults to 64."
 
 
 and _method_decls_info =
@@ -2318,6 +2350,19 @@ and pulse_force_continue =
      that if the callee had latent issues, those keep being surfaced, as appropriate.) Activating \
      this option will increase the coverage of code that is analyzed, but may introduce false \
      positives."
+
+
+and pulse_experimental_infinite_loop_checker =
+  CLOpt.mk_bool ~long:"pulse-experimental-infinite-loop-checker" ~default:false
+    "Enable the INFINITE_LOOP checker during analysis phase. This is a temporary flag in order to \
+     strictly gate this experimental checker. You may also need to activate reporting if needed"
+
+
+and pulse_experimental_infinite_loop_checker_v2 =
+  CLOpt.mk_bool ~long:"pulse-experimental-infinite-loop-checker-v2" ~default:false
+    "Enable the INFINITE_LOOP (2nd version) checker during analysis phase. This is a temporary \
+     flag in order to strictly gate this experimental checker. You may also need to activate \
+     reporting if needed"
 
 
 and pulse_havoc_arguments =
@@ -2627,6 +2672,13 @@ and pulse_report_flows_to_taint_sink =
   CLOpt.mk_string_opt ~long:"pulse-report-flows-to-taint-sink"
     ~in_help:InferCommand.[(Report, manual_pulse)]
     ~meta:"procname" "Report data flows which pass through taint sink $(b,procname)"
+
+
+and pulse_report_issues_reachable_from =
+  CLOpt.mk_string_list ~long:"pulse-report-issues-reachable-from" ~meta:"regex"
+    ~in_help:InferCommand.[(Report, manual_pulse); (Run, manual_pulse)]
+    "Re-raise issues that Pulse was able to propagate all the way to procedures matching one of \
+     the given regexes"
 
 
 and pulse_report_issues_for_tests =
@@ -3186,6 +3238,18 @@ and select =
     "Select option number $(i,N) or $(i,all) of them. If omitted, prompt for input."
 
 
+and semdiff_current =
+  CLOpt.mk_path_opt ~long:"semdiff-current"
+    ~in_help:InferCommand.[(SemDiff, manual_generic)]
+    "Current python program to be analysed by semdiff"
+
+
+and semdiff_previous =
+  CLOpt.mk_path_opt ~long:"semdiff-previous"
+    ~in_help:InferCommand.[(SemDiff, manual_generic)]
+    "Previous python program to be analysed by semdiff"
+
+
 and shrink_analysis_db =
   CLOpt.mk_bool ~long:"shrink-analysis-db"
     ~in_help:InferCommand.[(Analyze, manual_generic)]
@@ -3482,7 +3546,7 @@ and timeout =
     ?default:(if is_running_unit_test then None else Some 120.0)
     ~in_help:[(Analyze, manual_generic); (Run, manual_generic)]
     "Time after which any checker should give up analysing the current function or method, in \
-     seconds. Not implemented for multicore mode"
+     seconds. Defaults to 120 seconds."
 
 
 and top_longest_proc_duration_size =
@@ -3535,6 +3599,11 @@ and trace_events =
   CLOpt.mk_bool ~long:"trace-events"
     (Printf.sprintf "Emit Chrome performance trace events in %s"
        (ResultsDirEntryName.get_path ~results_dir:"infer-out" PerfEvents) )
+
+
+and trace_mutual_recursion_cycle_checker =
+  CLOpt.mk_bool ~long:"trace-mutual-recursion-cycle-checker"
+    "Emit debug information for the mutual recursion cycle checker."
 
 
 and trace_ondemand =
@@ -3665,11 +3734,12 @@ let inferconfig_file =
 
 
 let set_gc_params () =
+  let minor_heap_size_mb = if !multicore then min 64 !minor_heap_size_mb else !minor_heap_size_mb in
   let ctrl = Gc.get () in
   let words_of_Mb nMb = nMb * 1024 * 1024 * 8 / Sys.word_size_in_bits in
   let new_size nMb = max ctrl.minor_heap_size (words_of_Mb nMb) in
   (* increase the minor heap size *)
-  let minor_heap_size = new_size !minor_heap_size_mb in
+  let minor_heap_size = new_size minor_heap_size_mb in
   Gc.set {ctrl with minor_heap_size}
 
 
@@ -3799,6 +3869,8 @@ and abstract_pulse_models_for_erlang = !abstract_pulse_models_for_erlang
 
 and analysis_schedule_file = !analysis_schedule_file
 
+and android_view_class_list = RevList.to_list !android_view_class_list
+
 and annotation_reachability_apply_superclass_annotations =
   !annotation_reachability_apply_superclass_annotations
 
@@ -3887,6 +3959,8 @@ and buck_mode : BuckMode.t option =
 
 and buck_swift = !buck_swift
 
+and buck_swift_keep_going = !buck_swift_keep_going
+
 and buck_targets_block_list = RevList.to_list !buck_targets_block_list
 
 and capture = !capture
@@ -3955,7 +4029,8 @@ and classpath = !classpath
 and compaction_if_heap_greater_equal_to_GB = !compaction_if_heap_greater_equal_to_GB
 
 and compaction_if_heap_greater_equal_to_GB_multicore =
-  !compaction_if_heap_greater_equal_to_GB_multicore
+  Option.value_or_thunk !compaction_if_heap_greater_equal_to_GB_multicore ~default:(fun () ->
+      match Utils.get_available_memory_MB () with None -> 40 | Some mem_Mb -> mem_Mb / 1024 )
 
 
 and complete_capture_from = !complete_capture_from
@@ -4043,6 +4118,8 @@ and differential_filter_set = !differential_filter_set
 and dotty_cfg_libs = !dotty_cfg_libs
 
 and dump_duplicate_symbols = !dump_duplicate_symbols
+
+and dump_json_summaries = !dump_json_summaries
 
 and dump_llair = !dump_llair
 
@@ -4141,7 +4218,8 @@ and help_checker =
           L.die UserError
             "Wrong argument for --help-checker: '%s' is not a known checker identifier.@\n\
              @\n\
-             See --list-checkers for the list of all checkers." checker_string )
+             See --list-checkers for the list of all checkers."
+            checker_string )
 
 
 and help_issue_type =
@@ -4153,7 +4231,8 @@ and help_issue_type =
           L.die UserError
             "Wrong argument for --help-issue-type: '%s' is not a known issue type identifier.@\n\
              @\n\
-             See --list-issue-types for the list of all known issue types." id )
+             See --list-issue-types for the list of all known issue types."
+            id )
 
 
 and hoisting_report_only_expensive = !hoisting_report_only_expensive
@@ -4258,6 +4337,8 @@ and llvm_bitcode_file = !llvm_bitcode_file
 
 and llvm_bitcode_sources = RevList.to_list !llvm_bitcode_sources
 
+and llvm_translate_global_init = !llvm_translate_global_init
+
 and lock_model = !lock_model
 
 and log_pulse_disjunct_increase_after_model_call = !log_pulse_disjunct_increase_after_model_call
@@ -4322,7 +4403,7 @@ and print_types = !print_types
 
 and print_using_diff = !print_using_diff
 
-and procedures = !procedures
+and procedures = !procedures || !dump_json_summaries
 
 and procedures_attributes = !procedures_attributes
 
@@ -4342,7 +4423,7 @@ and procedures_source_file = !procedures_source_file
 
 and procedures_summary = !procedures_summary
 
-and procedures_summary_json = !procedures_summary_json
+and procedures_summary_json = !procedures_summary_json || !dump_json_summaries
 
 and procedures_summary_skip_empty = !procedures_summary_skip_empty
 
@@ -4387,6 +4468,10 @@ and pulse_cut_to_one_path_procedures_pattern =
 and pulse_final_types_are_exact = !pulse_final_types_are_exact
 
 and pulse_force_continue = !pulse_force_continue
+
+and pulse_experimental_infinite_loop_checker = !pulse_experimental_infinite_loop_checker
+
+and pulse_experimental_infinite_loop_checker_v2 = !pulse_experimental_infinite_loop_checker_v2
 
 and pulse_havoc_arguments = !pulse_havoc_arguments
 
@@ -4493,6 +4578,10 @@ and pulse_report_assert = !pulse_report_assert
 and pulse_report_flows_from_taint_source = !pulse_report_flows_from_taint_source
 
 and pulse_report_flows_to_taint_sink = !pulse_report_flows_to_taint_sink
+
+and pulse_report_issues_reachable_from =
+  RevList.rev_map !pulse_report_issues_reachable_from ~f:Str.regexp
+
 
 and pulse_report_issues_for_tests = !pulse_report_issues_for_tests
 
@@ -4707,6 +4796,10 @@ and select =
       L.die UserError "Wrong argument for --select: expected an integer or \"all\" but got '%s'" n )
 
 
+and semdiff_current = !semdiff_current
+
+and semdiff_previous = !semdiff_previous
+
 and shrink_analysis_db = !shrink_analysis_db
 
 and siof_check_iostreams = !siof_check_iostreams
@@ -4825,6 +4918,8 @@ and topl_properties =
 and topl_report_latent_issues = !topl_report_latent_issues
 
 and trace_events = !trace_events
+
+and trace_mutual_recursion_cycle_checker = !trace_mutual_recursion_cycle_checker
 
 and trace_ondemand = !trace_ondemand
 

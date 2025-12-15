@@ -27,10 +27,11 @@ type allocator =
   | JavaResource of JavaClassName.t
   | CSharpResource of CSharpClassName.t
   | ObjCAlloc
+  | SwiftAlloc
   | HackBuilderResource of HackClassName.t
   | Awaitable (* used for Hack and Python *)
   | FileDescriptor
-[@@deriving equal]
+[@@deriving compare, equal]
 
 val pp_allocator : F.formatter -> allocator -> unit
 

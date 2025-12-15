@@ -1,0 +1,44 @@
+[
+  {
+    "procedure_name": "test_offsetof_expr_bad",
+    "procedure_id": "test_offsetof_expr_bad",
+    "source_file": "offsetof_expr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 20,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "test_offsetof_expr_bad",
+    "procedure_id": "test_offsetof_expr_bad",
+    "source_file": "offsetof_expr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 20,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "test_offsetof_expr_bad",
+    "procedure_id": "test_offsetof_expr_bad",
+    "source_file": "offsetof_expr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 20,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

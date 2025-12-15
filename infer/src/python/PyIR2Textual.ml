@@ -554,7 +554,10 @@ let of_node is_module_body nullify_locals entry
         :: instrs )
     else instrs
   in
-  let exn_succs = [] (* TODO *) in
+  let exn_succs =
+    []
+    (* TODO *)
+  in
   let ssa_parameters = List.map ssa_parameters ~f:(fun ssa -> (mk_ident ssa, Typ.value)) in
   {Textual.Node.label; ssa_parameters; exn_succs; last; instrs; last_loc; label_loc}
 
@@ -604,7 +607,7 @@ let mk_procdesc proc_kind
     in
     location_from_opt_line last_loc
   in
-  {Textual.ProcDesc.procdecl; nodes; start; params; locals; exit_loc}
+  {Textual.ProcDesc.procdecl; nodes; fresh_ident= None; start; params; locals; exit_loc}
 
 
 let mk_module {Module.name; toplevel; functions} =

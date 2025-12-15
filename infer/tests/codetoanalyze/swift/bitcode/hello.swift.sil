@@ -12,67 +12,35 @@ define .plain_name = "main" $s5Hello4mainyyF() : void {
       
 } @?
 
-declare _swift_FORCE_LOAD_$_swiftCompatibility56() : void
+declare _swift_FORCE_LOAD_$_swiftCompatibility56() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftCoreFoundation() : void
+declare _swift_FORCE_LOAD_$_swiftCoreFoundation() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftDarwin() : void
+declare _swift_FORCE_LOAD_$_swiftDispatch() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftDispatch() : void
+declare _swift_FORCE_LOAD_$_swiftFoundation() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftFoundation() : void
+declare _swift_FORCE_LOAD_$_swiftObjectiveC() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftObjectiveC() : void
+declare _swift_FORCE_LOAD_$_swiftXPC() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftXPC() : void
+declare _swift_FORCE_LOAD_$_swift_Builtin_float() : *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swift_Builtin_float() : void
+global llvm::used: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swift_errno() : void
+global _swift_FORCE_LOAD_$_swift_Builtin_float_$_Hello: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swift_math() : void
+global _swift_FORCE_LOAD_$_swiftXPC_$_Hello: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swift_signal() : void
+global _swift_FORCE_LOAD_$_swiftObjectiveC_$_Hello: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swift_stdio() : void
+global _swift_FORCE_LOAD_$_swiftFoundation_$_Hello: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swift_time() : void
+global _swift_FORCE_LOAD_$_swiftDispatch_$_Hello: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftsys_time() : void
+global _swift_FORCE_LOAD_$_swiftCoreFoundation_$_Hello: *__infer_swift_type<ptr_elt>
 
-declare _swift_FORCE_LOAD_$_swiftunistd() : void
+global _swift_FORCE_LOAD_$_swiftCompatibility56_$_Hello: *__infer_swift_type<ptr_elt>
 
-global llvm::used: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftunistd_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftsys_time_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swift_time_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swift_stdio_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swift_signal_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swift_math_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swift_errno_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swift_Builtin_float_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftXPC_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftObjectiveC_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftFoundation_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftDispatch_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftDarwin_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftCoreFoundation_$_Hello: *ptr_elt
-
-global _swift_FORCE_LOAD_$_swiftCompatibility56_$_Hello: *ptr_elt
-
-global __swift_reflection_version: *ptr_elt
+global __swift_reflection_version: *__infer_swift_type<ptr_elt>
 

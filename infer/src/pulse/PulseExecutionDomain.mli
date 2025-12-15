@@ -10,15 +10,19 @@ module F = Format
 open PulseBasicInterface
 module AbductiveDomain = PulseAbductiveDomain
 module DecompilerExpr = PulseDecompilerExpr
+module Diagnostic = PulseDiagnostic
 module LatentIssue = PulseLatentIssue
 
 type 'abductive_domain_t base_t =
   | ContinueProgram of 'abductive_domain_t  (** represents the state at the program point *)
+  | InfiniteLoop of 'abductive_domain_t  (** state after an infinite loop was found **)
   | ExceptionRaised of 'abductive_domain_t  (** state after an exception has been thrown *)
   | ExitProgram of AbductiveDomain.Summary.t
       (** represents the state originating at exit/divergence. *)
-  | AbortProgram of AbductiveDomain.Summary.t
-      (** represents the state at the program point that caused an error *)
+  | AbortProgram of
+      {astate: AbductiveDomain.Summary.t; diagnostic: Diagnostic.t; trace_to_issue: Trace.t}
+      (** represents the state at the program point that caused an issue; the issue [diagnostic] has
+          been propagated from a call chain [trace] *)
   | LatentAbortProgram of {astate: AbductiveDomain.Summary.t; latent_issue: LatentIssue.t}
       (** this path leads to an error but we don't have conclusive enough data to report it yet *)
   | LatentInvalidAccess of
@@ -48,3 +52,5 @@ type summary = AbductiveDomain.Summary.t base_t [@@deriving compare, equal, yojs
 val pp_summary : Pp.print_kind -> F.formatter -> summary -> unit
 
 val to_name : 'a base_t -> string
+
+val back_edge : t list -> t list -> int -> int option

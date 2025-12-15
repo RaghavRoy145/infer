@@ -1,0 +1,13 @@
+[
+  {
+    "procedure_name": "X509_issuer_and_serial_hash",
+    "procedure_id": "X509_issuer_and_serial_hash",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "x509_cmp.c",
+      "npe_line": 88,
+      "original_pointer": "&f"
+    }
+  }
+]

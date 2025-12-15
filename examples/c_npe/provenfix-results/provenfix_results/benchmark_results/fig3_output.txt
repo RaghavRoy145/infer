@@ -1,0 +1,37 @@
+Capturing in make/cc mode ...
+Arguments are ,p
+/home/infer_TempFix/examples/fig3.c
+annalysing foo
+CallingFunction: malloc @6
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is q
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (.ret=q /\ CONSUME(q)@8 · RET(q)@8 · RET(q)@8,1)
+|- RHS: ((q!=0) /\ (!free(q))^* · free(q) · (_)^*) \/ (q=0 /\ (!_(q))^*)
+/home/infer_TempFix/examples/fig3.c
+
+=====> Actual effects of function: foo ======>
+(.ret=q /\ deref(p)@6 · deref(p)@7 · CONSUME(q)@8 · RET(q)@8,1) \/ (.ret=q /\ deref(p)@6 · CONSUME(q)@8 · RET(q)@8,1)
+Arguments are 
+/home/infer_TempFix/examples/fig3.c
+annalysing main
+CallingFunction: malloc @14
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p.f
+CallingFunction: foo @15
+CallingFunction: free @16
+CallingFunction: free @17
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (true /\ deref(p)@16 · free(p.f)@17,0) \/ (true /\ deref(p)@16 · free(q)@16 · free(p.f)@17,0)
+|- RHS: ((p.f!=0) /\ (!free(p.f))^* · free(p.f) · (_)^*) \/ (p.f=0 /\ (!_(p.f))^*)
+free(p.f)@17 |- (!_(p.f))^*
+ ------- 
+free(p.f)@17 |- (!_(p.f))^*
+ ------- 
+existing record: malloc @14
+spec': (!_(p.f))^*
+spec: (!_(p.f))^*
+/home/infer_TempFix/examples/fig3.c
+
+=====> Actual effects of function: main ======>
+(true /\ deref(p)@14 · deref(p)@16 · free(p.f)@17,0) \/ (true /\ deref(p)@14 · deref(p)@16 · free(q)@16 · free(p.f)@17,0)

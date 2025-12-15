@@ -102,6 +102,8 @@ val abstract_pulse_models_for_erlang : bool
 
 val analysis_schedule_file : string option
 
+val android_view_class_list : string list
+
 val annotation_reachability_apply_superclass_annotations : bool
 
 val annotation_reachability_check_loops : bool
@@ -171,6 +173,8 @@ val buck_mode : BuckMode.t option
 val buck_out_gen : string
 
 val buck_swift : bool
+
+val buck_swift_keep_going : bool
 
 val buck_targets_block_list : string list
 
@@ -297,6 +301,8 @@ val differential_filter_set : [`Introduced | `Fixed | `Preexisting] list
 val dotty_cfg_libs : bool
 
 val dump_duplicate_symbols : bool
+
+val dump_json_summaries : bool
 
 val dump_llair : bool
 
@@ -478,6 +484,8 @@ val llvm_bitcode_file : string option
 
 val llvm_bitcode_sources : string list
 
+val llvm_translate_global_init : bool
+
 val lock_model : Yojson.Safe.t
 
 val log_pulse_disjunct_increase_after_model_call : bool
@@ -580,6 +588,10 @@ val pulse_final_types_are_exact : bool
 
 val pulse_force_continue : bool
 
+val pulse_experimental_infinite_loop_checker : bool
+
+val pulse_experimental_infinite_loop_checker_v2 : bool
+
 val pulse_havoc_arguments : bool
 
 val pulse_inline_global_init_func_pointer : bool
@@ -655,6 +667,8 @@ val pulse_report_assert : bool
 val pulse_report_flows_from_taint_source : string option
 
 val pulse_report_flows_to_taint_sink : string option
+
+val pulse_report_issues_reachable_from : Str.regexp list
 
 val pulse_report_issues_for_tests : bool
 
@@ -786,6 +800,10 @@ val scope_leakage_config : Yojson.Safe.t
 
 val select : [`All | `Select of int] option
 
+val semdiff_current : string option
+
+val semdiff_previous : string option
+
 val shrink_analysis_db : bool
 
 val siof_check_iostreams : bool
@@ -889,6 +907,8 @@ val topl_properties : ToplAst.t list
 val topl_report_latent_issues : bool
 
 val trace_events : bool
+
+val trace_mutual_recursion_cycle_checker : bool
 
 val trace_ondemand : bool
 

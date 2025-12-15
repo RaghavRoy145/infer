@@ -27,6 +27,7 @@ let check_addr_access path ?must_be_valid_reason access_mode location (address, 
                    ; invalidation
                    ; invalidation_trace
                    ; access_trace
+                   ; may_depend_on_an_unknown_value= astate.AbductiveDomain.unknown_values
                    ; must_be_valid_reason }
              ; astate } )
     |> AccessResult.of_result path
@@ -440,7 +441,8 @@ let prune pdesc path location ~condition astate =
                 ValueOrigin.hist vo
           in
           let++ astate =
-            PulseArithmetic.prune_binop ~negated bop (to_op lhs_op) (to_op rhs_op) astate
+            PulseArithmetic.prune_binop ~negated bop ~ifkind:true (to_op lhs_op) (to_op rhs_op)
+              astate
           in
           let hist =
             match (to_hist lhs_op, to_hist rhs_op) with
@@ -522,10 +524,10 @@ let write_id id addr_hist astate = Stack.add (Var.of_id id) (ValueOrigin.unknown
 
 let read_id id astate = Stack.find_opt (Var.of_id id) astate |> Option.map ~f:ValueOrigin.addr_hist
 
-let add_static_type_objc_class tenv typ address location astate =
+let add_static_type_objc_swift_class tenv typ address location astate =
   match typ with
-  | {Typ.desc= Typ.Tptr ({Typ.desc= Tstruct (ObjcClass class_name)}, _)} ->
-      AddressAttributes.add_static_type tenv (ObjcClass class_name) address location astate
+  | {Typ.desc= Typ.Tptr ({Typ.desc= Tstruct ((ObjcClass _ | SwiftClass _) as class_typ)}, _)} ->
+      AddressAttributes.add_static_type tenv class_typ address location astate
   | _ ->
       astate
 

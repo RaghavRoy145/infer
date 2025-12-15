@@ -167,7 +167,7 @@ module Syntax = struct
             | ExecutionDomain.ContinueProgram astate ->
                 ContinueProgram ((), astate)
             | exec ->
-                Other exec ) )
+                Other exec ))
     , non_disj )
 
 
@@ -180,7 +180,7 @@ module Syntax = struct
             | ContinueProgram ((), astate) ->
                 ExecutionDomain.ContinueProgram astate
             | Other exec ->
-                exec ) )
+                exec ))
     , non_disj )
 
 
@@ -591,6 +591,12 @@ module Syntax = struct
     ret opt_resolved_proc_name data astate
 
 
+  let tenv_resolve_method_with_offset typ_name offset : Procname.t option model_monad =
+    let* {analysis_data= {tenv}} = get_data in
+    let proc_name_opt = Tenv.resolve_method_with_offset tenv typ_name offset in
+    ret proc_name_opt
+
+
   let read exp : aval model_monad =
     let* {path; location} = get_data in
     PulseOperations.eval path Read location exp |> exec_partial_operation
@@ -923,8 +929,10 @@ module Syntax = struct
         TextualSil.hack_mixed_type_name
     | Python ->
         TextualSil.python_mixed_type_name
-    | Java | C | Swift ->
-        L.die InternalError "DSL.call not supported on Java/C/Swift"
+    | Java | C ->
+        L.die InternalError "DSL.call not supported on Java/C"
+    | Swift ->
+        TextualSil.swift_mixed_type_name
     | Rust ->
         L.die InternalError "<NOT YET SUPPORTED>"
 
@@ -934,7 +942,7 @@ module Syntax = struct
     let typ = Typ.mk_ptr (Typ.mk_struct mixed_type_name) in
     let ret_id = Ident.create_none () in
     let call_args =
-      List.map named_args ~f:(fun (str, arg) : ValueOrigin.t ProcnameDispatcher.Call.FuncArg.t ->
+      List.map named_args ~f:(fun (str, arg) : ValueOrigin.t FuncArg.t ->
           let pvar = Pvar.mk (Mangled.from_string str) proc_name in
           let exp = Exp.Lvar pvar in
           let arg_payload = ValueOrigin.OnStack {var= Var.of_pvar pvar; addr_hist= arg} in
@@ -945,6 +953,8 @@ module Syntax = struct
 
 
   let python_call = call Python
+
+  let swift_call = call Swift
 
   let unknown_call ?(force_pure = false) lang skip_reason args : aval model_monad =
     let mixed_type_name = mixed_type_name lang in

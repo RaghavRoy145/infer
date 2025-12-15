@@ -513,7 +513,11 @@ let group_succ_by seq ~eq k =
           (* yield group, and start another one *)
           cur := [x] ) ;
   (* last list *)
-  match !cur with [] -> () | _ :: _ as l -> k l
+  match !cur with
+  | [] ->
+      ()
+  | _ :: _ as l ->
+      k l
 
 
 (*$R
@@ -1241,7 +1245,7 @@ let[@inline] hashtbl_add h seq = seq (fun (k, v) -> Hashtbl.add h k v)
 let hashtbl_replace h seq = seq (fun (k, v) -> Hashtbl.replace h k v)
 
 let to_hashtbl seq =
-  let h = Hashtbl.create 3 in
+  let h = Hashtbl.create 16 in
   hashtbl_replace h seq ;
   h
 

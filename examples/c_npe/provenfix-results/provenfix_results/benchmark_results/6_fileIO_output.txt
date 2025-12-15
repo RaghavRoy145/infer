@@ -1,0 +1,37 @@
+Capturing in make/cc mode ...
+Arguments are ,a,f1
+/home/infer_TempFix/my_benchmark/6_fileIO.c
+annalysing test
+CallingFunction: fwrite @8
+CallingFunction: printf @9
+CallingFunction: fclose @10
+CallingFunction: fopen @13
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f2
+CallingFunction: fread @14
+CallingFunction: fclose @15
+CallingFunction: printf @16
+CallingFunction: printf @18
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f2)@15,0)
+|- RHS: (f2>0 /\ (f2!=stdout) /\ (f2!=stdin) /\ (!fclose(f2))^* · fclose(f2) · (_)^*)
+/home/infer_TempFix/my_benchmark/6_fileIO.c
+
+=====> Actual effects of function: test ======>
+(true /\ fclose(f1)@10 · fclose(f2)@15,0)
+Arguments are 
+/home/infer_TempFix/my_benchmark/6_fileIO.c
+annalysing main
+CallingFunction: fopen @24
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f1
+CallingFunction: test @25
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (.ret=r0 /\ CONSUME(r0)@25 · RET(r0)@25 · RET(r0)@25,1)
+|- RHS: (f1>0 /\ (f1!=stdout) /\ (f1!=stdin) /\ (!fclose(f1))^* · fclose(f1) · (_)^*)
+RET(r0)@25 · RET(r0)@25 |- (!fclose(f1))^* · fclose(f1) · (_)^*
+ ------- 
+/home/infer_TempFix/my_benchmark/6_fileIO.c
+
+=====> Actual effects of function: main ======>
+(.ret=r0 /\ CONSUME(r0)@25 · RET(r0)@25,1)

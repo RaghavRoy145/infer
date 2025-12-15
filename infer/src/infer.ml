@@ -10,13 +10,14 @@ module CLOpt = CommandLineOption
 module L = Logging
 module Cmd = InferCommandImplementation
 
-(** Top-level driver that orchestrates build system integration, frontends, backend, and reporting *)
+(** Top-level driver that orchestrates build system integration, frontends, backend, and reporting
+*)
 
 let setup () =
   ( match Config.command with
   | Analyze ->
       ResultsDir.assert_results_dir "have you run capture before?"
-  | Report | ReportDiff ->
+  | Report | ReportDiff | SemDiff ->
       ResultsDir.create_results_dir ()
   | Capture | Compile | Run ->
       let driver_mode = Lazy.force Driver.mode_from_command_line in
@@ -54,7 +55,7 @@ let setup () =
       () ) ;
   let has_result_dir =
     match Config.command with
-    | Analyze | Capture | Compile | Debug | Explore | Report | ReportDiff | Run ->
+    | Analyze | Capture | Compile | Debug | Explore | Report | ReportDiff | Run | SemDiff ->
         true
     | Help ->
         false
@@ -140,6 +141,8 @@ let () =
       Cmd.report ()
   | ReportDiff ->
       Cmd.report_diff ()
+  | SemDiff ->
+      Cmd.sem_diff ()
   | Debug ->
       Cmd.debug ()
   | Explore ->

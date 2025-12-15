@@ -1,0 +1,44 @@
+[
+  {
+    "procedure_name": "dsa_sign_setup",
+    "procedure_id": "dsa_sign_setup{6464b0c2e0982f1fa03b91e3001c85b1}",
+    "source_file": "crypto/dsa/dsa_ossl.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 56,
+      "end_node": 12,
+      "start_line": 259,
+      "end_line": 295,
+      "guard_with_pointer": "&K",
+      "metrics": {
+        "cost_l_imprecision": 53,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 55,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
+        "total_aliases": 3
+      }
+    }
+  },
+  {
+    "procedure_name": "dsa_sign_setup",
+    "procedure_id": "dsa_sign_setup{6464b0c2e0982f1fa03b91e3001c85b1}",
+    "source_file": "crypto/dsa/dsa_ossl.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 74,
+      "end_node": 21,
+      "start_line": 261,
+      "end_line": 294,
+      "guard_with_pointer": "&K",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
+        "total_aliases": 3
+      }
+    }
+  }
+]

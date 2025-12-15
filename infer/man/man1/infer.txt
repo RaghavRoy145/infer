@@ -10,6 +10,7 @@ SYNOPSIS
        infer report [options]
        infer reportdiff [options]
        infer run [options]
+       infer semdiff [options]
        infer --compilation-database[-escaped] file [options]
        infer [options] -- compile command
        infer [options]
@@ -56,6 +57,12 @@ OPTIONS
        --analysis-schedule-file path
            The file where an analysis schedule is stored. The default is
            infer-out/analysis_dependency_graph
+           See also infer-analyze(1).
+
+       --android-view-class-list +string
+           A class C is considered a view when it has a supertype that
+           matches one of these classes. The default is
+           [`android.view.View`].
            See also infer-analyze(1).
 
        --annotation-reachability
@@ -229,6 +236,12 @@ OPTIONS
            Activates: When using the BXL Clang integration, pass --swift
            <bool> to control capture of Swift files. (Conversely:
            --no-buck-swift)
+           See also infer-capture(1).
+
+       --buck-swift-keep-going
+           Activates: When using the BXL Clang integration, pass
+           --swift-keep-going <bool>. (Conversely:
+           --no-buck-swift-keep-going)
            See also infer-capture(1).
 
        --buck-targets-block-list +regex
@@ -460,7 +473,8 @@ OPTIONS
            --reports-include-ml-loc, --no-only-cheap-debug, --trace-error,
            --write-html) (Conversely: --no-debug | -G)
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
-           infer-report(1), infer-reportdiff(1), and infer-run(1).
+           infer-report(1), infer-reportdiff(1), infer-run(1), and
+           infer-semdiff(1).
 
        --debug-level level
            Debug level (sets --bo-debug level, --debug-level-analysis level,
@@ -469,24 +483,28 @@ OPTIONS
              - 1: verbose debugging enabled
              - 2: very verbose debugging enabled
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
-           infer-report(1), infer-reportdiff(1), and infer-run(1).
+           infer-report(1), infer-reportdiff(1), infer-run(1), and
+           infer-semdiff(1).
 
        --debug-level-analysis int
            Debug level for the analysis. See --debug-level for accepted
            values.
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
-           infer-report(1), infer-reportdiff(1), and infer-run(1).
+           infer-report(1), infer-reportdiff(1), infer-run(1), and
+           infer-semdiff(1).
 
        --debug-level-capture int
            Debug level for the capture. See --debug-level for accepted
            values.
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
-           infer-report(1), infer-reportdiff(1), and infer-run(1).
+           infer-report(1), infer-reportdiff(1), infer-run(1), and
+           infer-semdiff(1).
 
        --debug-level-report int
            Debug level for the report. See --debug-level for accepted values.
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
-           infer-report(1), infer-reportdiff(1), and infer-run(1).
+           infer-report(1), infer-reportdiff(1), infer-run(1), and
+           infer-semdiff(1).
 
        --no-deduplicate
            Deactivates: Apply issue-specific deduplication during analysis
@@ -601,6 +619,7 @@ OPTIONS
              INFERBO_ALLOC_MAY_BE_BIG (enabled by default),
              INFERBO_ALLOC_MAY_BE_NEGATIVE (enabled by default),
              INFINITE_EXECUTION_TIME (disabled by default),
+             INFINITE_LOOP (disabled by default),
              INFINITE_RECURSION (disabled by default),
              INTEGER_OVERFLOW_L1 (enabled by default),
              INTEGER_OVERFLOW_L2 (enabled by default),
@@ -710,6 +729,12 @@ OPTIONS
            Activates: Dump all symbols with the same name that are defined in
            more than one file. (Conversely: --no-dump-duplicate-symbols)
            See also infer-capture(1).
+
+       --dump-json-summaries
+           Activates: Directly output the json export of each analyzed
+           procedures in <output-dir>/all_summaries.json (Conversely:
+           --no-dump-json-summaries)
+           See also infer-debug(1).
 
        --dynamic-dispatch-json-file-path path
            Dynamic dispatch file path to get the JSON used for method name
@@ -856,7 +881,7 @@ OPTIONS
            Show this manual
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
            infer-debug(1), infer-explore(1), infer-help(1), infer-report(1),
-           infer-reportdiff(1), and infer-run(1).
+           infer-reportdiff(1), infer-run(1), and infer-semdiff(1).
 
        --help-checker +checker-id
            Show information about a checker, for example pulse. To see the
@@ -869,14 +894,14 @@ OPTIONS
            to pager otherwise.
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
            infer-debug(1), infer-explore(1), infer-help(1), infer-report(1),
-           infer-reportdiff(1), and infer-run(1).
+           infer-reportdiff(1), infer-run(1), and infer-semdiff(1).
 
        --help-full
            Show this manual with all internal options in the INTERNAL OPTIONS
            section
            See also infer-analyze(1), infer-capture(1), infer-compile(1),
            infer-debug(1), infer-explore(1), infer-help(1), infer-report(1),
-           infer-reportdiff(1), and infer-run(1).
+           infer-reportdiff(1), infer-run(1), and infer-semdiff(1).
 
        --help-issue-type +UNIQUE_ID
            Show information about an issue type, for example
@@ -950,7 +975,8 @@ OPTIONS
        --issues-tests-fields ,-separated sequence of { bug_type | bucket |
        qualifier | suggestion | severity | line | column | procedure |
        procedure_start_line | file | bug_trace | key | hash | line_offset |
-       qualifier_contains_potential_exception_note | taint_extra |
+       qualifier_contains_potential_exception_note |
+       may_depend_on_an_unknown_value | taint_extra |
        transitive_callees_extra | suppressed | autofix }
            Fields to emit with --issues-tests
            See also infer-report(1).
@@ -1142,6 +1168,11 @@ OPTIONS
 
        --llvm-bitcode-source +string
            [EXPERIMENTAL] Specify source files for llvm bitcode capture
+           See also infer-capture(1).
+
+       --llvm-translate-global-init
+           Activates: Translates the initializers of globals in the llvm
+           frontend. (Conversely: --no-llvm-translate-global-init)
            See also infer-capture(1).
 
        --lock-model json
@@ -1637,6 +1668,11 @@ OPTIONS
            Report data flows which pass through taint sink procname
            See also infer-report(1).
 
+       --pulse-report-issues-reachable-from +regex
+           Re-raise issues that Pulse was able to propagate all the way to
+           procedures matching one of the given regexes
+           See also infer-report(1) and infer-run(1).
+
        --pulse-retain-cycle-blocklist-pattern string
            Skip reporting retain cycles which include an expression that
            matches this pattern. It is useful when developers use naming
@@ -2076,6 +2112,14 @@ OPTIONS
            (Conversely: --no-self-in-block-only)
            See also infer-analyze(1).
 
+       --semdiff-current path
+           Current python program to be analysed by semdiff
+           See also infer-semdiff(1).
+
+       --semdiff-previous path
+           Previous python program to be analysed by semdiff
+           See also infer-semdiff(1).
+
        --shrink-analysis-db
            Activates: After analysis, delete analysis summaries (but not
            report summaries) and vacuum analysis database. (Conversely:
@@ -2296,7 +2340,7 @@ OPTIONS
 
        --timeout float
            Time after which any checker should give up analysing the current
-           function or method, in seconds. Not implemented for multicore mode
+           function or method, in seconds. Defaults to 120 seconds.
            See also infer-analyze(1) and infer-run(1).
 
        --top-longest-proc-duration-size int
@@ -2428,5 +2472,5 @@ FILES
 SEE ALSO
        infer-analyze(1), infer-capture(1), infer-compile(1), infer-debug(1),
        infer-explore(1), infer-help(1), infer-report(1), infer-reportdiff(1),
-       infer-run(1)
+       infer-run(1), infer-semdiff(1)
 

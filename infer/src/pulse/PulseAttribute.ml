@@ -29,6 +29,7 @@ module Attribute = struct
     | JavaResource of JavaClassName.t
     | CSharpResource of CSharpClassName.t
     | ObjCAlloc
+    | SwiftAlloc
     | HackBuilderResource of HackClassName.t
     | Awaitable (* used for Hack and Python *)
     | FileDescriptor
@@ -51,7 +52,7 @@ module Attribute = struct
         F.fprintf fmt "java resource %a" JavaClassName.pp class_name
     | CSharpResource class_name ->
         F.fprintf fmt "csharp resource %a" CSharpClassName.pp class_name
-    | ObjCAlloc ->
+    | ObjCAlloc | SwiftAlloc ->
         F.fprintf fmt "alloc"
     | HackBuilderResource class_name ->
         F.fprintf fmt "hack builder %a" HackClassName.pp class_name
@@ -677,6 +678,7 @@ module Attribute = struct
     | CppNew, Some (CppDelete, _)
     | CppNewArray, Some (CppDeleteArray, _)
     | ObjCAlloc, _
+    | SwiftAlloc, _
     | FileDescriptor, Some (FClose, _) ->
         true
     | JavaResource _, _ | CSharpResource _, _ | HackBuilderResource _, _ | Awaitable, _ ->
@@ -698,7 +700,8 @@ module Attribute = struct
     | ObjCAlloc
     | JavaResource _
     | CSharpResource _
-    | FileDescriptor ->
+    | FileDescriptor
+    | SwiftAlloc ->
         false
 
 
@@ -716,14 +719,15 @@ module Attribute = struct
     | ObjCAlloc
     | JavaResource _
     | CSharpResource _
-    | FileDescriptor ->
+    | FileDescriptor
+    | SwiftAlloc ->
         false
 
 
   let filter_unreachable subst f_keep attr =
     let filter_aux things ~get_addr ~set_addr =
       let module Hashtbl = Stdlib.Hashtbl in
-      let to_keep = Hashtbl.create 17 in
+      let to_keep = Hashtbl.create 32 in
       let filter_thing thing =
         let addr = get_addr thing in
         if f_keep addr then Hashtbl.replace to_keep thing ()
@@ -884,7 +888,7 @@ module Attributes = struct
       | Some kinds_to_remove -> (
           let taint_map =
             get_by_rank Attribute.must_not_be_tainted_rank attrs
-                ~dest:(function [@warning "-partial-match"] MustNotBeTainted map -> map)
+              ~dest:(function [@warning "-partial-match"] MustNotBeTainted map -> map )
           in
           match taint_map with
           | None ->

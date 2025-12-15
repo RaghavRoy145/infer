@@ -108,7 +108,33 @@ module TypeNameBridge = struct
         L.die InternalError "to_python_class_name failed"
 
 
-  let to_sil (lang : Lang.t) {name= {value}; args} : SilTyp.Name.t =
+  let to_swift_class_name value : SwiftClassName.t =
+    match value with
+    | {TypeName.name; args}
+      when Textual.BaseTypeName.equal name Textual.BaseTypeName.swift_type_name ->
+        let mangled_name, plain_name =
+          match args with
+          | [mangled_name] ->
+              (mangled_name, None)
+          | [mangled_name; plain_name] ->
+              (mangled_name, Some plain_name)
+          | _ ->
+              assert false
+        in
+        let plain_name =
+          Option.map
+            ~f:(fun plain_name -> Textual.BaseTypeName.to_string plain_name.name)
+            plain_name
+        in
+        SwiftClassName.of_string ?plain_name (Textual.BaseTypeName.to_string mangled_name.name)
+    | {TypeName.name}
+      when Textual.BaseTypeName.equal name Textual.BaseTypeName.swift_tuple_class_name ->
+        SwiftClassName.of_string (Textual.BaseTypeName.to_string name)
+    | _ ->
+        assert false
+
+
+  let to_sil (lang : Lang.t) ({name= {value}; args} as typ) : SilTyp.Name.t =
     match (lang, args) with
     | Java, [] ->
         string_to_java_sil value
@@ -127,8 +153,7 @@ module TypeNameBridge = struct
     | Rust, _ ->
         L.die InternalError "to_stil conversion error <NOT YET SUPPORTED>"
     | Swift, _ ->
-        (* TODO: translate Swift tuples more precisely *)
-        SilTyp.Name.C.from_string value
+        SwiftClass (to_swift_class_name typ)
 
 
   let java_lang_object = of_string "java.lang.Object"
@@ -166,6 +191,8 @@ let hack_builtins_type_name = SilTyp.HackClass (HackClassName.make "$builtins")
 let hack_root_type_name = SilTyp.HackClass (HackClassName.make "$root")
 
 let python_mixed_type_name = SilTyp.PythonClass (PythonClassName.Builtin PyObject)
+
+let swift_mixed_type_name = SilTyp.SwiftClass (SwiftClassName.of_string "SwiftMixed")
 
 let python_dict_type_name = SilTyp.PythonClass (PythonClassName.Builtin PyDict)
 
@@ -429,7 +456,16 @@ module ProcDeclBridge = struct
         `Regular (TypeNameBridge.to_python_class_name value args)
 
 
-  let to_sil lang t : SilProcname.t =
+  let swift_class_name_to_sil = function
+    | QualifiedProcName.TopLevel ->
+        None
+    | QualifiedProcName.Enclosing {name= {value}} when String.equal "$builtins" value ->
+        Some `Builtin
+    | QualifiedProcName.Enclosing class_name ->
+        Some (`Regular (TypeNameBridge.to_swift_class_name class_name))
+
+
+  let to_sil_tenv lang t : SilStruct.tenv_method =
     let method_name = t.qualified_name.name.ProcName.value in
     match (lang : Lang.t) with
     | Java ->
@@ -457,27 +493,32 @@ module ProcDeclBridge = struct
               SilProcname.Java.Non_Static
         in
         SilProcname.make_java ~class_name ~return_type ~method_name ~parameters:formals_types ~kind
+        |> SilStruct.mk_tenv_method
     | Hack ->
         let class_name = hack_class_name_to_sil t.qualified_name.enclosing_class in
         let arity = Option.map t.formals_types ~f:List.length in
         SilProcname.make_hack ~class_name ~function_name:method_name ~arity
+        |> SilStruct.mk_tenv_method
     | Python -> (
       match python_class_name_to_sil t.qualified_name.enclosing_class with
       | `Regular module_name ->
           SilProcname.make_python ~module_name ~function_name:method_name
+          |> SilStruct.mk_tenv_method
       | `Builtin ->
           let builtin =
             PythonProcname.builtin_from_string method_name
             |> Option.value_or_thunk ~default:(fun () ->
                    L.die InternalError "unknown python builtin name %s" method_name )
           in
-          SilProcname.make_python_builtin builtin )
+          SilProcname.make_python_builtin builtin |> SilStruct.mk_tenv_method )
     | C ->
         SilProcname.C (SilProcname.C.from_string t.qualified_name.name.value)
+        |> SilStruct.mk_tenv_method
     | Rust ->
         L.die InternalError "<NOT YET SUPPORTED>"
     | Swift -> (
         let plain_name = List.find_map ~f:Attr.get_plain_name t.attributes in
+        let llvm_offset = List.find_map ~f:Attr.get_method_offset t.attributes in
         let mangled =
           match plain_name with
           | Some plain_name ->
@@ -487,10 +528,30 @@ module ProcDeclBridge = struct
         in
         match t.qualified_name.enclosing_class with
         | TopLevel ->
-            SilProcname.Swift (SilProcname.Swift.mk_function mangled)
-        | Enclosing class_name ->
-            let class_name = TypeNameBridge.to_sil lang class_name in
-            SilProcname.Swift (SilProcname.Swift.mk_class_method class_name mangled) )
+            SilProcname.Swift (SwiftProcname.mk_function mangled)
+            |> SilStruct.mk_tenv_method ?llvm_offset
+        | Enclosing _ -> (
+          match swift_class_name_to_sil t.qualified_name.enclosing_class with
+          | Some (`Regular class_name) ->
+              let class_name = SilTyp.SwiftClass class_name in
+              SilProcname.Swift (SwiftProcname.mk_class_method class_name mangled)
+              |> SilStruct.mk_tenv_method ?llvm_offset
+          | Some `Builtin ->
+              let builtin =
+                SwiftProcname.builtin_from_string method_name
+                |> Option.value_or_thunk ~default:(fun () ->
+                       L.internal_error "unknown swift builtin name %s, using NonDet@\n" method_name ;
+                       SwiftProcname.NonDet )
+              in
+              SilProcname.Swift (SwiftProcname.mk_builtin builtin)
+              |> SilStruct.mk_tenv_method ?llvm_offset
+          | None ->
+              L.die InternalError "unexpected case" ) )
+
+
+  let to_sil lang t : Procname.t =
+    let m = to_sil_tenv lang t in
+    m.name
 
 
   let call_to_sil (lang : Lang.t) (callsig : ProcSig.t) t : SilProcname.t =
@@ -529,10 +590,13 @@ end
 module FieldDeclBridge = struct
   open FieldDecl
 
-  let to_sil lang {qualified_name} =
-    SilFieldname.make
-      (TypeNameBridge.to_sil lang qualified_name.enclosing_class)
-      qualified_name.name.value
+  let to_sil lang field =
+    let is_weak =
+      if Lang.is_swift lang then Some (List.exists field.attributes ~f:Attr.is_weak) else None
+    in
+    SilFieldname.make ?is_weak
+      (TypeNameBridge.to_sil lang field.qualified_name.enclosing_class)
+      field.qualified_name.name.value
 
 
   let of_sil f typ is_final =
@@ -580,7 +644,7 @@ module StructBridge = struct
           | Decl _ ->
               (* TODO: Don't just throw Decls away entirely *)
               None )
-      |> List.map ~f:(ProcDeclBridge.to_sil lang)
+      |> List.map ~f:(ProcDeclBridge.to_sil_tenv lang)
     in
     let fields =
       List.map fields ~f:(fun ({FieldDecl.typ; attributes} as fdecl) ->
@@ -660,7 +724,7 @@ module ExpBridge = struct
         let name = VarNameBridge.of_pvar Lang.Java pvar in
         ( if SilPvar.is_global pvar then
             let typ : Typ.t = Struct (TypeNameBridge.of_global_pvar Lang.Java pvar) in
-            let global : Global.t = {name; typ; attributes= []} in
+            let global : Global.t = {name; typ; attributes= []; init_exp= None} in
             TextualDecls.declare_global decls global ) ;
         Lvar name
     | Lfield ({exp= e}, f, typ) ->
@@ -711,6 +775,10 @@ module ExpBridge = struct
           Lindex (aux exp1, aux exp2)
       | Const const ->
           Const (ConstBridge.to_sil const)
+      | If _ ->
+          L.die InternalError
+            "If expression must have been removed by TextualTransform before generating SIL \
+             expression"
       | Call {proc; args= [Typ typ; exp]} when ProcDecl.is_cast_builtin proc ->
           Cast (TypBridge.to_sil lang typ, aux exp)
       | Call {proc; args} -> (
@@ -822,7 +890,9 @@ module InstrBridge = struct
         L.die InternalError
           "to_sil should come after type transformation remove_effects_in_subexprs"
     | Let {id= Some id; exp= Call {proc; args= [Typ typ]}; loc}
-      when ProcDecl.is_allocate_object_builtin proc || ProcDecl.is_malloc_builtin proc ->
+      when ProcDecl.is_allocate_object_builtin proc
+           || ProcDecl.is_malloc_builtin proc
+           || ProcDecl.is_swift_alloc_builtin proc ->
         let typ = TypBridge.to_sil lang typ in
         let sizeof =
           SilExp.Sizeof
@@ -835,6 +905,8 @@ module InstrBridge = struct
         let builtin_name =
           if ProcDecl.is_allocate_object_builtin proc then
             SilExp.Const (SilConst.Cfun BuiltinDecl.__new)
+          else if ProcDecl.is_swift_alloc_builtin proc then
+            SilExp.Const (SilConst.Cfun BuiltinDecl.__swift_alloc)
           else SilExp.Const (SilConst.Cfun BuiltinDecl.malloc)
         in
         Call ((ret, class_type), builtin_name, args, loc, CallFlags.default)
@@ -900,8 +972,8 @@ module InstrBridge = struct
         let builtin_new = SilExp.Const (SilConst.Cfun BuiltinDecl.__new_array) in
         Call ((ret, class_type), builtin_new, args, loc, CallFlags.default)
     | Let {id= Some id; exp= Call {proc; args= [Typ typ]}; loc}
-      when ProcDecl.is_lazy_class_initialize_builtin proc || ProcDecl.is_get_lazy_class_builtin proc
-      ->
+      when QualifiedProcName.equal ProcDecl.lazy_class_initialize_builtin proc
+           || ProcDecl.is_get_lazy_class_builtin proc ->
         let typ = TypBridge.to_sil lang typ in
         let sizeof =
           SilExp.Sizeof
@@ -912,7 +984,7 @@ module InstrBridge = struct
         let ret = IdentBridge.to_sil id in
         let loc = LocationBridge.to_sil sourcefile loc in
         let builtin =
-          if ProcDecl.is_lazy_class_initialize_builtin proc then
+          if QualifiedProcName.equal ProcDecl.lazy_class_initialize_builtin proc then
             SilExp.Const (Cfun BuiltinDecl.__lazy_class_initialize)
           else if ProcDecl.is_get_lazy_class_builtin proc then
             SilExp.Const (Cfun BuiltinDecl.__get_lazy_class)
@@ -1243,7 +1315,7 @@ module ProcDescBridge = struct
     P.set_exit_node pdesc exit_node ;
     let exn_sink_node = P.create_node pdesc exit_loc P.Node.exn_sink_kind [] in
     P.node_set_succs pdesc exn_sink_node ~normal:[exit_node] ~exn:[exit_node] ;
-    let node_map : (string, Node.t * P.Node.t) Hashtbl.t = Hashtbl.create 17 in
+    let node_map : (string, Node.t * P.Node.t) Hashtbl.t = Hashtbl.create 32 in
     List.iter nodes ~f:(fun node ->
         let data = (node, NodeBridge.to_sil lang decls_env procdecl pdesc node) in
         let key = node.Node.label.value in
@@ -1280,7 +1352,7 @@ module ProcDescBridge = struct
 
   let make_label_of_node () =
     let open SilProcdesc in
-    let tbl = NodeHash.create 17 in
+    let tbl = NodeHash.create 32 in
     let count = ref 0 in
     fun node ->
       match NodeHash.find_opt tbl node with
@@ -1341,7 +1413,8 @@ module ProcDescBridge = struct
              (var, Typ.mk_without_attributes typ) )
     in
     let exit_loc = Location.Unknown in
-    {procdecl; nodes; start; params; locals; exit_loc}
+    let fresh_ident = None in
+    {procdecl; nodes; fresh_ident; start; params; locals; exit_loc}
 end
 
 module ModuleBridge = struct
@@ -1380,7 +1453,7 @@ module ModuleBridge = struct
       (not (TypeName.Set.mem tname types_used_as_enclosing_but_not_defined))
       && TextualDecls.get_struct decls_env tname |> Option.is_none
     in
-    if not (Lang.equal lang Python) then
+    if not (Lang.equal lang Python || Lang.equal lang Swift) then
       TextualDecls.get_undefined_types decls_env
       |> Seq.iter (fun tname ->
              if is_undefined_type tname then

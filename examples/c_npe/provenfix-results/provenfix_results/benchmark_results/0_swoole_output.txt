@@ -1,0 +1,99 @@
+Capturing in make/cc mode ...
+/home/infer_TempFix/my_benchmark/0_swoole.c:40:5: error: use of undeclared identifier 'size_t'; did you mean 'sizeof'?
+    size_t filesize = swoole_file_size(filename);
+    ^~~~~~
+    sizeof
+/home/infer_TempFix/my_benchmark/0_swoole.c:40:21: error: expression is not assignable
+    size_t filesize = swoole_file_size(filename);
+    ~~~~~~~~~~~~~~~ ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:40:12: error: use of undeclared identifier 'filesize'
+    size_t filesize = swoole_file_size(filename);
+           ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:41:9: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+    if (filesize < 0)
+        ^~~~~~~~
+        filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:43:16: error: use of undeclared identifier 'NULL'
+        return NULL;
+               ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:45:14: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+    else if (filesize == 0)
+             ^~~~~~~~
+             filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:48:16: error: use of undeclared identifier 'NULL'
+        return NULL;
+               ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:50:14: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+    else if (filesize > SW_MAX_FILE_CONTENT)
+             ^~~~~~~~
+             filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:53:16: error: use of undeclared identifier 'NULL'
+        return NULL;
+               ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:59:16: error: use of undeclared identifier 'NULL'
+        return NULL;
+               ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:61:38: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+    swString *content = swString_new(filesize);
+                                     ^~~~~~~~
+                                     filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:65:16: error: use of undeclared identifier 'NULL'
+        return NULL;
+               ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:70:19: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+    while(readn < filesize)
+                  ^~~~~~~~
+                  filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:72:45: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+        n = pread(fd, content->str + readn, filesize - readn, readn);
+                                            ^~~~~~~~
+                                            filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:81:62: error: use of undeclared identifier 'filesize'; did you mean 'filename'?
+                swSysError("pread(%d, %ld, %d) failed.", fd, filesize - readn, readn);
+                                                             ^~~~~~~~
+                                                             filename
+/home/infer_TempFix/my_benchmark/0_swoole.c:38:42: note: 'filename' declared here
+swString* swoole_file_get_contents(char *filename)
+                                         ^
+/home/infer_TempFix/my_benchmark/0_swoole.c:84:24: error: use of undeclared identifier 'NULL'
+                return NULL;
+                       ^
+16 errors generated.
+Arguments are ,filename
+/home/infer_TempFix/my_benchmark/0_swoole.c
+annalysing swoole_file_get_contents
+CallingFunction: swoole_error_log @47
+CallingFunction: swoole_error_log @52
+CallingFunction: open @55
+CallingFunction: swWarn @58
+CallingFunction: swString_new @61
+CallingFunction: close @64
+CallingFunction: pread @72
+CallingFunction: swSysError @81
+CallingFunction: swString_free @82
+CallingFunction: close @83
+CallingFunction: close @89
+/home/infer_TempFix/my_benchmark/0_swoole.c
+
+=====> Actual effects of function: swoole_file_get_contents ======>
+(.ret=content /\ close(fd)@89 · deref(content)@90 · CONSUME(content)@91 · RET(content)@91,1) \/ (.ret=0 /\ close(fd)@83 · RET()@84,1) \/ (.ret=0 /\ close(fd)@64 · RET()@65,1) \/ (.ret=0 /\ RET()@59,1) \/ (.ret=0 /\ RET()@53,1) \/ (.ret=0 /\ RET()@48,1) \/ (.ret=0 /\ RET()@43,1)
+<<<SYH:Clang.Capture.run_clang-ErrorN>>>
+

@@ -1,0 +1,201 @@
+Found 65 issues
+
+apps/apps.c:395: error: NULL_DEREFERENCE
+  pointer arg->data last assigned on line 392 could be null and is dereferenced at line 395, column 3
+
+apps/ca.c:2408: error: NULL_DEREFERENCE
+  pointer 0 could be null and is dereferenced by call to ASN1_TIME_set_string() at line 2408, column 9
+
+apps/crl2p7.c:321: error: NULL_DEREFERENCE
+  pointer xi last assigned on line 320 could be null and is dereferenced at line 321, column 7
+
+apps/ocsp.c:1113: error: NULL_DEREFERENCE
+  pointer bs last assigned on line 1082 could be null and is dereferenced by call to OCSP_basic_add1_status() at line 1113, column 4
+
+apps/srp.c:149: error: NULL_DEREFERENCE
+  pointer pp last assigned on line 148 could be null and is dereferenced at line 149, column 37
+
+apps/srp.c:168: error: NULL_DEREFERENCE
+  pointer pp last assigned on line 166 could be null and is dereferenced at line 168, column 7
+
+apps/x509.c:1160: error: NULL_DEREFERENCE
+  pointer upkey last assigned on line 1159 could be null and is dereferenced by call to EVP_PKEY_copy_parameters() at line 1160, column 2
+
+apps/x509.c:1261: error: NULL_DEREFERENCE
+  pointer pktmp last assigned on line 1260 could be null and is dereferenced by call to EVP_PKEY_copy_parameters() at line 1261, column 2
+
+crypto/asn1/x_name.c:275: error: NULL_DEREFERENCE
+  pointer entries last assigned on line 260 could be null and is dereferenced by call to sk_push() at line 275, column 7
+
+crypto/bio/bss_file.c:184: error: RESOURCE_LEAK
+   resource of type _IO_FILE acquired to file by call to fopen() at line 165, column 7 is not released after line 184, column 2
+
+crypto/hmac/hm_ameth.c:130: error: NULL_DEREFERENCE
+  pointer *pder last assigned on line 125 could be null and is dereferenced by call to memcpy() at line 130, column 3
+
+crypto/mem.c:331: error: NULL_DEREFERENCE
+  pointer ret last assigned on line 329 could be null and is dereferenced by call to strcpy() at line 331, column 2
+
+crypto/mem_dbg.c:683: error: NULL_DEREFERENCE
+  pointer lcl last assigned on line 680 could be null and is dereferenced at line 683, column 4
+
+crypto/ocsp/ocsp_ext.c:403: error: NULL_DEREFERENCE
+  pointer resp_ext last assigned on line 402 could be null and is dereferenced at line 403, column 43
+
+crypto/ocsp/ocsp_ext.c:403: error: NULL_DEREFERENCE
+  pointer req_ext last assigned on line 401 could be null and is dereferenced at line 403, column 27
+
+crypto/ocsp/ocsp_ht.c:161: error: NULL_DEREFERENCE
+  pointer rctx last assigned on line 160 could be null and is dereferenced at line 161, column 2
+
+crypto/pkcs7/pk7_doit.c:1166: error: NULL_DEREFERENCE
+  pointer ri last assigned on line 1165 could be null and is dereferenced at line 1166, column 8
+
+crypto/x509/x509_att.c:206: error: NULL_DEREFERENCE
+  pointer at last assigned on line 205 could be null and is dereferenced by call to X509_ATTRIBUTE_count() at line 206, column 24
+
+crypto/x509/x509_lu.c:306: error: NULL_DEREFERENCE
+  pointer lu last assigned on line 305 could be null and is dereferenced by call to X509_LOOKUP_by_subject() at line 306, column 6
+
+crypto/x509/x509_lu.c:594: error: NULL_DEREFERENCE
+  pointer &obj last assigned on line 593 could be null and is dereferenced by call to x509_object_cmp() at line 594, column 7
+
+crypto/x509/x509_req.c:123: error: NULL_DEREFERENCE
+  pointer xk last assigned on line 122 could be null and is dereferenced by call to EVP_PKEY_cmp() at line 123, column 10
+
+crypto/x509/x509_req.c:201: error: NULL_DEREFERENCE
+  pointer attr last assigned on line 200 could be null and is dereferenced at line 201, column 6
+
+crypto/x509/x509_trs.c:120: error: NULL_DEREFERENCE
+  pointer pt last assigned on line 119 could be null and is dereferenced at line 120, column 9
+
+crypto/x509/x509_vfy.c:1165: error: NULL_DEREFERENCE
+  pointer crl_ta last assigned on line 1164 could be null and is dereferenced by call to X509_cmp() at line 1165, column 7
+
+crypto/x509/x509_vfy.c:1165: error: NULL_DEREFERENCE
+  pointer cert_ta last assigned on line 1163 could be null and is dereferenced by call to X509_cmp() at line 1165, column 7
+
+crypto/x509/x509_vfy.c:1957: error: NULL_DEREFERENCE
+  pointer ptmp last assigned on line 1956 could be null and is dereferenced at line 1957, column 7
+
+crypto/x509/x509_vpm.c:92: error: NULL_DEREFERENCE
+  pointer param last assigned on line 91 could be null and is dereferenced by call to memset() at line 92, column 2
+
+crypto/x509/x509name.c:85: error: NULL_DEREFERENCE
+  pointer data last assigned on line 84 could be null and is dereferenced at line 85, column 5
+
+crypto/x509v3/v3_info.c:117: error: NULL_DEREFERENCE
+  pointer vtmp last assigned on line 115 could be null and is dereferenced at line 117, column 34
+
+engines/ccgost/gost2001.c:43: error: NULL_DEREFERENCE
+  pointer ctx last assigned on line 40 could be null and is dereferenced by call to BN_CTX_start() at line 43, column 2
+
+engines/ccgost/gost2001.c:104: error: NULL_DEREFERENCE
+  pointer ctx last assigned on line 103 could be null and is dereferenced by call to BN_CTX_start() at line 104, column 2
+
+engines/ccgost/gost2001.c:196: error: NULL_DEREFERENCE
+  pointer ctx last assigned on line 187 could be null and is dereferenced by call to BN_CTX_start() at line 196, column 2
+
+engines/ccgost/gost2001.c:290: error: NULL_DEREFERENCE
+  pointer ctx last assigned on line 289 could be null and is dereferenced by call to BN_CTX_start() at line 290, column 2
+
+engines/ccgost/gost2001.c:325: error: NULL_DEREFERENCE
+  pointer order last assigned on line 323 could be null and is dereferenced by call to EC_GROUP_get_order() at line 325, column 2
+
+engines/ccgost/gost94_keyx.c:123: error: NULL_DEREFERENCE
+  pointer mykey last assigned on line 122 could be null and is dereferenced by call to EVP_PKEY_assign() at line 123, column 4
+
+engines/ccgost/gost_ameth.c:578: error: NULL_DEREFERENCE
+  pointer eto last assigned on line 575 could be null and is dereferenced by call to EC_KEY_set_group() at line 578, column 2
+
+engines/ccgost/gost_ameth.c:753: error: NULL_DEREFERENCE
+  pointer order last assigned on line 752 could be null and is dereferenced by call to EC_GROUP_get_order() at line 753, column 2
+
+engines/ccgost/gost_pmeth.c:107: error: NULL_DEREFERENCE
+  pointer pctx->shared_ukm last assigned on line 106 could be null and is dereferenced by call to memcpy() at line 107, column 4
+
+engines/ccgost/gost_sign.c:58: error: NULL_DEREFERENCE
+  pointer ctx last assigned on line 57 could be null and is dereferenced by call to BN_CTX_start() at line 58, column 2
+
+engines/ccgost/gost_sign.c:145: error: NULL_DEREFERENCE
+  pointer ctx last assigned on line 143 could be null and is dereferenced by call to BN_CTX_start() at line 145, column 2
+
+engines/e_4758cca.c:578: error: NULL_DEREFERENCE
+  pointer keyToken last assigned on line 576 could be null and is dereferenced at line 578, column 19
+
+engines/e_4758cca.c:607: error: NULL_DEREFERENCE
+  pointer keyToken last assigned on line 605 could be null and is dereferenced at line 607, column 19
+
+engines/e_4758cca.c:640: error: NULL_DEREFERENCE
+  pointer keyToken last assigned on line 631 could be null and is dereferenced at line 640, column 27
+
+engines/e_4758cca.c:765: error: NULL_DEREFERENCE
+  pointer keyToken last assigned on line 757 could be null and is dereferenced at line 765, column 27
+
+engines/e_sureware.c:680: error: NULL_DEREFERENCE
+  pointer rsatmp->e last assigned on line 678 could be null and is dereferenced by call to bn_expand2() at line 680, column 3
+
+engines/e_ubsec.c:951: error: NULL_DEREFERENCE
+  pointer pub_key last assigned on line 949 could be null and is dereferenced at line 951, column 20
+
+ssl/s3_enc.c:599: error: NULL_DEREFERENCE
+  pointer s->s3->handshake_dgst last assigned on line 598 could be null and is dereferenced by call to memset() at line 599, column 2
+
+ssl/ssl_ciph.c:1820: error: NULL_DEREFERENCE
+  pointer comp last assigned on line 1819 could be null and is dereferenced at line 1820, column 2
+
+ssl/ssl_rsa.c:197: error: NULL_DEREFERENCE
+  pointer pktmp last assigned on line 196 could be null and is dereferenced by call to EVP_PKEY_copy_parameters() at line 197, column 3
+
+test/bntest.c:811: error: NULL_DEREFERENCE
+  pointer a last assigned on line 801 could be null and is dereferenced at line 811, column 3
+
+test/bntest.c:859: error: NULL_DEREFERENCE
+  pointer a last assigned on line 847 could be null and is dereferenced at line 859, column 3
+
+test/bntest.c:930: error: NULL_DEREFERENCE
+  pointer c last assigned on line 920 could be null and is dereferenced by call to BN_mod_exp() at line 930, column 8
+
+test/bntest.c:1157: error: NULL_DEREFERENCE
+  pointer e last assigned on line 1129 could be null and is dereferenced at line 1157, column 8
+
+test/bntest.c:1288: error: NULL_DEREFERENCE
+  pointer d last assigned on line 1257 could be null and is dereferenced at line 1288, column 8
+
+test/bntest.c:1343: error: NULL_DEREFERENCE
+  pointer d last assigned on line 1316 could be null and is dereferenced at line 1343, column 8
+
+test/bntest.c:1404: error: NULL_DEREFERENCE
+  pointer f last assigned on line 1373 could be null and is dereferenced at line 1404, column 8
+
+test/bntest.c:1451: error: NULL_DEREFERENCE
+  pointer c last assigned on line 1433 could be null and is dereferenced by call to BN_add() at line 1451, column 4
+
+test/bntest.c:1534: error: NULL_DEREFERENCE
+  pointer f last assigned on line 1507 could be null and is dereferenced at line 1534, column 8
+
+test/bntest.c:1598: error: NULL_DEREFERENCE
+  pointer e last assigned on line 1565 could be null and is dereferenced at line 1598, column 9
+
+test/bntest.c:1838: error: NULL_DEREFERENCE
+  pointer a last assigned on line 1836 could be null and is dereferenced at line 1838, column 6
+
+test/bntest.c:1843: error: NULL_DEREFERENCE
+  pointer c last assigned on line 1828 could be null and is dereferenced by call to BN_add() at line 1843, column 3
+
+test/bntest.c:1890: error: NULL_DEREFERENCE
+  pointer a last assigned on line 1885 could be null and is dereferenced at line 1890, column 2
+
+test/bntest.c:1934: error: NULL_DEREFERENCE
+  pointer a last assigned on line 1926 could be null and is dereferenced at line 1934, column 2
+
+test/bntest.c:1977: error: NULL_DEREFERENCE
+  pointer a last assigned on line 1972 could be null and is dereferenced at line 1977, column 2
+
+test/ectest.c:206: error: NULL_DEREFERENCE
+  pointer order last assigned on line 203 could be null and is dereferenced by call to EC_GROUP_get_order() at line 206, column 7
+
+Summary of the reports
+
+  NULL_DEREFERENCE: 64
+     RESOURCE_LEAK: 1

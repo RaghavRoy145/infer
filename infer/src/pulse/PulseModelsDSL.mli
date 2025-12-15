@@ -79,12 +79,11 @@ module Syntax : sig
     -> 'a model_monad
 
   val dispatch_call :
-       Ident.t * Typ.t
-    -> Procname.t
-    -> ValueOrigin.t ProcnameDispatcher.Call.FuncArg.t list
-    -> unit model_monad
+    Ident.t * Typ.t -> Procname.t -> ValueOrigin.t FuncArg.t list -> unit model_monad
 
   val python_call : Procname.t -> (string * aval) list -> aval model_monad
+
+  val swift_call : Procname.t -> (string * aval) list -> aval model_monad
 
   val apply_hack_closure : aval -> aval list -> aval model_monad
 
@@ -172,6 +171,8 @@ module Syntax : sig
 
   val load : aval -> aval model_monad
   (** read the Dereference access from the value *)
+
+  val load_exp : Exp.t -> aval model_monad
 
   val and_dynamic_type_is : aval -> Typ.t -> unit model_monad
 
@@ -278,6 +279,8 @@ module Syntax : sig
   val tenv_resolve_fieldname :
     Typ.name -> string -> (Fieldname.t option * Tenv.unresolved_reason option) model_monad
 
+  val tenv_resolve_method_with_offset : Typ.name -> int -> Procname.t option model_monad
+
   val tenv_type_is_defined : Typ.name -> bool model_monad
   (** {2 Invalidation operations} *)
 
@@ -285,7 +288,8 @@ module Syntax : sig
 
   (** {2 Escape Hatches}
 
-      if necessary you can convert an operation outside of this module with the following operators *)
+      if necessary you can convert an operation outside of this module with the following operators
+  *)
 
   val exec_command : (astate -> astate) -> unit model_monad
 
@@ -304,7 +308,7 @@ module Syntax : sig
     val return_alloc_not_null :
       Attribute.allocator -> Exp.t option -> initialize:bool -> unit model_monad
 
-    val free : Invalidation.t -> ValueOrigin.t ProcnameDispatcher.Call.FuncArg.t -> unit model_monad
+    val free : Invalidation.t -> ValueOrigin.t FuncArg.t -> unit model_monad
 
     val early_exit : model
   end

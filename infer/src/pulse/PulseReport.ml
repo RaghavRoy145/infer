@@ -17,15 +17,15 @@ let is_nullptr_dereference_in_nullsafe_class tenv ~is_nullptr_dereference jn =
   && match NullsafeMode.of_java_procname tenv jn with Default -> false | Local | Strict -> true
 
 
-let report {InterproceduralAnalysis.tenv; proc_desc; err_log} ~is_suppressed ~latent
-    (diagnostic : Diagnostic.t) =
+let do_report {InterproceduralAnalysis.tenv; proc_desc; err_log} ~is_suppressed ~latent
+    ?location_override ?extra_trace ?reachable_from (diagnostic : Diagnostic.t) =
   let open Diagnostic in
   if is_suppressed && not Config.pulse_report_issues_for_tests then ()
   else
     (* Report suppressed issues with a message to distinguish them from non-suppressed issues.
        Useful for infer's tests. *)
     let loc_instantiated = Diagnostic.get_location_instantiated diagnostic in
-    let extra_trace =
+    let suppressed_extra_trace =
       if is_suppressed && Config.pulse_report_issues_for_tests then
         let depth = 0 in
         let tags = [] in
@@ -34,6 +34,14 @@ let report {InterproceduralAnalysis.tenv; proc_desc; err_log} ~is_suppressed ~la
       else []
     in
     let extras =
+      let may_depend_on_an_unknown_value =
+        match diagnostic with
+        | AccessToInvalidAddress {may_depend_on_an_unknown_value= true} ->
+            let elt : Jsonbug_t.may_depend_on_an_unknown_value = {value= true} in
+            Some elt
+        | _ ->
+            None
+      in
       let transitive_callees, transitive_missed_captures =
         let to_jsonbug_missed_capture class_name =
           {Jsonbug_t.class_name= Typ.Name.name class_name}
@@ -117,6 +125,8 @@ let report {InterproceduralAnalysis.tenv; proc_desc; err_log} ~is_suppressed ~la
       ; cost_degree= None
       ; copy_type
       ; config_usage_extra
+      ; may_depend_on_an_unknown_value
+      ; reachable_from
       ; taint_extra
       ; transitive_callees
       ; transitive_missed_captures }
@@ -137,11 +147,45 @@ let report {InterproceduralAnalysis.tenv; proc_desc; err_log} ~is_suppressed ~la
     in
     let issue_type = get_issue_type tenv ~latent diagnostic proc_desc in
     let message, suggestion = get_message_and_suggestion diagnostic in
+    let message =
+      Option.fold reachable_from ~init:message ~f:(fun message reachable_from ->
+          F.sprintf "(reachable from %s) %s" reachable_from message )
+    in
     let autofix = PulseAutofix.get_autofix proc_desc diagnostic in
+    let loc =
+      match location_override with
+      | Some location ->
+          location
+      | None ->
+          Diagnostic.get_location diagnostic
+    in
+    let ltr =
+      Option.fold extra_trace
+        ~init:(suppressed_extra_trace @ get_trace diagnostic)
+        ~f:(fun ltr extra_trace ->
+          Trace.add_to_errlog ~nesting:0
+            ~pp_immediate:(fun fmt -> F.fprintf fmt "original issue trace starts here")
+            extra_trace ltr )
+    in
     L.d_printfln ~color:Red "Reporting issue: %a: %s" IssueType.pp issue_type message ;
-    Reporting.log_issue proc_desc err_log ~loc:(get_location diagnostic) ?loc_instantiated
-      ~ltr:(extra_trace @ get_trace diagnostic)
-      ~extras ~autofix ?suggestion Pulse issue_type message
+    Reporting.log_issue proc_desc err_log ~loc ?loc_instantiated ~ltr ~extras ~autofix ?suggestion
+      Pulse issue_type message
+
+
+let report analysis_data ~is_suppressed ~latent diagnostic =
+  do_report analysis_data ~is_suppressed ~latent diagnostic
+
+
+let report_if_entry_point ({InterproceduralAnalysis.proc_desc} as analysis_data) trace_to_error
+    diagnostic =
+  let proc_name_s = Procdesc.get_proc_name proc_desc |> Procname.to_string in
+  if
+    List.exists Config.pulse_report_issues_reachable_from ~f:(fun regex ->
+        Str.string_match regex proc_name_s 0 )
+  then
+    let location_override = Trace.get_outer_location trace_to_error in
+    do_report analysis_data ~is_suppressed:false ~latent:false ~location_override
+      ~extra_trace:trace_to_error ~reachable_from:proc_name_s diagnostic
 
 
 let report_latent_issue analysis_data latent_issue ~is_suppressed =
@@ -163,7 +207,7 @@ let is_constant_deref_without_invalidation (invalidation : Invalidation.t) acces
               when Invalidation.is_same_type trace_invalidation invalidation ->
                 true
             | _ ->
-                false ) )
+                false ))
     | CFree
     | CppDelete
     | CppDeleteArray
@@ -189,6 +233,7 @@ let is_constant_deref_without_invalidation_diagnostic (diagnostic : Diagnostic.t
   | ConstRefableParameter _
   | DynamicTypeMismatch _
   | ErlangError _
+  | InfiniteLoopError _
   | HackCannotInstantiateAbstractClass _
   | MutualRecursionCycle _
   | ReadonlySharedPtrParameter _
@@ -289,6 +334,8 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
              ; invalidation_trace=
                  Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
              ; access_trace
+             ; may_depend_on_an_unknown_value=
+                 AbductiveDomain.Summary.contains_unknown_values summary
              ; must_be_valid_reason= snd must_be_valid } ) ;
       Some (LatentInvalidAccess {astate= summary; address; must_be_valid; calling_context= []})
   | PotentialInvalidSpecializedCall {specialized_type; trace} ->
@@ -310,7 +357,7 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
         (* if is_suppressed then L.d_printfln "ReportNow suppressed error" ;
         report analysis_data ~latent:false ~is_suppressed diagnostic ;
         if Diagnostic.aborts_execution path diagnostic then Some (AbortProgram summary) else None *)
-        if is_suppressed then L.d_printfln "ReportNow suppressed error" ;
+        (* if is_suppressed then L.d_printfln "ReportNow suppressed error" ; *)
         let astate =
           match access_error with
           | AccessResult.ReportableError {astate; _} -> astate
@@ -319,38 +366,65 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
                  this should never happen; but make it total *)
               assert false
         in
-        begin
-          match diagnostic with
-          | AccessToInvalidAddress na ->
-            let ptr_exp, ptr_var =
-              match na.invalid_address with
-              | PulseDecompilerExpr.SourceExpr ((PVar pvar, _), _) -> (Exp.Lvar pvar, Some (Var.of_pvar pvar))
-              | _ -> (Exp.null, None)
+        if not is_suppressed then (
+          begin
+            match diagnostic with
+            | AccessToInvalidAddress na ->
+              let ptr_exp, ptr_var =
+                match na.invalid_address with
+                | PulseDecompilerExpr.SourceExpr ((PVar pvar, _), _) -> (Exp.Lvar pvar, Some (Var.of_pvar pvar))
+                | _ -> (Exp.null, None)
+              in
+              let err_node =
+                List.find (Procdesc.get_nodes proc_desc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) (Trace.get_start_location na.access_trace))
+                |> Option.value ~default:(Procdesc.get_start_node proc_desc)
+              in
+              let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
+              let bug : _ PulseTransform.bug_info = {
+                  PulseTransform.ptr_expr = ptr_exp;
+                  ptr_var;
+                  diag_trace = na.access_trace;
+                  err_node; astate; av_opt;
+                  analysis = analysis_data;
+              } in
+              PulseTransform.plan_and_log_if_unique ~proc_desc ~bug;
+              let plans_to_save = !PulseTransform.logged_transformations_cache in
+              if not (List.is_empty plans_to_save) then (
+                (* The plans are in reverse order of discovery, so we reverse them back. *)
+                let ordered_plans = List.rev plans_to_save in
+                PulseTransform.save_all_plans proc_desc ordered_plans
+              );
+              (* CRITICAL: Clear the cache for the next procedure. *)
+              PulseTransform.clear_cache_for_proc ();
+              (* report analysis_data ~latent:false ~is_suppressed diagnostic;
+              if Diagnostic.aborts_execution path diagnostic then
+                let trace_to_issue =
+                  Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
+                in
+                Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
+              else None *)
+            | _ ->
+              ()
+            (* report analysis_data ~latent:false ~is_suppressed diagnostic ; *)
+            (* 3. Proceed with the original, unmodified reporting logic for this path. *)
+            (* if Diagnostic.aborts_execution path diagnostic then 
+              let trace_to_issue =
+                Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
+              in
+              Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
+            else None *)
+            end
+          );
+          if is_suppressed then L.d_printfln "ReportNow suppressed error";
+          report analysis_data ~latent:false ~is_suppressed diagnostic;
+          if Diagnostic.aborts_execution path diagnostic then
+            let trace_to_issue =
+              Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
             in
-            let err_node =
-              List.find (Procdesc.get_nodes proc_desc) ~f:(fun n -> Location.equal (Procdesc.Node.get_loc n) (Trace.get_start_location na.access_trace))
-              |> Option.value ~default:(Procdesc.get_start_node proc_desc)
-            in
-            let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
-            let bug : _ PulseRepair.bug_info = {
-                PulseRepair.ptr_expr = ptr_exp;
-                ptr_var;
-                diag_trace = na.access_trace;
-                err_node; astate; av_opt;
-                analysis = analysis_data;
-            } in
-            PulseRepair.plan_and_log_if_unique ~proc_desc ~bug;
-            report analysis_data ~latent:false ~is_suppressed diagnostic;
-            if Diagnostic.aborts_execution path diagnostic
-            then Some (AbortProgram summary)
-            else None
-          | _ ->
-          report analysis_data ~latent:false ~is_suppressed diagnostic ;
-          (* 3. Proceed with the original, unmodified reporting logic for this path. *)
-          if Diagnostic.aborts_execution path diagnostic
-          then Some (AbortProgram summary)
-          else None(* Not an NPE, so no plans *)
-          end
+            Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
+          else 
+            None
+      
       | `DelayReport latent_issue ->
           if is_suppressed then L.d_printfln "DelayReport suppressed error" ;
           if Config.pulse_report_latent_issues then

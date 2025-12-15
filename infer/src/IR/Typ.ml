@@ -163,7 +163,8 @@ and name =
   | PythonClass of PythonClassName.t
   | ObjcBlock of objc_block_sig
   | CFunction of c_function_sig
-[@@deriving hash, sexp]
+  | SwiftClass of SwiftClassName.t
+[@@deriving hash, sexp, compare, equal]
 
 and template_arg = TType of t | TInt of int64 | TNull | TNullPtr | TOpaque
 
@@ -244,6 +245,8 @@ and pp_name_c_syntax pe f = function
       F.fprintf f "%s" bsig.name
   | CFunction csig ->
       F.fprintf f "%a" QualifiedCppName.pp csig.c_name
+  | SwiftClass name ->
+      SwiftClassName.pp f name
 
 
 and pp_template_spec_info pe f = function
@@ -434,60 +437,8 @@ module Name = struct
     | ( (CStruct name1 | CUnion name1 | CppClass {name= name1})
       , (CStruct name2 | CUnion name2 | CppClass {name= name2}) ) ->
         QualifiedCppName.compare_name name1 name2
-    | (CStruct _ | CUnion _ | CppClass _), _ ->
-        -1
-    | _, (CStruct _ | CUnion _ | CppClass _) ->
-        1
-    | CSharpClass name1, CSharpClass name2 ->
-        String.compare (CSharpClassName.classname name1) (CSharpClassName.classname name2)
-    | CSharpClass _, _ ->
-        -1
-    | _, CSharpClass _ ->
-        1
-    | ErlangType name1, ErlangType name2 ->
-        ErlangTypeName.compare name1 name2
-    | ErlangType _, _ ->
-        -1
-    | _, ErlangType _ ->
-        1
-    | JavaClass name1, JavaClass name2 ->
-        String.compare (JavaClassName.classname name1) (JavaClassName.classname name2)
-    | JavaClass _, _ ->
-        -1
-    | _, JavaClass _ ->
-        1
-    | ObjcClass name1, ObjcClass name2 ->
-        QualifiedCppName.compare_name name1 name2
-    | ObjcClass _, _ ->
-        -1
-    | _, ObjcClass _ ->
-        1
-    | ObjcProtocol name1, ObjcProtocol name2 ->
-        QualifiedCppName.compare_name name1 name2
-    | HackClass name1, HackClass name2 ->
-        HackClassName.compare name1 name2
-    | HackClass _, _ ->
-        -1
-    | _, HackClass _ ->
-        1
-    | PythonClass name1, PythonClass name2 ->
-        PythonClassName.compare name1 name2
-    | PythonClass _, _ ->
-        -1
-    | _, PythonClass _ ->
-        1
-    | ObjcBlock bsig1, ObjcBlock bsig2 ->
-        compare_objc_block_sig bsig1 bsig2
-    | ObjcBlock _, _ ->
-        -1
-    | _, ObjcBlock _ ->
-        1
-    | CFunction csig1, CFunction csig2 ->
-        compare_c_function_sig csig1 csig2
-    | CFunction _, _ ->
-        -1
-    | _, CFunction _ ->
-        1
+    | _ ->
+        compare x y
 
 
   let qual_name = function
@@ -502,7 +453,8 @@ module Name = struct
     | HackClass _
     | PythonClass _
     | ObjcBlock _
-    | CFunction _ ->
+    | CFunction _
+    | SwiftClass _ ->
         QualifiedCppName.empty
 
 
@@ -517,7 +469,8 @@ module Name = struct
     | HackClass _
     | PythonClass _
     | ObjcBlock _
-    | CFunction _ ->
+    | CFunction _
+    | SwiftClass _ ->
         QualifiedCppName.empty
 
 
@@ -548,6 +501,8 @@ module Name = struct
         bsig.name
     | CFunction csig ->
         QualifiedCppName.to_qual_string csig.c_name
+    | SwiftClass name ->
+        SwiftClassName.to_string name
 
 
   let pp fmt tname =
@@ -556,7 +511,7 @@ module Name = struct
           "struct"
       | CUnion _ ->
           "union"
-      | CppClass _ | CSharpClass _ | JavaClass _ | ObjcClass _ ->
+      | CppClass _ | CSharpClass _ | JavaClass _ | ObjcClass _ | SwiftClass _ ->
           "class"
       | ErlangType _ ->
           "erlang"
@@ -579,7 +534,13 @@ module Name = struct
   let show = to_string
 
   let is_class = function
-    | CppClass _ | JavaClass _ | HackClass _ | ObjcClass _ | CSharpClass _ | PythonClass _ ->
+    | CppClass _
+    | JavaClass _
+    | HackClass _
+    | ObjcClass _
+    | CSharpClass _
+    | PythonClass _
+    | SwiftClass _ ->
         true
     | CStruct _ | CUnion _ | ErlangType _ | ObjcProtocol _ | ObjcBlock _ | CFunction _ ->
         false
@@ -590,6 +551,8 @@ module Name = struct
   let is_objc_protocol name = match name with ObjcProtocol _ -> true | _ -> false
 
   let is_objc_class name = match name with ObjcClass _ -> true | _ -> false
+
+  let is_swift_class name = match name with SwiftClass _ -> true | _ -> false
 
   let is_objc_block name = match name with ObjcBlock _ -> true | _ -> false
 

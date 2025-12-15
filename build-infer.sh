@@ -17,8 +17,8 @@ DEPENDENCIES_DIR="$INFER_ROOT/facebook/dependencies"
 PLATFORM="$(uname)"
 SANDCASTLE=${SANDCASTLE:-}
 NCPU="$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo 1)"
-INFER_OPAM_DEFAULT_SWITCH="5.2.1+flambda"
-INFER_OPAM_DEFAULT_SWITCH_OPTIONS="--package=ocaml-variants.5.2.1+options,ocaml-option-flambda"
+INFER_OPAM_DEFAULT_SWITCH="5.3.0+flambda"
+INFER_OPAM_DEFAULT_SWITCH_OPTIONS="--package=ocaml-variants.5.3.0+options,ocaml-option-flambda"
 INFER_OPAM_SWITCH=${INFER_OPAM_SWITCH:-$INFER_OPAM_DEFAULT_SWITCH}
 INFER_OPAM_SWITCH_OPTIONS=${INFER_OPAM_SWITCH_OPTIONS:-$INFER_OPAM_DEFAULT_SWITCH_OPTIONS}
 PLUGIN_DIR="$INFER_ROOT/facebook-clang-plugins"
@@ -76,7 +76,7 @@ function build_all() {
   BUILD_HACK=yes
   BUILD_JAVA=yes
   BUILD_PYTHON=yes
-  BUILD_RUST=yes
+  BUILD_RUST=no
   BUILD_SWIFT=yes
 }
 
@@ -167,6 +167,20 @@ if [ "$BUILD_CLANG" == "no" ] && [ "$BUILD_ERLANG" == "no" ] && \
   build_all
 fi
 
+CHARON_VERSION="0.1.123"
+CHARON_VERSION_COMMIT="4289a52cc427ac6f8ecbb746e2b226f5b297be40"
+# Check for charon on path when rust is enabled
+if [ "$BUILD_RUST" == "yes" ]; then
+  if [[ $(charon version) != "$CHARON_VERSION" ]]; then
+    echo "Warning: charon command not found or charon is the incorrect version " \
+         "(is it on your PATH ?)"
+    echo "The rust analyzer requires version $CHARON_VERSION of the charon library"
+    echo "You can download charon from "\
+         "https://github.com/AeneasVerif/charon/tree/$CHARON_VERSION_COMMIT"
+    exit 1
+  fi
+fi
+
 # enable --yes option for some commands in non-interactive mode
 YES=
 if [ "$INTERACTIVE" == "no" ]; then
@@ -188,8 +202,25 @@ install_opam_deps () {
     if [ "$USE_OPAM_LOCK" == yes ]; then
         locked=.locked
     fi
+
+    # Charon Version 0.1.123
+    opam pin add --no-action charon https://github.com/AeneasVerif/charon.git#$CHARON_VERSION_COMMIT
+    opam pin add --no-action name_matcher_parser https://github.com/AeneasVerif/charon.git#$CHARON_VERSION_COMMIT
     opam pin add --no-action ppx_show "$INFER_ROOT"/dependencies/ppx_show
     opam pin add --no-action pyml "$INFER_ROOT"/dependencies/pyml
+    # camlzip checks that it is within the required version that the zip/jar file declares as
+    # needed to decompress it:
+    #   https://github.com/xavierleroy/camlzip/blob/dd86042ac5eba8ba21e3d98b2f3e3dd82fc14033/zip.ml#L197-L198
+    #
+    # Sadly, for some reason we sometimes encounter jar files with a required version of 788.
+    # So, we fork camlzip to remove the check (YOLO), and pin the forked version here.
+    #
+    # Also done for the non-Sandcastle case below (in Sandcastle we can pin ahead of installing
+    # dependencies because at this point here we are sure that the opam repository is
+    # initialized but for non-Sandcastle builds that point is inside build-infer.sh so we need
+    # to pin camlzip after the fact instead; this will only rebuild javalib and sawja and only
+    # the first time that we pin camlzip)
+    opam pin add --no-action camlzip "$INFER_ROOT"/dependencies/camlzip
     opam install --deps-only "$INFER_ROOT"/opam/infer.opam$locked
 }
 

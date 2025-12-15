@@ -11,7 +11,6 @@ open PulseDomainInterface
 open PulseOperationResult.Import
 open PulseModelsImport
 module DSL = PulseModelsDSL
-module FuncArg = ProcnameDispatcher.Call.FuncArg
 
 let free deleted_access : model = Basic.free_or_delete `Free CFree deleted_access
 
@@ -65,6 +64,7 @@ let realloc_common ~null_case ~desc allocator pointer size : model =
          | ContinueProgram astate ->
              alloc_common ~null_case ~initialize:false ~desc allocator (Some size) data astate
                non_disj
+         | InfiniteLoop _
          | ExceptionRaised _
          | ExitProgram _
          | AbortProgram _

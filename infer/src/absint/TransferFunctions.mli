@@ -28,7 +28,8 @@ module type S = sig
       [{astate} instr {astate'}] is a valid Hoare triple. In other words, [exec_instr] defines how
       executing an instruction from a given abstract state changes that state into a new one. This
       is usually called the {i transfer function} in Abstract Interpretation terms. [node] is the
-      node containing the current instruction and [idx] is the index of the instruction in the node. *)
+      node containing the current instruction and [idx] is the index of the instruction in the node.
+  *)
 
   val pp_session_name : CFG.Node.t -> Format.formatter -> unit
   (** print session name for HTML debug *)
@@ -77,6 +78,10 @@ module type DisjReady = sig
   val remember_dropped_disjuncts : DisjDomain.t list -> NonDisjDomain.t -> NonDisjDomain.t
 
   val pp_session_name : CFG.Node.t -> Format.formatter -> unit
+
+  val mark_loop_header : analysis_data -> CFG.Node.t -> DisjDomain.t list -> DisjDomain.t list
+
+  val widen_list : DisjDomain.t list -> DisjDomain.t list -> num_iters:int -> DisjDomain.t list
 
   val pp_disjunct : Pp.print_kind -> Format.formatter -> DisjDomain.t -> unit
 

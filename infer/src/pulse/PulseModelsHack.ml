@@ -273,7 +273,8 @@ module Vec = struct
         let* new_vec = new_vec_dsl [v_snd; value] in
         let* size = load_access vec (FieldAccess size_field) in
         store_field ~ref:new_vec size_field size
-        @@> (* overwrite default size of 2 *)
+        @@>
+        (* overwrite default size of 2 *)
         assign_ret new_vec
     | _ ->
         L.d_printfln "vec hack array cow set argument error" ;
@@ -400,7 +401,11 @@ let get_static_companion_var type_name =
 let get_static_companion ~model_desc path location type_name astate =
   let pvar = get_static_companion_var type_name in
   let var = Var.of_pvar pvar in
-  let hist = Hist.single_call path location model_desc in
+  let {PathContext.timestamp} = path in
+  let hist =
+    Hist.single_call path location model_desc
+    |> Hist.add_event (ClassObjectInitialization (type_name, location, timestamp))
+  in
   let astate, vo = AbductiveDomain.Stack.eval hist var astate in
   let static_type_name = Typ.Name.Hack.static_companion type_name in
   let typ = Typ.mk_struct static_type_name in
@@ -1006,14 +1011,16 @@ let hhbc_cmp_same x y : model =
               L.d_printfln "hhbc_cmp_same: not a known primitive type" ;
               disj
                 [ prune_eq x y
-                  @@> (* CAUTION: Note that the pruning on a pointer may result in incorrect semantics
+                  @@>
+                  (* CAUTION: Note that the pruning on a pointer may result in incorrect semantics
                          if the pointer is given as a parameter. In that case, the pruning may work as
                          a value assignment to the pointer. *)
                   make_hack_bool true
                 ; prune_ne x y
-                  @@> (* TODO(dpichardie) cover the comparisons of vec, keyset, dict and
+                  @@>
+                  (* TODO(dpichardie) cover the comparisons of vec, keyset, dict and
                          shape, taking into account the difference between == and ===. *)
-                      (* TODO(dpichardie) cover the specificities of == that compare objects properties
+                  (* TODO(dpichardie) cover the specificities of == that compare objects properties
                          (structural equality). *)
                   make_hack_random_bool () ] )
         | Some {Formula.typ= x_typ}, Some {Formula.typ= y_typ} when not (Typ.equal x_typ y_typ) ->
@@ -1126,6 +1133,31 @@ let hh_type_structure clsobj constnameobj : model =
   @@>
   let* retval = internal_hack_field_get clsobj constname in
   assign_ret retval
+
+
+let read_string_field_from_ts fieldname tdict =
+  let open DSL.Syntax in
+  let field = TextualSil.wildcard_sil_fieldname Textual.Lang.Hack fieldname in
+  let* field_boxed_string = load_access tdict (FieldAccess field) in
+  let* field_string_val = load_access field_boxed_string (FieldAccess string_val_field) in
+  as_constant_string field_string_val
+
+
+let hh_type_structure_class clsobj constnameobj : model =
+  let open DSL.Syntax in
+  start_model
+  @@ fun () ->
+  let* constname = load_access constnameobj (FieldAccess string_val_field) in
+  constinit_existing_class_object clsobj
+  @@>
+  let* tdict = internal_hack_field_get clsobj constname in
+  let* classname = read_string_field_from_ts "classname" tdict in
+  match classname with
+  | Some classname ->
+      let* ret = make_hack_string classname in
+      assign_ret ret
+  | None ->
+      ret ()
 
 
 let hack_set_static_prop this prop obj : model =
@@ -1395,14 +1427,6 @@ let read_nullable_field_from_ts tdict =
   as_constant_bool nullable_bool_val
 
 
-let read_string_field_from_ts fieldname tdict =
-  let open DSL.Syntax in
-  let field = TextualSil.wildcard_sil_fieldname Textual.Lang.Hack fieldname in
-  let* field_boxed_string = load_access tdict (FieldAccess field) in
-  let* field_string_val = load_access field_boxed_string (FieldAccess string_val_field) in
-  as_constant_string field_string_val
-
-
 let read_access_from_ts tdict =
   let open DSL.Syntax in
   let field = TextualSil.wildcard_sil_fieldname Textual.Lang.Hack "access_list" in
@@ -1545,6 +1569,11 @@ let hhbc_verify_type_pred _dummy pred : model =
   assign_ret zero
 
 
+let hhbc_cast_int arg : model =
+  let open DSL.Syntax in
+  start_model @@ fun () -> assign_ret arg
+
+
 let hhbc_cast_string arg : model =
   (* https://github.com/facebook/hhvm/blob/605ac5dde604ded7f25e9786032a904f28230845/hphp/doc/bytecode.specification#L1087
      Cast to string ((string),(binary)). Pushes (string)$1 onto the stack. If $1
@@ -1623,6 +1652,7 @@ let matchers : matcher list =
     $--> hhbc_lazy_class_from_class
   ; -"$builtins" &:: "hack_field_get" <>$ capt_arg_payload $+ capt_arg_payload $--> hack_field_get
   ; -"$builtins" &:: "hhbc_cast_string" <>$ capt_arg_payload $--> hhbc_cast_string
+  ; -"$builtins" &:: "hhbc_cast_int" <>$ capt_arg_payload $--> hhbc_cast_int
   ; -"$builtins" &:: "hhbc_class_get_c" <>$ capt_arg_payload $--> hhbc_class_get_c
     (* we should be able to model that directly in Textual once specialization will be stronger *)
   ; -"$builtins" &:: "hhbc_cmp_same" <>$ capt_arg_payload $+ capt_arg_payload $--> hhbc_cmp_same
@@ -1665,6 +1695,8 @@ let matchers : matcher list =
     $--> hack_await_static
   ; -"$root" &:: "HH::type_structure" <>$ any_arg $+ capt_arg_payload $+ capt_arg_payload
     $--> hh_type_structure
+  ; -"$root" &:: "HH::type_structure_class" <>$ any_arg $+ capt_arg_payload $+ capt_arg_payload
+    $--> hh_type_structure_class
   ; -"$builtins" &:: "hhbc_iter_base" <>$ capt_arg_payload $--> hhbc_iter_base
   ; -"$builtins" &:: "hhbc_iter_init" <>$ capt_arg_payload $+ capt_arg_payload $--> hhbc_iter_init
   ; -"$builtins" &:: "hhbc_iter_get_key" <>$ capt_arg_payload $+ capt_arg_payload

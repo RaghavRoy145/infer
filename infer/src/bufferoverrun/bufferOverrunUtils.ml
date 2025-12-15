@@ -142,7 +142,10 @@ module Exec = struct
             in
             let offset, size = (Itv.zero, length) in
             let v =
-              let traces = TraceSet.bottom (* TODO: location of field declaration *) in
+              let traces =
+                TraceSet.bottom
+                (* TODO: location of field declaration *)
+              in
               Dom.Val.of_c_array_alloc allocsite ~stride ~offset ~size ~traces
             in
             mem |> Dom.Mem.strong_update field_loc v
@@ -415,6 +418,7 @@ module ReplaceCallee = struct
                   let* {Struct.methods} = Tenv.lookup tenv class_name in
                   (* NOTE: This drops the last void type off. *)
                   let* param_typs_templ = List.drop_last param_typs_templ in
+                  let methods = List.map ~f:Struct.name_of_tenv_method methods in
                   List.find methods
                     ~f:(is_cpp_constructor_with_types get_formals class_typ_templ param_typs_templ)
               | _ ->

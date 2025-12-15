@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "print_leak_doall_arg",
+    "procedure_id": "print_leak_doall_arg{af900b49a17a72846fe49b14f6b784d2}",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 36,
+      "end_node": 36,
+      "start_line": 698,
+      "end_line": 698,
+      "guard_with_pointer": "&sbuffer"
+    }
+  }
+]

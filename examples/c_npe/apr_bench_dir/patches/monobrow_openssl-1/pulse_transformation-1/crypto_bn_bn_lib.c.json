@@ -1,0 +1,86 @@
+[
+  {
+    "procedure_name": "BN_bin2bn",
+    "procedure_id": "BN_bin2bn",
+    "source_file": "crypto/bn/bn_lib.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 60,
+      "end_node": 22,
+      "start_line": 589,
+      "end_line": 605,
+      "guard_with_pointer": "&ret",
+      "metrics": {
+        "cost_l_imprecision": 12,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 15,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 8,
+        "total_aliases": 4
+      }
+    }
+  },
+  {
+    "procedure_name": "BN_bin2bn",
+    "procedure_id": "BN_bin2bn",
+    "source_file": "crypto/bn/bn_lib.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 20,
+      "end_node": 3,
+      "start_line": 617,
+      "end_line": 618,
+      "guard_with_pointer": "&ret",
+      "metrics": {
+        "cost_l_imprecision": 14,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 17,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 8,
+        "total_aliases": 4
+      }
+    }
+  },
+  {
+    "procedure_name": "BN_bin2bn",
+    "procedure_id": "BN_bin2bn",
+    "source_file": "crypto/bn/bn_lib.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 37,
+      "end_node": 37,
+      "start_line": 598,
+      "end_line": 598,
+      "guard_with_pointer": "&ret",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 8,
+        "total_aliases": 4
+      }
+    }
+  },
+  {
+    "procedure_name": "BN_bin2bn",
+    "procedure_id": "BN_bin2bn",
+    "source_file": "crypto/bn/bn_lib.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 58,
+      "end_node": 58,
+      "start_line": 593,
+      "end_line": 593,
+      "guard_with_pointer": "&ret",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 8,
+        "total_aliases": 4
+      }
+    }
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "str_copy",
+    "procedure_id": "str_copy{5fae1e16a66fac1fe4d42c089f9596df}",
+    "source_file": "crypto/conf/conf_def.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "crypto/conf/conf_def.c",
+      "npe_line": 509,
+      "original_pointer": "&to"
+    }
+  }
+]

@@ -182,6 +182,7 @@ $(b,infer) $(b,explore) $(i,[options])
 $(b,infer) $(b,report) $(i,[options])
 $(b,infer) $(b,reportdiff) $(i,[options])
 $(b,infer) $(b,run) $(i,[options])
+$(b,infer) $(b,semdiff) $(i,[options])
 $(b,infer) $(b,--compilation-database[-escaped]) $(i,file) $(i,[options])
 $(b,infer) $(i,[options]) $(b,--) $(b,compile command)
 $(b,infer) $(i,[options])|}
@@ -200,30 +201,30 @@ $(b,infer) $(i,[options])|}
            $(b,infer-analyze)(1)." ]
     ~options:
       (`Prepend
-        [ `P "Every infer command accepts the arguments from all the other infer commands."
-        ; `P
-            (Printf.sprintf
-               "Options are read from the $(b,%s) file, then from the $(b,%s) environment \
-                variable, then from the command line. Options in $(b,%s) take precedence over \
-                options in $(b,%s), and options passed on the command line take precedence over \
-                options in $(b,%s). See the $(i,%s) and $(i,%s) sections of this manual for more \
-                information."
-               inferconfig_file CLOpt.args_env_var CLOpt.args_env_var inferconfig_file
-               CLOpt.args_env_var Cmdliner.Manpage.s_environment Cmdliner.Manpage.s_files )
-        ; `P
-            "Options can be specified inside an argument file $(i,file) by passing $(b,@)$(i,file) \
-             as argument. The format is one option per line, and enclosing single ' and double \" \
-             quotes are ignored."
-        ; `P
-            "Options without a default value (e.g., $(b,--changed-files-index)) and options with \
-             list-like values (e.g., $(b,--Xbuck)) all have a corresponding $(b,--option-reset) \
-             flag that resets their values to nothing or the empty list, respectively. For \
-             instance, $(b,--Xbuck-reset) will cancel any previous $(b,--Xbuck) option passed to \
-             infer."
-        ; `P
-            "See the manuals of individual infer commands for details about their supported \
-             options. The following is a list of all the supported options (see also \
-             $(b,--help-full) for options reserved for internal use)." ] )
+         [ `P "Every infer command accepts the arguments from all the other infer commands."
+         ; `P
+             (Printf.sprintf
+                "Options are read from the $(b,%s) file, then from the $(b,%s) environment \
+                 variable, then from the command line. Options in $(b,%s) take precedence over \
+                 options in $(b,%s), and options passed on the command line take precedence over \
+                 options in $(b,%s). See the $(i,%s) and $(i,%s) sections of this manual for more \
+                 information."
+                inferconfig_file CLOpt.args_env_var CLOpt.args_env_var inferconfig_file
+                CLOpt.args_env_var Cmdliner.Manpage.s_environment Cmdliner.Manpage.s_files )
+         ; `P
+             "Options can be specified inside an argument file $(i,file) by passing \
+              $(b,@)$(i,file) as argument. The format is one option per line, and enclosing single \
+              ' and double \" quotes are ignored."
+         ; `P
+             "Options without a default value (e.g., $(b,--changed-files-index)) and options with \
+              list-like values (e.g., $(b,--Xbuck)) all have a corresponding $(b,--option-reset) \
+              flag that resets their values to nothing or the empty list, respectively. For \
+              instance, $(b,--Xbuck-reset) will cancel any previous $(b,--Xbuck) option passed to \
+              infer."
+         ; `P
+             "See the manuals of individual infer commands for details about their supported \
+              options. The following is a list of all the supported options (see also \
+              $(b,--help-full) for options reserved for internal use)." ] )
     ~environment:
       [ `P
           (Printf.sprintf
@@ -340,6 +341,20 @@ $(b,infer) $(b,analyze) $(i,[options])|} ]
     ~see_also:InferCommand.[Analyze; Capture; Report]
 
 
+let semdiff =
+  mk_command_doc ~title:"Infer Semantic Difference"
+    ~short_description:"compute the semantic differences between two Python programs"
+    ~synopsis:
+      "$(b,infer) $(b,semdiff) $(b,--semdiff-previous) $(i,file) $(b,--semdiff-current) $(i,file) \
+       $(i,[options])"
+    ~description:
+      [ `P
+          "Given two python programs $(i,current) and $(i,previous), compute the a report \
+           informing if the programs are semantically equal.  The report is stored in the \
+           \"semdiff.json\" file inside the standard infer output folder" ]
+    ~see_also:InferCommand.[ReportDiff]
+
+
 let command_to_data =
   let mk cmd mk_doc =
     let name = InferCommand.to_string cmd in
@@ -355,7 +370,8 @@ let command_to_data =
   ; mk Help help
   ; mk Report report
   ; mk ReportDiff reportdiff
-  ; mk Run run ]
+  ; mk Run run
+  ; mk SemDiff semdiff ]
 
 
 let data_of_command command =

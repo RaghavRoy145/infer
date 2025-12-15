@@ -101,10 +101,7 @@ module InstrBasicCostWithReason = struct
   let get_call_cost_record tenv
       {inferbo_invariant_map; integer_type_widths; inferbo_get_summary; get_summary; get_formals}
       instr_node callee_pname ret args captured_vars location =
-    let fun_arg_list =
-      List.map args ~f:(fun (exp, typ) ->
-          {ProcnameDispatcher.Call.FuncArg.exp; typ; arg_payload= ()} )
-    in
+    let fun_arg_list = List.map args ~f:(fun (exp, typ) -> {FuncArg.exp; typ; arg_payload= ()}) in
     let inferbo_mem_opt =
       BufferOverrunAnalysis.extract_pre (InstrCFG.Node.id instr_node) inferbo_invariant_map
     in
@@ -209,6 +206,8 @@ let compute_errlog_extras cost =
   ; cost_degree= BasicCostWithReason.degree cost |> Option.map ~f:Polynomials.Degree.encode_to_int
   ; copy_type= None
   ; config_usage_extra= None
+  ; may_depend_on_an_unknown_value= None
+  ; reachable_from= None
   ; taint_extra= None
   ; transitive_callees= []
   ; transitive_missed_captures= [] }

@@ -1,0 +1,282 @@
+[
+  {
+    "procedure_name": "struct_value_by_ref_callee_write_skip_bad",
+    "procedure_id": "struct_value_by_ref_callee_write_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 127,
+      "end_line": 127,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "bake",
+    "procedure_id": "bake",
+    "source_file": "angelism.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 5,
+      "def_site_line": 16,
+      "target_pvar": "zero",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "struct_value_from_pointer_skip_bad",
+    "procedure_id": "struct_value_from_pointer_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 159,
+      "end_line": 159,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_from_pointer_skip_bad",
+    "procedure_id": "struct_value_from_pointer_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 6,
+      "end_node": 6,
+      "start_line": 157,
+      "end_line": 157,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_by_ref_ptr_write_bad",
+    "procedure_id": "struct_value_by_ref_ptr_write_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 112,
+      "end_line": 112,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_by_ref_callee_write_no_skip_bad",
+    "procedure_id": "struct_value_by_ref_callee_write_no_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 120,
+      "end_line": 120,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_by_ref_callee_write_skip_bad",
+    "procedure_id": "struct_value_by_ref_callee_write_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 127,
+      "end_line": 127,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "bake",
+    "procedure_id": "bake",
+    "source_file": "angelism.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 5,
+      "def_site_line": 16,
+      "target_pvar": "zero",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "struct_value_from_pointer_skip_bad",
+    "procedure_id": "struct_value_from_pointer_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 159,
+      "end_line": 159,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_from_pointer_skip_bad",
+    "procedure_id": "struct_value_from_pointer_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 6,
+      "end_node": 6,
+      "start_line": 157,
+      "end_line": 157,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_skip_null_deref_bad",
+    "procedure_id": "struct_value_skip_null_deref_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 141,
+      "end_line": 141,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_by_ref_ptr_write_bad",
+    "procedure_id": "struct_value_by_ref_ptr_write_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 112,
+      "end_line": 112,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_by_ref_callee_write_no_skip_bad",
+    "procedure_id": "struct_value_by_ref_callee_write_no_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 120,
+      "end_line": 120,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "struct_value_by_ref_callee_write_skip_bad",
+    "procedure_id": "struct_value_by_ref_callee_write_skip_bad",
+    "source_file": "angelism.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 127,
+      "end_line": 127,
+      "guard_with_pointer": "&x",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

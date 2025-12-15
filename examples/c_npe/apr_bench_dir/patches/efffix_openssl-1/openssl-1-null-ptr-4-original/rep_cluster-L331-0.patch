@@ -1,0 +1,11 @@
+--- /output/mem.c.backup	2023-09-24 10:45:33.583050169 +0000
++++ /experiment/efffix/openssl-1/null-ptr-4/src/crypto/mem.c	2023-09-24 10:51:07.455498341 +0000
+@@ -328,7 +328,7 @@
+ 	{
+ 	char *ret = CRYPTO_malloc(strlen(str)+1, file, line);
+ 
+-	strcpy(ret, str);
++return ret;  	strcpy(ret, str);
+ 	return ret;
+ 	}
+ 

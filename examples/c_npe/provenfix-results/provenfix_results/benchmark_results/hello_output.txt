@@ -1,0 +1,8 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/examples/hello.c
+annalysing test
+/home/infer_TempFix/examples/hello.c
+
+=====> Actual effects of function: test ======>
+(true /\ deref(s)@12,0)

@@ -441,7 +441,7 @@ OPTIONS
 
        --timeout float
            Time after which any checker should give up analysing the current
-           function or method, in seconds. Not implemented for multicore mode
+           function or method, in seconds. Defaults to 120 seconds.
 
        --top-longest-proc-duration-size int
            Number of procedures for which we track longest analysis duration
@@ -513,6 +513,12 @@ ANALYSIS SCHEDULER OPTIONS
            higher chance of success compared with having to read the previous
            results database successfully as fewer datatypes are involved.
            (Conversely: --no-store-analysis-schedule)
+
+ANDROID OPTIONS
+       --android-view-class-list +string
+           A class C is considered a view when it has a supertype that
+           matches one of these classes. The default is
+           [`android.view.View`].
 
 BUFFER OVERRUN OPTIONS
        --no-bo-assume-void

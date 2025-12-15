@@ -1,0 +1,464 @@
+[
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary7_bad",
+    "procedure_id": "ternary7_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 3,
+      "start_line": 51,
+      "end_line": 51,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 2,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 4,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary7_bad",
+    "procedure_id": "ternary7_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 3,
+      "start_line": 51,
+      "end_line": 51,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 2,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 4,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary4_bad",
+    "procedure_id": "ternary4_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 36,
+      "end_line": 36,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary7_bad",
+    "procedure_id": "ternary7_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 3,
+      "start_line": 51,
+      "end_line": 51,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 2,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 4,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary2_bad",
+    "procedure_id": "ternary2_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 9,
+      "start_line": 21,
+      "end_line": 21,
+      "guard_with_pointer": "&p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "ternary7_bad",
+    "procedure_id": "ternary7_bad",
+    "source_file": "ternary.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 3,
+      "start_line": 51,
+      "end_line": 51,
+      "guard_with_pointer": "&#GB<ternary.c>$d",
+      "metrics": {
+        "cost_l_imprecision": 2,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 4,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 2
+      }
+    }
+  }
+]

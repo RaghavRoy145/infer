@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "dsa_builtin_paramgen",
+    "procedure_id": "dsa_builtin_paramgen",
+    "source_file": "crypto/dsa/dsa_gen.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 14,
+      "end_node": 14,
+      "start_line": 365,
+      "end_line": 365,
+      "guard_with_pointer": "&ctx",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

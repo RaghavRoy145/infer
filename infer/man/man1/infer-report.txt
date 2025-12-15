@@ -159,6 +159,7 @@ OPTIONS
              INFERBO_ALLOC_MAY_BE_BIG (enabled by default),
              INFERBO_ALLOC_MAY_BE_NEGATIVE (enabled by default),
              INFINITE_EXECUTION_TIME (disabled by default),
+             INFINITE_LOOP (disabled by default),
              INFINITE_RECURSION (disabled by default),
              INTEGER_OVERFLOW_L1 (enabled by default),
              INTEGER_OVERFLOW_L2 (enabled by default),
@@ -302,7 +303,8 @@ OPTIONS
        --issues-tests-fields ,-separated sequence of { bug_type | bucket |
        qualifier | suggestion | severity | line | column | procedure |
        procedure_start_line | file | bug_trace | key | hash | line_offset |
-       qualifier_contains_potential_exception_note | taint_extra |
+       qualifier_contains_potential_exception_note |
+       may_depend_on_an_unknown_value | taint_extra |
        transitive_callees_extra | suppressed | autofix }
            Fields to emit with --issues-tests
 
@@ -420,6 +422,10 @@ PULSE CHECKER OPTIONS
 
        --pulse-report-flows-to-taint-sink procname
            Report data flows which pass through taint sink procname
+
+       --pulse-report-issues-reachable-from +regex
+           Re-raise issues that Pulse was able to propagate all the way to
+           procedures matching one of the given regexes
 
 ENVIRONMENT
        INFER_ARGS, INFERCONFIG, INFER_STRICT_MODE

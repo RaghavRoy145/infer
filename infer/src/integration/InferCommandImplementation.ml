@@ -45,14 +45,20 @@ let debug () =
             Summary.OnDisk.get ~lazy_payloads:false AnalysisRequest.all proc_name
             |> Option.map ~f:Summary.yojson_of_t
           in
-          let f_json proc_names =
-            Yojson.Safe.to_channel stdout (`List (List.filter_map ~f:json_of_summary proc_names)) ;
+          let f_json channel proc_names =
+            Yojson.Safe.to_channel channel (`List (List.filter_map ~f:json_of_summary proc_names)) ;
             Out_channel.newline stdout ;
             Out_channel.flush stdout
           in
-          Option.iter
-            (Procedures.select_proc_names_interactive ~filter)
-            ~f:(if Config.procedures_summary_json then f_json else f_console_output)
+          let output_all_summaries proc_names =
+            let filename = Filename.concat Config.results_dir "all_summaries.json" in
+            Utils.with_file_out filename ~f:(fun channel -> f_json channel proc_names)
+          in
+          if Config.dump_json_summaries then Procedures.get_all ~filter () |> output_all_summaries
+          else
+            Option.iter
+              (Procedures.select_proc_names_interactive ~filter)
+              ~f:(if Config.procedures_summary_json then f_json stdout else f_console_output)
         else if Config.procedures_call_graph then
           let files_to_graph =
             match SourceFile.read_config_files_to_analyze () with
@@ -113,8 +119,10 @@ let debug () =
 
 
 let explore () =
-  if (* explore bug traces *)
-     Config.html then
+  if
+    (* explore bug traces *)
+    Config.html
+  then
     TraceBugs.gen_html_report ~report_json:(ResultsDir.get_path ReportJson)
       ~show_source_context:Config.source_preview ~max_nested_level:Config.max_nesting
       ~report_html_dir:(ResultsDir.get_path ReportHtml)
@@ -337,3 +345,12 @@ let report_diff () =
           ~config_impact_current ~config_impact_previous ;
       Option.both stats_dir_previous stats_dir_current
       |> Option.iter ~f:(fun (previous, current) -> StatsDiff.diff ~previous ~current)
+
+
+let sem_diff () =
+  let open Config in
+  match Option.both semdiff_previous semdiff_current with
+  | None ->
+      L.die UserError "Expected '--semdiff-current' and '--semdiff-previous' to be specified."
+  | Some (previous, current) ->
+      PythonCompareWithoutTypeAnnot.semdiff previous current

@@ -82,7 +82,8 @@ let compare_err_data =
       compare_err_data_by_trace
 
 
-module ErrDataSet = (* set err_data with no repeated loc *)
+module ErrDataSet =
+(* set err_data with no repeated loc *)
 Stdlib.Set.Make (struct
   type t = err_data [@@deriving compare]
 end)
@@ -109,7 +110,7 @@ end
 type t = ErrDataSet.t ErrLogHash.t
 
 (** Empty error log *)
-let empty () = ErrLogHash.create 13
+let empty () = ErrLogHash.create 16
 
 (** type of the function to be passed to iter *)
 type iter_fun = err_key -> err_data -> unit

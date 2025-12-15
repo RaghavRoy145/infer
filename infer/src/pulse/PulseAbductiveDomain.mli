@@ -34,7 +34,8 @@ module PathContext = PulsePathContext
     values in the raw map corresponding to the memory are not necessarily normalized at all times
     but the API allows one to pretend they are by normalizing them on the fly. On the other hand,
     *keys* in the memory map are always normalized so values must be normalized before being looked
-    up in the map and this module takes care of that transparently too. See also [PulseCanonValue]. *)
+    up in the map and this module takes care of that transparently too. See also [PulseCanonValue].
+*)
 
 (** signature common to the "normal" [Domain], representing the post at the current program point,
     and the inverted [PreDomain], representing the inferred pre-condition*)
@@ -69,6 +70,8 @@ type t = private
             reached so far *)
   ; transitive_info: TransitiveInfo.t  (** record transitive information inter-procedurally *)
   ; recursive_calls: PulseMutualRecursion.Set.t
+  ; loop_header_info: PulseLoopHeaderInfo.t
+  ; unknown_values: bool  (** did we generate at least one unknown abstract value on this path? *)
   ; skipped_calls: SkippedCalls.t  (** metadata: procedure calls for which no summary was found *)
   }
 [@@deriving equal]
@@ -79,7 +82,8 @@ val pp : Format.formatter -> t -> unit
 
 val mk_initial : Tenv.t -> ProcAttributes.t -> t
 
-val are_same_values_as_pre_formals : Procdesc.t -> AbstractValue.t list -> t -> bool
+val are_same_values_as_pre_formals :
+  Procdesc.t -> (AbstractValue.t * ValueHistory.t) list -> t -> bool
 
 val mk_join_state :
      pre:PulseBaseStack.t * PulseBaseMemory.t * PulseBaseAddressAttributes.t
@@ -90,6 +94,8 @@ val mk_join_state :
   -> PulseTopl.state
   -> TransitiveInfo.t
   -> PulseMutualRecursion.Set.t
+  -> PulseLoopHeaderInfo.t
+  -> unknown_values:bool
   -> SkippedCalls.t
   -> t
 
@@ -222,7 +228,8 @@ module AddressAttributes : sig
     -> Location.t
     -> t
     -> t
-  (** Add "Uninitialized" attributes when a variable is declared or a memory is allocated by malloc. *)
+  (** Add "Uninitialized" attributes when a variable is declared or a memory is allocated by malloc.
+  *)
 
   val always_reachable : AbstractValue.t -> t -> t
 
@@ -359,12 +366,6 @@ val reachable_addresses_from :
   -> AbstractValue.Set.t
 (** Compute the set of abstract addresses that are reachable from given abstract addresses. *)
 
-val has_reachable_in_inner_pre_heap : AbstractValue.t list -> t -> bool
-(** [true] if there is a value in the provided list that is reachable from the pre-condition after
-    some non-trivial steps in the pre heap, i.e. the value is gotten from at least one dereference
-    from the parameters of the current procedure. Used to detect likely-harmless recursive calls
-    since heap progress has been made. *)
-
 val get_unreachable_attributes : t -> AbstractValue.t list
 (** collect the addresses that have attributes but are unreachable in the current post-condition *)
 
@@ -372,7 +373,8 @@ val finalize_all_hack_builders : t -> t
 
 val mark_potential_leaks : Location.t -> dead_roots:Var.t list -> t -> t
 
-val add_recursive_call : Location.t -> Procname.t -> AbstractValue.t list -> t -> t
+val add_recursive_call :
+  Location.t -> Procname.t -> (AbstractValue.t * ValueHistory.t) list -> t -> t
 
 val add_recursive_calls : PulseMutualRecursion.Set.t -> t -> t
 
@@ -382,7 +384,13 @@ val add_skipped_calls : SkippedCalls.t -> t -> t
 
 val add_missed_captures : Typ.Name.Set.t -> t -> t
 
+val declare_unknown_values : t -> t
+
+val get_path_condition : t -> Formula.t
+
 val set_path_condition : Formula.t -> t -> t
+
+val push_loop_header_info : Procdesc.Node.id -> Timestamp.t -> t -> t
 
 val record_transitive_access : Location.t -> t -> t
 
@@ -478,6 +486,8 @@ module Summary : sig
     summary -> AbstractValue.t Specialization.HeapPath.Map.t
 
   val get_recursive_calls : summary -> PulseMutualRecursion.Set.t
+
+  val contains_unknown_values : summary -> bool
 
   val get_skipped_calls : summary -> SkippedCalls.t
 

@@ -30,7 +30,8 @@ module PathContext = PulsePathContext
     - When a copy variable goes out of scope, we first lookup the corresponding source address which
       we can then use to loopkup the snapshot from the non-disjunctive domain
 
-    Then we compare the snapshot heap with the current heap (see {!PulseNonDisjunctiveOperations}.) *)
+    Then we compare the snapshot heap with the current heap (see {!PulseNonDisjunctiveOperations}.)
+*)
 open AbstractDomain.Types
 
 module MakeDomainFromTotalOrder (M : AbstractDomain.Comparable) = struct
@@ -330,14 +331,14 @@ module IntraDomElt = struct
       match CopyMap.find_opt copy_var copy_map with
       | Some
           (Copied
-            { source_typ
-            ; source_opt
-            ; from
-            ; node
-            ; copied_location
-            ; location
-            ; heap= copy_heap
-            ; timestamp= copied_timestamp } )
+             { source_typ
+             ; source_opt
+             ; from
+             ; node
+             ; copied_location
+             ; location
+             ; heap= copy_heap
+             ; timestamp= copied_timestamp } )
         when is_modified copy_heap copied_timestamp ->
           Logging.d_printfln_escaped "Copy/source modified!" ;
           let modified : copy_spec_t =
@@ -437,7 +438,8 @@ module IntraDomElt = struct
               (not (Pvar.is_global pvar))
               && (not (is_lvalue_ref_param ~ref_formals pvar))
               && (not (List.Assoc.mem ptr_formals ~equal:Pvar.equal pvar))
-              && (* Note: We should NOT use [copied_location] here, because which is highly liked a
+              &&
+              (* Note: We should NOT use [copied_location] here, because which is highly liked a
                     location of another procedure, so is unhelpful to reason about intra-procedrual
                     order. *)
               is_never_used_after_copy_into_intermediate_or_field pvar location copied_timestamp
@@ -846,7 +848,7 @@ let exec non_disj ~exec_instr =
         (* move the abstract state from the non-disjunctive part into a single disjunct *)
         let non_disj = {non_disj with astate= Bottom} in
         (* set the context to "non-disjunctive" *)
-        let path = {path with is_non_disj= true} in
+        let path = PathContext.set_is_non_disj path in
         let exec_states_paths, non_disj =
           exec_instr ((ExecutionDomain.ContinueProgram astate, path), non_disj)
         in

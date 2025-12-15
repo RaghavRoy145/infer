@@ -9,7 +9,8 @@
 type t =
   | Analyze  (** analyze previously captured source files *)
   | Capture
-      (** capture compilation commands and translate source files into infer's intermediate language *)
+      (** capture compilation commands and translate source files into infer's intermediate language
+      *)
   | Compile
       (** set up the infer environment then run the compilation commands without capturing the
           source files *)
@@ -19,6 +20,7 @@ type t =
   | Report  (** post-process infer results and reports *)
   | ReportDiff  (** compute the difference of two infer reports *)
   | Run  (** orchestrate the capture, analysis, and reporting of a compilation command *)
+  | SemDiff  (** compute the semantic difference of two programs (currently for Python only) *)
 [@@deriving compare]
 
 val of_string : string -> t

@@ -1,0 +1,30 @@
+Capturing in make/cc mode ...
+/home/infer_TempFix/my_benchmark/urv/1_localtime.c:12:19: error: use of undeclared identifier 'SW_LOG_DATE_STRLEN'
+    char date_str[SW_LOG_DATE_STRLEN];
+                  ^
+/home/infer_TempFix/my_benchmark/urv/1_localtime.c:13:18: error: use of undeclared identifier 'SW_LOG_BUFFER_SIZE'
+    char log_str[SW_LOG_BUFFER_SIZE];
+                 ^
+/home/infer_TempFix/my_benchmark/urv/1_localtime.c:21:24: error: use of undeclared identifier 'SW_LOG_DATE_STRLEN'
+    snprintf(date_str, SW_LOG_DATE_STRLEN, "%d-%02d-%02d %02d:%02d:%02d", p->tm_year + 1900, p->tm_mon + 1, p->tm_mday, p->tm_hour, p->tm_min, p->tm_sec);
+                       ^
+3 errors generated.
+Arguments are ,level,cnt
+/home/infer_TempFix/my_benchmark/urv/1_localtime.c
+annalysing swLog_put
+CallingFunction: time @18
+CallingFunction: localtime @19
+|- futurec_raw (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: snprintf @21
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ deref(p)@20,0)
+|- RHS: (p=0 /\ (!_(p))^*)
+deref(p)@20 |- (!_(p))^*
+ ------- 
+/home/infer_TempFix/my_benchmark/urv/1_localtime.c
+
+=====> Actual effects of function: swLog_put ======>
+(true /\ deref(p)@20,0)
+<<<SYH:Clang.Capture.run_clang-ErrorN>>>
+

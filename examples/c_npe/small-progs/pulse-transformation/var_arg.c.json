@@ -1,0 +1,44 @@
+[
+  {
+    "procedure_name": "unknown_sum_four_then_npe_bad",
+    "procedure_id": "unknown_sum_four_then_npe_bad",
+    "source_file": "var_arg.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 63,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "sum_one_then_npe_bad",
+    "procedure_id": "sum_one_then_npe_bad",
+    "source_file": "var_arg.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 24,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "FP_sum_then_unreachable_npe_ok",
+    "procedure_id": "FP_sum_then_unreachable_npe_ok",
+    "source_file": "var_arg.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 48,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

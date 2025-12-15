@@ -14,8 +14,8 @@ let pp_taint_extra fmt
   Option.iter taint_source ~f:(fun source -> F.fprintf fmt "source: %s" source) ;
   Option.iter taint_sink ~f:(fun sink -> F.fprintf fmt ", sink: %s" sink) ;
   Option.iter tainted_expression ~f:(fun expr -> F.fprintf fmt ", tainted expression: %s" expr) ;
-  Option.iter taint_policy_privacy_effect ~f:(fun effect ->
-      F.fprintf fmt ", privacy effect: %s" effect )
+  Option.iter taint_policy_privacy_effect ~f:(fun privacy_effect ->
+      F.fprintf fmt ", privacy effect: %s" privacy_effect )
 
 
 let pp_trace fmt trace comma =
@@ -93,6 +93,10 @@ let pp_custom_of_report fmt report fields =
           let taint_extra = Option.bind issue.extras ~f:(fun extras -> extras.taint_extra) in
           Option.iter taint_extra ~f:(fun taint_extra ->
               F.fprintf fmt "%s%a" (comma_separator index) pp_taint_extra taint_extra )
+      | MayDependOnAnUnknownValue ->
+          Option.iter issue.extras ~f:(fun {may_depend_on_an_unknown_value} ->
+              Option.iter may_depend_on_an_unknown_value ~f:(fun {value} ->
+                  if value then F.fprintf fmt "true" ) )
       | TransitiveCalleesExtra ->
           let pp_item fmt
               {Jsonbug_t.caller_name; callsite_relative_position_in_caller; kind; resolution} =

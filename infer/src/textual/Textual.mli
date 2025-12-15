@@ -17,6 +17,8 @@ module Lang : sig
   val to_string : t -> string
 
   val is_swift : t -> bool
+
+  val is_c : t -> bool
 end
 
 module Location : sig
@@ -36,6 +38,8 @@ module type NAME = sig
 
   val of_string : ?loc:Location.t -> string -> t
   (** we replace any dot in the string by '::' because dot is a reserved separator in Textual *)
+
+  val to_string : t -> string
 
   val pp : F.formatter -> t -> unit
 
@@ -63,7 +67,13 @@ module FieldName : NAME (* field names, without their enclosing types *)
 
 module NodeName : NAME (* node names, also called labels *)
 
-module BaseTypeName : NAME
+module BaseTypeName : sig
+  include NAME
+
+  val swift_tuple_class_name : t
+
+  val swift_type_name : t
+end
 
 module TypeName : sig
   (* structured value type name *)
@@ -75,6 +85,8 @@ module TypeName : sig
   val of_string_no_dot_escape : string -> t
 
   val mk_swift_tuple_type_name : t list -> t
+
+  val mk_swift_type_name : ?plain_name:string -> string -> t
 
   val pp : F.formatter -> t -> unit
 
@@ -97,11 +109,17 @@ module QualifiedProcName : sig
   type t = {enclosing_class: enclosing_class; name: ProcName.t} [@@deriving compare, equal, hash]
   (* procedure name [name] is attached to the name space [enclosing_class] *)
 
+  module Map : Stdlib.Map.S with type key = t
+
   val pp : F.formatter -> t -> unit
 
   val name : t -> ProcName.t
 
+  val get_class_name : t -> TypeName.t option
+
   val contains_wildcard : t -> bool
+
+  val is_hack_closure_generated_invoke : t -> bool
 
   val is_python_builtin : t -> bool
 
@@ -112,7 +130,7 @@ module QualifiedProcName : sig
   module Hashtbl : Hashtbl.S with type key = t
 end
 
-type qualified_fieldname = {enclosing_class: TypeName.t; name: FieldName.t}
+type qualified_fieldname = {enclosing_class: TypeName.t; name: FieldName.t} [@@deriving equal]
 (* field name [name] must be declared in type [enclosing_class] *)
 
 val pp_qualified_fieldname : F.formatter -> qualified_fieldname -> unit
@@ -127,6 +145,8 @@ module Attr : sig
   val mk_source_language : Lang.t -> t
 
   val mk_static : t
+
+  val mk_weak : t
 
   val mk_final : t
 
@@ -145,6 +165,8 @@ module Attr : sig
   val is_notnull : t -> bool
 
   val is_static : t -> bool
+
+  val is_weak : t -> bool
 
   val is_interface : t -> bool
 
@@ -166,7 +188,11 @@ module Attr : sig
 
   val mk_plain_name : string -> t
 
+  val mk_method_offset : int -> t
+
   val get_plain_name : t -> string option
+
+  val get_method_offset : t -> int option
 
   val pp : F.formatter -> t -> unit [@@warning "-unused-value-declaration"]
 
@@ -196,6 +222,10 @@ module Typ : sig
   val pp_annotated : F.formatter -> annotated -> unit
 
   val mk_without_attributes : t -> annotated
+
+  val any_type_llvm : t
+
+  val any_type_swift : t
 end
 
 module Ident : sig
@@ -214,6 +244,8 @@ module Ident : sig
   val fresh : Set.t -> t
 
   val to_ssa_var : t -> VarName.t
+
+  val to_temp_var : t -> VarName.t
 
   val pp : F.formatter -> t -> unit
 end
@@ -296,7 +328,11 @@ module ProcDecl : sig
 
   val malloc_name : QualifiedProcName.t
 
+  val swift_alloc_name : QualifiedProcName.t
+
   val is_malloc_builtin : QualifiedProcName.t -> bool
+
+  val is_swift_alloc_builtin : QualifiedProcName.t -> bool
 
   val free_name : QualifiedProcName.t [@@warning "-unused-value-declaration"]
 
@@ -314,7 +350,7 @@ module ProcDecl : sig
 
   val is_get_lazy_class_builtin : QualifiedProcName.t -> bool
 
-  val is_lazy_class_initialize_builtin : QualifiedProcName.t -> bool
+  val lazy_class_initialize_builtin : QualifiedProcName.t
 
   val is_side_effect_free_sil_expr : QualifiedProcName.t -> bool
 
@@ -327,15 +363,11 @@ module ProcDecl : sig
   val is_builtin : QualifiedProcName.t -> Lang.t -> bool
 end
 
-module Global : sig
-  type t = {name: VarName.t; typ: Typ.t; attributes: Attr.t list}
-end
-
 module FieldDecl : sig
   type t = {qualified_name: qualified_fieldname; typ: Typ.t; attributes: Attr.t list}
 end
 
-module Exp : sig
+module rec Exp : sig
   type call_kind = Virtual | NonVirtual [@@deriving equal]
 
   type t =
@@ -345,6 +377,7 @@ module Exp : sig
     | Field of {exp: t; field: qualified_fieldname}  (** field offset *)
     | Index of t * t  (** an array index offset: [exp1[exp2]] *)
     | Const of Const.t
+    | If of {cond: BoolExp.t; then_: t; else_: t}
     | Call of {proc: QualifiedProcName.t; args: t list; kind: call_kind}
     | Closure of
         { proc: QualifiedProcName.t
@@ -374,7 +407,7 @@ module Exp : sig
   val pp : F.formatter -> t -> unit
 end
 
-module BoolExp : sig
+and BoolExp : sig
   type t = Exp of Exp.t | Not of t | And of t * t | Or of t * t
 
   val pp : F.formatter -> t -> unit [@@warning "-unused-value-declaration"]
@@ -424,10 +457,16 @@ module Node : sig
   module Set : Stdlib.Set.S with type elt = t
 end
 
+module Global : sig
+  type t = {name: VarName.t; typ: Typ.t; attributes: Attr.t list; init_exp: Exp.t option}
+end
+
 module ProcDesc : sig
   type t =
     { procdecl: ProcDecl.t
     ; nodes: Node.t list
+    ; fresh_ident: Ident.t option
+          (* an ident that is never defined in this pdesc (used for some later  transformations) *)
     ; start: NodeName.t
     ; params: VarName.t list
     ; locals: (VarName.t * Typ.annotated) list

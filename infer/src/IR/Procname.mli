@@ -10,9 +10,6 @@ module F = Format
 
 (** Module for Procedure Names. *)
 
-(** Level of verbosity of some to_string functions. *)
-type detail_level = FullNameOnly | NameOnly | Non_verbose | Simple | Verbose
-
 (** Type of csharp procedure names. *)
 module CSharp : sig
   type kind =
@@ -188,17 +185,6 @@ module Hack : sig
   val belongs_to_static_companion : t -> bool
 end
 
-module Swift : sig
-  type t =
-    | ClassMethod of {class_name: Typ.Name.t; method_name: Mangled.t}
-    | Function of {function_name: Mangled.t}
-  [@@deriving compare, equal, yojson_of, sexp, hash, normalize]
-
-  val mk_function : Mangled.t -> t
-
-  val mk_class_method : Typ.Name.t -> Mangled.t -> t
-end
-
 (** Type of procedure names. *)
 type t =
   | Block of Block.t
@@ -209,7 +195,7 @@ type t =
   | Java of Java.t
   | ObjC_Cpp of ObjC_Cpp.t
   | Python of PythonProcname.t
-  | Swift of Swift.t
+  | Swift of SwiftProcname.t
 [@@deriving compare, yojson_of, sexp, hash, normalize]
 
 val compare_name : t -> t -> int
@@ -317,7 +303,8 @@ val make_objc_copy : Typ.Name.t -> t
 (** Create a Objective-C copy name. *)
 
 val make_objc_copyWithZone : is_mutable:bool -> Typ.Name.t -> t
-(** Create an Objective-C method for copyWithZone: or mutableCopyWithZone: according to is_mutable. *)
+(** Create an Objective-C method for copyWithZone: or mutableCopyWithZone: according to is_mutable.
+*)
 
 val make_python : module_name:PythonClassName.t -> function_name:string -> t
 (** Create a Python procedure name. *)
@@ -374,7 +361,8 @@ val objc_cpp_replace_method_name : t -> string -> t
 
 val is_static : t -> bool option
 (** Check if a procedure is a static class method or not. If the procedure is not a class method or
-    is unknown to be static, it returns [None]. For now, this checking does not work on C++ methods. *)
+    is unknown to be static, it returns [None]. For now, this checking does not work on C++ methods.
+*)
 
 val get_global_name_of_initializer : t -> string option
 (** Return the name of the global for which this procedure is the initializer if this is an
@@ -389,7 +377,7 @@ val pp : Format.formatter -> t -> unit
 val pp_verbose : Format.formatter -> t -> unit
 (** Pretty print a proc name for the user to see with verbosity parameter. *)
 
-val to_string : ?verbosity:detail_level -> t -> string
+val to_string : ?verbosity:PpDetailLevel.t -> t -> string
 (** Convert a proc name into a string for the user to see. *)
 
 val to_string_verbose : t -> string
@@ -475,7 +463,8 @@ val erlang_call_unqualified : arity:int -> t
 
 val erlang_call_qualified : arity:int -> t
 (** Same as [erlang_call_unqualified] but is expected to have an erlang module name as the first
-    parameter, and the function name as second. [arity] is (still) the erlang arity of the function. *)
+    parameter, and the function name as second. [arity] is (still) the erlang arity of the function.
+*)
 
 val is_erlang_call_unqualified : t -> bool
 

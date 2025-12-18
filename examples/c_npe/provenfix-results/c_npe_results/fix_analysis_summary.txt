@@ -1,0 +1,24 @@
+ProvenFix C NPE Test Cases - Fix Analysis Summary
+==================================================
+Total Test Cases: 20
+Fixes Generated: 4
+
+
+FIXES GENERATED (with analysis):
+---------------------------------
+
+1. test02_conditional_null:
+   PARTIAL INCORRECT -  Correct location for null check after malloc (line 10) but uses void return instead of 'return 0;'
+
+2. test08_malloc_fail:
+   PARTIAL INCORRECT - Correct location for null check after malloc (line 10) but uses void return instead of 'return 0;'
+
+3. test10_switch_case_null:
+   COMPLETELY INCORRECT - Suggests freeing ptr at line 4 (before it's even initialized/used) instead of checking for null before dereference at line 22
+
+4. test18_realloc_null:
+   PARTIAL INCORRECT - Correct location for null check after realloc (line 12) but uses void return instead of 'return 0;'
+
+
+
+

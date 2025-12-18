@@ -1,0 +1,74 @@
+ProvenFix Benchmark Results - Fix Analysis Summary
+===================================================
+
+IMPORTANT NOTE: The benchmark_results folder contains 7 detail files, but they are actually
+only 3 unique files with duplicated names:
+- Group 1: 0_swoole_detail.txt = 1_peek_detail.txt = fig3_detail.txt (contains fig3.c fix)
+- Group 2: 1_localtime_detail.txt = 2_returnChunkSize_detail.txt (contains fig3.c + 6_fileIO.c + 1_localtime.c fixes)
+- Group 3: 6_fileIO_detail.txt = hello_detail.txt (contains fig3.c + 6_fileIO.c fixes)
+
+ACTUAL BENCHMARK FILES ANALYZED: 7 files
+FIXES GENERATED: 3 fixes (fig3.c, 1_localtime.c, 6_fileIO.c)
+SUCCESS RATE: 3/7 (43%)
+
+================================================================================
+FIXES GENERATED (with detailed analysis):
+================================================================================
+
+1. fig3.c (examples/fig3.c)
+   BUG: Potential double-free vulnerability
+   - Line 14: p.f = malloc(1)
+   - Lines 6-8: foo() returns either malloc(1) (if p->flag) or p->f (if !p->flag)
+   - Line 16: if (p.flag) free(q) - only frees q when p.flag is true
+   - Line 17: free(p.f) - always frees p.f
+   - When p.flag is false, q and p.f point to same memory, causing double-free
+
+   SUGGESTED FIX: @ line 16: if (p.f==0){ return; }
+
+   ANALYSIS: COMPLETELY INCORRECT
+   - Fix checks if p.f is null, but p.f is allocated at line 14 so it won't be null
+   - Doesn't address the actual double-free bug when p.flag is false and q == p.f
+   - Correct fix would need to track whether q and p.f are the same pointer
+
+--------------------------------------------------------------------------------
+
+2. 1_localtime.c (my_benchmark/urv/1_localtime.c)
+   BUG: localtime() can return NULL, dereferenced without checking
+   - Line 19: p = localtime(&t) - can return NULL
+   - Line 20: p->tm_year - first dereference without null check
+   - Line 21: uses p->tm_year, p->tm_mon, p->tm_mday, etc.
+
+   SUGGESTED FIX: @ line 20: if (p==0){ return; }
+
+   ANALYSIS: PARTIAL INCORRECT
+   - Correct concept: checks for null before first dereference
+   - Correct location: line 20 (before first use)
+   - WRONG: uses void return instead of proper error handling for swLog_put()
+   - Should return error code or handle gracefully, not just 'return;'
+
+--------------------------------------------------------------------------------
+
+3. 6_fileIO.c (my_benchmark/6_fileIO.c)
+   BUG: fopen() can return NULL, file pointer used without checking
+   - Line 24: f1 = fopen("file.txt", "a") - can return NULL
+   - Line 25: return test(a, f1) - passes f1 to test()
+   - Line 7 in test(): assert(f1) - will crash if f1 is NULL
+
+   SUGGESTED FIX: @ line 25: if (f1>0 /\ (f1!=stdout) /\ (f1!=stdin)){fclose(f1); }
+
+   ANALYSIS: COMPLETELY INCORRECT
+   - Wrong approach: suggests closing file instead of checking for NULL before use
+   - Invalid C syntax: uses '/\' (logical AND from formal spec) instead of '&&'
+   - Wrong comparison: file pointers shouldn't be compared with '>' operator
+   - Wrong location: should check before calling test(), not after fopen
+   - Correct fix: if (f1 == NULL) return error; OR check before assert in test()
+
+================================================================================
+NO FIXES GENERATED:
+================================================================================
+
+4. 0_swoole.c - No fix generated (detail file contains only Snort fixes)
+5. 1_peek.c - No fix generated (detail file contains only Snort fixes)
+6. 2_returnChunkSize.c - No fix generated (detail file contains only Snort fixes)
+7. hello.c - No fix generated (detail file contains only Snort fixes)
+

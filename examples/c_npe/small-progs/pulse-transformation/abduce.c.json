@@ -14,34 +14,6 @@
     }
   },
   {
-    "procedure_name": "FP_set_ptr_param_array_return_true_ok",
-    "procedure_id": "FP_set_ptr_param_array_return_true_ok",
-    "source_file": "abduce.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 9,
-      "def_site_line": 40,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "FP_set_ptr_param_array_get_ptr_ok",
-    "procedure_id": "FP_set_ptr_param_array_get_ptr_ok",
-    "source_file": "abduce.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 9,
-      "def_site_line": 48,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
     "procedure_name": "FP_set_ptr_local_array_return_true_ok",
     "procedure_id": "FP_set_ptr_local_array_return_true_ok",
     "source_file": "abduce.c",
@@ -56,20 +28,6 @@
     }
   },
   {
-    "procedure_name": "FP_set_ptr_param_array_get_ptr_ok",
-    "procedure_id": "FP_set_ptr_param_array_get_ptr_ok",
-    "source_file": "abduce.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 9,
-      "def_site_line": 48,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
     "procedure_name": "FP_set_ptr_param_array_return_true_ok",
     "procedure_id": "FP_set_ptr_param_array_return_true_ok",
     "source_file": "abduce.c",
@@ -77,20 +35,6 @@
     "details": {
       "def_site_node": 9,
       "def_site_line": 40,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "FP_set_ptr_local_array_return_true_ok",
-    "procedure_id": "FP_set_ptr_local_array_return_true_ok",
-    "source_file": "abduce.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 9,
-      "def_site_line": 27,
       "target_pvar": "p",
       "pvar_type": "int*",
       "reuse_candidate": null,

@@ -1,5 +1,17 @@
 [
   {
+    "procedure_name": "no_fopen_check_fputs_bad",
+    "procedure_id": "no_fopen_check_fputs_bad",
+    "source_file": "fopen.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "fopen.c",
+      "npe_line": 79,
+      "original_pointer": "&f"
+    }
+  },
+  {
     "procedure_name": "no_fopen_check_fseek_bad",
     "procedure_id": "no_fopen_check_fseek_bad",
     "source_file": "fopen.c",
@@ -12,26 +24,62 @@
     }
   },
   {
-    "procedure_name": "no_fopen_check_clearerr_bad",
-    "procedure_id": "no_fopen_check_clearerr_bad",
+    "procedure_name": "no_fopen_check_ferror_bad",
+    "procedure_id": "no_fopen_check_ferror_bad",
     "source_file": "fopen.c",
     "plan_type": "NoPlanGenerated",
     "details": {
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "fopen.c",
-      "npe_line": 225,
+      "npe_line": 243,
       "original_pointer": "&f"
     }
   },
   {
-    "procedure_name": "no_fopen_check_fgets_bad",
-    "procedure_id": "no_fopen_check_fgets_bad",
+    "procedure_name": "no_fopen_check_feof_bad",
+    "procedure_id": "no_fopen_check_feof_bad",
     "source_file": "fopen.c",
     "plan_type": "NoPlanGenerated",
     "details": {
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "fopen.c",
-      "npe_line": 170,
+      "npe_line": 261,
+      "original_pointer": "&f"
+    }
+  },
+  {
+    "procedure_name": "no_fopen_check_ungetc_bad",
+    "procedure_id": "no_fopen_check_ungetc_bad",
+    "source_file": "fopen.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "fopen.c",
+      "npe_line": 63,
+      "original_pointer": "&f"
+    }
+  },
+  {
+    "procedure_name": "no_fopen_check_getc_bad",
+    "procedure_id": "no_fopen_check_getc_bad",
+    "source_file": "fopen.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "fopen.c",
+      "npe_line": 14,
+      "original_pointer": "&f"
+    }
+  },
+  {
+    "procedure_name": "no_fopen_check_fgetpos_bad",
+    "procedure_id": "no_fopen_check_fgetpos_bad",
+    "source_file": "fopen.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "fopen.c",
+      "npe_line": 321,
       "original_pointer": "&f"
     }
   },
@@ -48,14 +96,14 @@
     }
   },
   {
-    "procedure_name": "no_fopen_check_putc_bad",
-    "procedure_id": "no_fopen_check_putc_bad",
+    "procedure_name": "no_fopen_check_clearerr_bad",
+    "procedure_id": "no_fopen_check_clearerr_bad",
     "source_file": "fopen.c",
     "plan_type": "NoPlanGenerated",
     "details": {
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "fopen.c",
-      "npe_line": 115,
+      "npe_line": 225,
       "original_pointer": "&f"
     }
   },
@@ -68,18 +116,6 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "fopen.c",
       "npe_line": 97,
-      "original_pointer": "&f"
-    }
-  },
-  {
-    "procedure_name": "no_fopen_check_fsetpos_bad",
-    "procedure_id": "no_fopen_check_fsetpos_bad",
-    "source_file": "fopen.c",
-    "plan_type": "NoPlanGenerated",
-    "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "fopen.c",
-      "npe_line": 341,
       "original_pointer": "&f"
     }
   },
@@ -104,6 +140,18 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "fopen.c",
       "npe_line": 151,
+      "original_pointer": "&f"
+    }
+  },
+  {
+    "procedure_name": "no_fopen_check_fsetpos_bad",
+    "procedure_id": "no_fopen_check_fsetpos_bad",
+    "source_file": "fopen.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "fopen.c",
+      "npe_line": 341,
       "original_pointer": "&f"
     }
   }

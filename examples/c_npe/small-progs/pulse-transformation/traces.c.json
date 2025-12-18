@@ -1,26 +1,5 @@
 [
   {
-    "procedure_name": "access_use_after_free_bad",
-    "procedure_id": "access_use_after_free_bad",
-    "source_file": "traces.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 4,
-      "end_node": 3,
-      "start_line": 61,
-      "end_line": 62,
-      "guard_with_pointer": "&l",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 2,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
     "procedure_name": "access_null_deref_bad",
     "procedure_id": "access_null_deref_bad",
     "source_file": "traces.c",
@@ -74,90 +53,6 @@
         "initial_candidate_plans": 2,
         "total_aliases": 1
       }
-    }
-  },
-  {
-    "procedure_name": "simple_deref",
-    "procedure_id": "simple_deref",
-    "source_file": "traces.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 5,
-      "def_site_line": 12,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
-    }
-  },
-  {
-    "procedure_name": "access_null_deref_bad",
-    "procedure_id": "access_null_deref_bad",
-    "source_file": "traces.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 57,
-      "end_line": 57,
-      "guard_with_pointer": "&l",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "simple_deref_via_alias",
-    "procedure_id": "simple_deref_via_alias",
-    "source_file": "traces.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 4,
-      "def_site_line": 19,
-      "target_pvar": "q",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
-    }
-  },
-  {
-    "procedure_name": "access_use_after_free_bad",
-    "procedure_id": "access_use_after_free_bad",
-    "source_file": "traces.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 4,
-      "end_node": 3,
-      "start_line": 61,
-      "end_line": 62,
-      "guard_with_pointer": "&l",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 2,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "simple_deref",
-    "procedure_id": "simple_deref",
-    "source_file": "traces.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 5,
-      "def_site_line": 12,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
     }
   }
 ]

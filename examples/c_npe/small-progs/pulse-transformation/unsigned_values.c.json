@@ -1,12 +1,12 @@
 [
   {
-    "procedure_name": "FP_nonnegative_array_ok",
-    "procedure_id": "FP_nonnegative_array_ok",
+    "procedure_name": "FP_nonnegative_int_ok",
+    "procedure_id": "FP_nonnegative_int_ok",
     "source_file": "unsigned_values.c",
     "plan_type": "Replace",
     "details": {
       "def_site_node": 9,
-      "def_site_line": 93,
+      "def_site_line": 18,
       "target_pvar": "p",
       "pvar_type": "int*",
       "reuse_candidate": null,
@@ -14,13 +14,13 @@
     }
   },
   {
-    "procedure_name": "FP_nonnegative_field_ok",
-    "procedure_id": "FP_nonnegative_field_ok",
+    "procedure_name": "signed_field_bad",
+    "procedure_id": "signed_field_bad",
     "source_file": "unsigned_values.c",
     "plan_type": "Replace",
     "details": {
       "def_site_node": 9,
-      "def_site_line": 71,
+      "def_site_line": 80,
       "target_pvar": "p",
       "pvar_type": "int*",
       "reuse_candidate": null,
@@ -42,13 +42,27 @@
     }
   },
   {
-    "procedure_name": "signed_int_bad",
-    "procedure_id": "signed_int_bad",
+    "procedure_name": "FP_nonnegative_int_ptr_ok",
+    "procedure_id": "FP_nonnegative_int_ptr_ok",
     "source_file": "unsigned_values.c",
     "plan_type": "Replace",
     "details": {
       "def_site_node": 9,
-      "def_site_line": 29,
+      "def_site_line": 42,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "FP_nonnegative_array_ok",
+    "procedure_id": "FP_nonnegative_array_ok",
+    "source_file": "unsigned_values.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 9,
+      "def_site_line": 93,
       "target_pvar": "p",
       "pvar_type": "int*",
       "reuse_candidate": null,

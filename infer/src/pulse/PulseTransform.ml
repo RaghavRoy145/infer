@@ -502,16 +502,8 @@ let find_last_def_site ~proc_desc ~ptr_var =
       (* Step 2. Build the dominator tree to check for correct ordering. *)
       let idom = GDoms.compute_idom proc_desc (Procdesc.get_start_node proc_desc) in
       let dominates def_node use_node =
-        let rec is_dominated_by_rec current_node =
-          if Procdesc.Node.equal current_node def_node then true
-          else
-            let dominator = idom current_node in
-            if Procdesc.Node.equal dominator current_node then false (* Reached root of dominator tree *)
-            else is_dominated_by_rec dominator
-        in
-        is_dominated_by_rec use_node
+        is_dominated_by ~dominator:def_node ~node:use_node idom
       in
-      
       (* Step 3. Find all nodes that contain a definition of the variable. *)
       let is_def_instr instr =
         match (instr : Sil.instr) with

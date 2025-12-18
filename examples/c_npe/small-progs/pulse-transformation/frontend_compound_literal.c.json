@@ -12,33 +12,5 @@
       "reuse_candidate": null,
       "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
     }
-  },
-  {
-    "procedure_name": "init_with_compound_literal_npe_bad",
-    "procedure_id": "init_with_compound_literal_npe_bad",
-    "source_file": "frontend_compound_literal.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 9,
-      "def_site_line": 18,
-      "target_pvar": "pointer",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "init_with_compound_literal_npe_bad",
-    "procedure_id": "init_with_compound_literal_npe_bad",
-    "source_file": "frontend_compound_literal.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 9,
-      "def_site_line": 18,
-      "target_pvar": "pointer",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
   }
 ]

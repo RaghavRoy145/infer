@@ -1,47 +1,5 @@
 [
   {
-    "procedure_name": "memleak_continues_execution_bad",
-    "procedure_id": "memleak_continues_execution_bad",
-    "source_file": "issues_abort_execution.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 4,
-      "def_site_line": 25,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "uninit_continues_execution_bad",
-    "procedure_id": "uninit_continues_execution_bad",
-    "source_file": "issues_abort_execution.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 4,
-      "def_site_line": 14,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "memleak_continues_execution_bad",
-    "procedure_id": "memleak_continues_execution_bad",
-    "source_file": "issues_abort_execution.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 4,
-      "def_site_line": 25,
-      "target_pvar": "p",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
     "procedure_name": "uninit_continues_execution_bad",
     "procedure_id": "uninit_continues_execution_bad",
     "source_file": "issues_abort_execution.c",

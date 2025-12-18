@@ -1,215 +1,5 @@
 [
   {
-    "procedure_name": "test_update_callback_bad",
-    "procedure_id": "test_update_callback_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 243,
-      "end_line": 243,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "test_returned_funptr_specialization_bad",
-    "procedure_id": "test_returned_funptr_specialization_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 33,
-      "end_line": 33,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "apply_funptr_with_intptrptr_and_after",
-    "procedure_id": "apply_funptr_with_intptrptr_and_after",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 142,
-      "end_line": 142,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "test_syntactic_specialization_bad",
-    "procedure_id": "test_syntactic_specialization_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 23,
-      "end_line": 23,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "test_assign_NULL_callback_bad",
-    "procedure_id": "test_assign_NULL_callback_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 231,
-      "end_line": 231,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad",
-    "procedure_id": "funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 11,
-      "def_site_line": 193,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "funptr_if_bad",
-    "procedure_id": "funptr_if_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 11,
-      "def_site_line": 40,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
-    }
-  },
-  {
-    "procedure_name": "funptr_apply_funptr_with_intptrptr_specialized_bad",
-    "procedure_id": "funptr_apply_funptr_with_intptrptr_specialized_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 11,
-      "def_site_line": 108,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
-    }
-  },
-  {
-    "procedure_name": "funptr_conditional_call_bad",
-    "procedure_id": "funptr_conditional_call_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 11,
-      "def_site_line": 91,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
-    }
-  },
-  {
-    "procedure_name": "funptr_else_bad",
-    "procedure_id": "funptr_else_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 11,
-      "def_site_line": 66,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
-    }
-  },
-  {
-    "procedure_name": "funptr_conditionnaly_apply_funptr_with_intptrptr_specialized_bad",
-    "procedure_id": "funptr_conditionnaly_apply_funptr_with_intptrptr_specialized_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 11,
-      "def_site_line": 207,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "test_update_callback_bad",
-    "procedure_id": "test_update_callback_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 243,
-      "end_line": 243,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
     "procedure_name": "funptr_else_bad",
     "procedure_id": "funptr_else_bad",
     "source_file": "funptr.c",
@@ -252,17 +42,24 @@
     }
   },
   {
-    "procedure_name": "funptr_apply_funptr_with_intptrptr_specialized_bad",
-    "procedure_id": "funptr_apply_funptr_with_intptrptr_specialized_bad",
+    "procedure_name": "test_assign_NULL_callback_bad",
+    "procedure_id": "test_assign_NULL_callback_bad",
     "source_file": "funptr.c",
-    "plan_type": "Replace",
+    "plan_type": "Skip",
     "details": {
-      "def_site_node": 11,
-      "def_site_line": 108,
-      "target_pvar": "ptr",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 231,
+      "end_line": 231,
+      "guard_with_pointer": "&ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -287,6 +84,20 @@
     }
   },
   {
+    "procedure_name": "funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad",
+    "procedure_id": "funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad",
+    "source_file": "funptr.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 193,
+      "target_pvar": "ptr",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
     "procedure_name": "apply_funptr_with_intptrptr_and_after",
     "procedure_id": "apply_funptr_with_intptrptr_and_after",
     "source_file": "funptr.c",
@@ -296,69 +107,6 @@
       "end_node": 3,
       "start_line": 142,
       "end_line": 142,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "test_returned_funptr_specialization_bad",
-    "procedure_id": "test_returned_funptr_specialization_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 33,
-      "end_line": 33,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "test_assign_NULL_callback_bad",
-    "procedure_id": "test_assign_NULL_callback_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 231,
-      "end_line": 231,
-      "guard_with_pointer": "&ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "test_update_callback_bad",
-    "procedure_id": "test_update_callback_bad",
-    "source_file": "funptr.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 243,
-      "end_line": 243,
       "guard_with_pointer": "&ptr",
       "metrics": {
         "cost_l_imprecision": 0,
@@ -385,17 +133,59 @@
     }
   },
   {
-    "procedure_name": "funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad",
-    "procedure_id": "funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad",
+    "procedure_name": "test_returned_funptr_specialization_bad",
+    "procedure_id": "test_returned_funptr_specialization_bad",
+    "source_file": "funptr.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 33,
+      "end_line": 33,
+      "guard_with_pointer": "&ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "funptr_apply_funptr_with_intptrptr_specialized_bad",
+    "procedure_id": "funptr_apply_funptr_with_intptrptr_specialized_bad",
     "source_file": "funptr.c",
     "plan_type": "Replace",
     "details": {
       "def_site_node": 11,
-      "def_site_line": 193,
+      "def_site_line": 108,
       "target_pvar": "ptr",
       "pvar_type": "int*",
       "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 2 }
+    }
+  },
+  {
+    "procedure_name": "test_update_callback_bad",
+    "procedure_id": "test_update_callback_bad",
+    "source_file": "funptr.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 243,
+      "end_line": 243,
+      "guard_with_pointer": "&ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   }
 ]

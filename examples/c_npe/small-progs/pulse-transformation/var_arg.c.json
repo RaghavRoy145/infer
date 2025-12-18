@@ -1,5 +1,19 @@
 [
   {
+    "procedure_name": "unknown_sum_one_then_npe_bad",
+    "procedure_id": "unknown_sum_one_then_npe_bad",
+    "source_file": "var_arg.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 57,
+      "target_pvar": "p",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
     "procedure_name": "unknown_sum_four_then_npe_bad",
     "procedure_id": "unknown_sum_four_then_npe_bad",
     "source_file": "var_arg.c",

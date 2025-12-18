@@ -1,53 +1,5 @@
 [
   {
-    "procedure_name": "memcpy_from_null_bad",
-    "procedure_id": "memcpy_from_null_bad",
-    "source_file": "memcpy.c",
-    "plan_type": "NoPlanGenerated",
-    "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "memcpy.c",
-      "npe_line": 39,
-      "original_pointer": "&src"
-    }
-  },
-  {
-    "procedure_name": "memcpy_to_null_bad",
-    "procedure_id": "memcpy_to_null_bad",
-    "source_file": "memcpy.c",
-    "plan_type": "NoPlanGenerated",
-    "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "memcpy.c",
-      "npe_line": 26,
-      "original_pointer": "&p"
-    }
-  },
-  {
-    "procedure_name": "memcpy_to_null_indirect_bad",
-    "procedure_id": "memcpy_to_null_indirect_bad",
-    "source_file": "memcpy.c",
-    "plan_type": "NoPlanGenerated",
-    "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "memcpy.c",
-      "npe_line": 33,
-      "original_pointer": "&r"
-    }
-  },
-  {
-    "procedure_name": "memcpy_from_null_bad",
-    "procedure_id": "memcpy_from_null_bad",
-    "source_file": "memcpy.c",
-    "plan_type": "NoPlanGenerated",
-    "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "memcpy.c",
-      "npe_line": 39,
-      "original_pointer": "&src"
-    }
-  },
-  {
     "procedure_name": "memcpy_to_null_bad",
     "procedure_id": "memcpy_to_null_bad",
     "source_file": "memcpy.c",

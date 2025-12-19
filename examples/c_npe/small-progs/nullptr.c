@@ -9,209 +9,50 @@
 #include <stdlib.h>
 #include <stdnoreturn.h>
 
+/* ========================================================================= */
+/* GROUP 1: BASELINE & LOCAL NPEs (Tool works well here)                     */
+/* ========================================================================= */
+
+// BUG_TYPE: B-INTRA
+// EXPECTED_STRATEGY: REPLACE (or SKIP/EVADE if return issue fixed)
+// CURRENT_STATUS: UNSAFE (Wraps return p, causing Use-After-Return)
+// FIX_REQUIRED: FIX-04 (Return Safety) or FIX-08 (Escape Analysis)
 int* malloc_no_check_bad() {
   int* p = (int*)malloc(sizeof(int));
   *p = 42;
   return p;
 }
 
-void malloc_assert_ok() {
-  int* p = (int*)malloc(sizeof(int));
-  assert(p);
-  *p = 42;
-  free(p);
-}
-
-void create_null_path_ok(int* p) {
-  if (p) {
-    *p = 32;
-  }
-}
-
-void call_create_null_path_then_deref_unconditionally_ok(int* p) {
-  create_null_path_ok(p);
-  *p = 52;
-}
-
-void create_null_path2_bad_FN(int* p) {
-  int* q = NULL;
-  if (p) {
-    *p = 32;
-  }
-  // arguably bogus to check p above but not here, but the above could
-  // also be macro-generated code so both reporting and not reporting
-  // are sort of justifiable
-  *p = 52;
-}
-
-// combine several of the difficulties above
-void malloc_then_call_create_null_path_then_deref_unconditionally_bad_FN(
-    int* p) {
-  int* x = (int*)malloc(sizeof(int));
-  if (p) {
-    *p = 32;
-  }
-  create_null_path_ok(p);
-  *p = 52;
-  free(x);
-}
-
-// pulse should remember the value of vec[64] because it was just written to
-void nullptr_deref_young_bad(int* x) {
-  int* vec[65] = {x, x, x, x, x, x, x, x, x, x, x, x, x, x,   x, x, x,
-                  x, x, x, x, x, x, x, x, x, x, x, x, x, x,   x, x, x,
-                  x, x, x, x, x, x, x, x, x, x, x, x, x, x,   x, x, x,
-                  x, x, x, x, x, x, x, x, x, x, x, x, x, NULL};
-  int p = *vec[64];
-}
-
-// due to the recency model of memory accesses, vec[0] can get forgotten
-// by the time we have processed the last element of the
-// initialization so we don't report here
-void FN_nullptr_deref_old_bad(int* x) {
-  int* vec[65] = {NULL, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x,
-                  x,    x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x,
-                  x,    x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x,
-                  x,    x, x, x, x, x, x, x, x, x, x, x, x, x};
-  int p = *vec[0];
-}
-
-void malloc_free_ok() {
-  int* p = (int*)malloc(sizeof(int));
-  free(p);
-}
-
-void wrap_free(void* p) { free(p); }
-
-void interproc_free_ok() {
-  int* p = (int*)malloc(sizeof(int));
-  wrap_free(p);
-}
-
-noreturn void no_return();
-
-void wrap_malloc(int** x) {
-  *x = (int*)malloc(sizeof(int));
-  if (!*x) {
-    no_return();
-  }
-}
-
-void call_no_return_good() {
-  int* x = NULL;
-  wrap_malloc(&x);
-  *x = 5;
-  free(x);
-}
-
-void bug_after_malloc_result_test_bad(int* x) {
-  x = (int*)malloc(sizeof(int));
-  if (x) {
-    int* y = NULL;
-    *y = 42;
-  }
-}
-
-void bug_after_abduction_bad(int* x) {
-  *x = 42;
-  int* y = NULL;
-  *y = 42;
-}
-
+// BUG_TYPE: B-INTRA
+// EXPECTED_STRATEGY: REPLACE
+// CURRENT_STATUS: OPTIMAL
 void bug_with_allocation_bad(int* x) {
   x = (int*)malloc(sizeof(int));
   int* y = NULL;
   *y = 42;
 }
 
-void null_alias_bad(int* x) {
-  int* y = NULL;
-  x = (int*)malloc(sizeof(int*));
-  *x = 42;
-}
-
-void dereference(int* p) { int i = *p; }
-
-void several_dereferences_ok(int* x, int* y, int* z) {
-  int* p = x;
-  *z = 52;
-  dereference(y);
-  *y = 42;
-  *x = 32;
-  *x = 777;
-  *y = 888;
-  *z = 999;
-}
-
-void report_correct_error_among_multiple_bad() {
-  int* p = NULL;
-  // the trace should complain about the first access inside the callee
-  several_dereferences_ok(p, p, p);
-}
-
-int unknown(int x);
-
-void unknown_is_functional_ok() {
-  int* p = NULL;
-  if (unknown(10) != unknown(10)) {
-    *p = 42;
-  }
-}
-
-void unknown_with_different_values_bad() {
-  int* p = NULL;
-  if (unknown(32) != unknown(52)) {
-    *p = 42;
-  }
-}
-
-void unknown_conditional_dereference(int x, int* p) {
-  if (unknown(x) == 999) {
-    *p = 42;
-  }
-}
-
-void unknown_from_parameters_latent(int x) {
-  unknown_conditional_dereference(x, NULL);
-}
-
-// is pruned away without the model
-void random_non_functional_bad() {
-  if (random() != random()) {
-    int* p = NULL;
-    *p = 42;
-  }
-}
-
-void random_modelled_bad(int y) {
-  int x = random();
-  if (x == y) {
-    int* p = NULL;
-    *p = 42;
-  }
-}
-
-void arithmetic_weakness_ok() {
-  int x = random();
-  int y = random();
-  if (x < y && x > y) {
-    int* p = NULL;
-    *p = 42;
-  }
-}
-
-int* unknown_int_pointer();
-
+// BUG_TYPE: B-ALIAS
+// EXPECTED_STRATEGY: REPLACE
+// CURRENT_STATUS: OPTIMAL
 void no_invalidation_compare_to_NULL_bad() {
-  int* p = unknown_int_pointer();
   int x;
+  int* p = &x; // Simulating unknown source
   int* q = &x;
   if (p == NULL) {
-    q = p;
+    q = p; // q becomes NULL
   }
   *q = 42;
 }
 
+/* ========================================================================= */
+/* GROUP 2: THE "ADDRESS-OF" GUARD BUG (FIX-01)                              */
+/* ========================================================================= */
+
+// BUG_TYPE: B-ALIAS
+// EXPECTED_STRATEGY: SKIP (Guard 'ptr')
+// CURRENT_STATUS: INEFFECTIVE (Guards '&ptr' which is stack address)
+// FIX_REQUIRED: FIX-01 (Smart Guard Selection)
 void incr_deref(int* x, int* y) {
   (*x)++;
   (*y)++;
@@ -227,12 +68,720 @@ void call_incr_deref_with_alias_bad(void) {
   x = *ptr;
 }
 
-void call_incr_deref_with_alias_good(void) {
-  int x = 0;
-  int* ptr = &x;
-  incr_deref(ptr, ptr);
-  if (x != 2) {
-    ptr = NULL;
+// BUG_TYPE: B-ARRAY
+// EXPECTED_STRATEGY: SKIP (Guard 'vec' content or index)
+// CURRENT_STATUS: INEFFECTIVE (Guards '&vec')
+// FIX_REQUIRED: FIX-01
+void nullptr_deref_young_bad(int* x) {
+  int* vec[65] = {x, x, x, x, x, x, x, x, x, x, x, x, x, x,   x, x, x,
+                  x, x, x, x, x, x, x, x, x, x, x, x, x, x,   x, x, x,
+                  x, x, x, x, x, x, x, x, x, x, x, x, x, x,   x, x, x,
+                  x, x, x, x, x, x, x, x, x, x, x, x, x, NULL};
+  int p = *vec[64];
+}
+
+/* ========================================================================= */
+/* GROUP 3: VIACALL LOCATION MAPPING (FIX-02)                                */
+/* ========================================================================= */
+
+// BUG_TYPE: B-FILE-API
+// EXPECTED_STRATEGY: SKIP (Guard 'f' before getc)
+// CURRENT_STATUS: NO_PLAN (Reason: "Already syntactically guarded")
+// FIX_REQUIRED: FIX-02 (ViaCall Mapping)
+void no_fopen_check_getc_bad() {
+  FILE* f;
+  int i;
+  f = fopen("this_file_doesnt_exist", "r");
+  i = getc(f); // Crash inside library
+  printf("i =%i\n", i);
+  fclose(f);
+}
+
+// BUG_TYPE: B-INTER
+// EXPECTED_STRATEGY: SKIP (Guard 'joe' before call)
+// CURRENT_STATUS: NO_PLAN
+// FIX_REQUIRED: FIX-02
+struct Person { int age; };
+struct Person* Person_create(int age) { return NULL; }
+int get_age(struct Person* who) { return who->age; }
+
+int null_pointer_interproc_bad() {
+  struct Person* joe = Person_create(32);
+  return get_age(joe); // Crash inside get_age
+}
+
+/* ========================================================================= */
+/* GROUP 4: SCOPING & COMPILATION ERRORS (FIX-03)                            */
+/* ========================================================================= */
+
+// BUG_TYPE: B-ARITH
+// EXPECTED_STRATEGY: NONE (Cannot fix in caller) or EVADE (if possible)
+// CURRENT_STATUS: INCORRECT (Guards 'p' which exists only in callee)
+// FIX_REQUIRED: FIX-03 (Scope Check)
+void assume_non_negative(int x) { if (x < 0) exit(1); }
+void if_negative_then_crash_latent(int x) {
+  assume_non_negative(-x);
+  int* p = NULL;
+  *p = 42;
+}
+void call_if_negative_then_crash_with_local_bad() {
+  int x = rand();
+  if_negative_then_crash_latent(x);
+}
+
+// BUG_TYPE: B-CYCLE
+// EXPECTED_STRATEGY: NONE or SKIP (Caller side)
+// CURRENT_STATUS: INCORRECT (Guards 'crash' which is in callee)
+// FIX_REQUIRED: FIX-03
+struct node { int data; struct node* next; };
+void traverse_and_crash_if_equal_to_root(struct node* p) {
+  struct node* old_p = p;
+  while (p != NULL) {
+    p = p->next;
+    if (old_p == p) {
+      int* crash = NULL;
+      *crash = 42;
+    }
   }
-  x = *ptr;
+}
+void crash_after_one_node_bad(struct node* q) {
+  q->next = q;
+  traverse_and_crash_if_equal_to_root(q);
+}
+
+/* ========================================================================= */
+/* GROUP 5: RETURN SAFETY & EVADE (FIX-04, FIX-06)                           */
+/* ========================================================================= */
+
+// BUG_TYPE: B-STRUCT
+// EXPECTED_STRATEGY: EVADE (Early return)
+// CURRENT_STATUS: UNSAFE (Wraps return, falls through end of function)
+// FIX_REQUIRED: FIX-04 (Return Safety) & FIX-06 (Evade Trigger)
+int simple_null_pointer_bad() {
+  struct Person* max = NULL;
+  return max->age;
+}
+
+// BUG_TYPE: B-ANGELIC-SKIP
+// EXPECTED_STRATEGY: EVADE
+// CURRENT_STATUS: UNSAFE (Wraps return)
+// FIX_REQUIRED: FIX-04 & FIX-06
+struct delicious { int* ptr; };
+extern void struct_ptr_skip(struct delicious* s);
+int struct_value_by_ref_ptr_write_bad() {
+  struct delicious x;
+  struct_ptr_skip(&x);
+  x.ptr = NULL;
+  return *x.ptr;
+}
+
+/* ========================================================================= */
+/* GROUP 6: NEW CANDIDATES (STRUCTURAL COVERAGE)                             */
+/* ========================================================================= */
+
+// BUG_TYPE: B-FUNC-PTR
+// EXPECTED_STRATEGY: REPLACE
+// CURRENT_STATUS: OPTIMAL
+static int* return_null() { return NULL; }
+void null_pointer_with_function_pointer_bad() {
+  int* (*fp)();
+  fp = return_null;
+  int* x = fp();
+  *x = 3;
+}
+
+// BUG_TYPE: B-ALLOC-FAIL
+// EXPECTED_STRATEGY: SKIP (Guard 'q')
+// CURRENT_STATUS: OPTIMAL
+void FPuseafterfree_no_check_for_null_after_realloc_bad() {
+  int* p = (int*)malloc(sizeof(int) * 5);
+  int* q = (int*)realloc(p, sizeof(int) * 10);
+  if (!q)
+    free(p);
+  q[7] = 0; // Null Deref on failure
+  free(q);
+}
+
+// BUG_TYPE: B-STACK-STRUCT
+// EXPECTED_STRATEGY: SKIP (Guard 'l.next')
+// CURRENT_STATUS: INEFFECTIVE (Guards '&l')
+// FIX_REQUIRED: FIX-01 (Smart Guard Selection)
+struct list { struct list* next; int data; };
+void access_null_deref_bad() {
+  struct list l = {NULL, 44};
+  l.next->next = NULL;
+}
+
+// BUG_TYPE: B-FUNPTR-INDIRECT
+// EXPECTED_STRATEGY: SKIP (Guard 'ptr')
+// CURRENT_STATUS: INEFFECTIVE (Guards '&ptr')
+// FIX_REQUIRED: FIX-01
+void assign_NULL(int** ptr) { *ptr = NULL; }
+void call_funptr(void (*funptr)(int**), int** ptr) { (*funptr)(ptr); }
+void test_syntactic_specialization_bad(int* ptr) {
+  call_funptr(&assign_NULL, &ptr);
+  *ptr = 42;
+}
+
+// BUG_TYPE: B-SHORT-CIRCUIT
+// EXPECTED_STRATEGY: SKIP (Guard 'p' deref)
+// CURRENT_STATUS: FRAGMENTED (Two separate plans)
+// FIX_REQUIRED: FIX-07 (Compaction Logic)
+struct data { int flag; };
+static struct data d;
+int ternary2_bad(int x) {
+  struct data* p = x ? &d : 0;
+  return p->flag && p; // Deref before check
+}
+
+
+
+/* ========================================================================= */
+/* CATEGORY: B-FUNC-PTR (Function Pointers)                                  */
+/* Aim: Tracking null values through indirect calls.                   */
+/* ========================================================================= */
+
+static int* return_null() { return NULL; }
+
+void null_pointer_with_function_pointer_bad() {
+  int* (*fp)();
+  fp = return_null;
+  int* x = fp();
+  *x = 3; 
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-STRUCT (Struct Field Access vs Struct Pointer)                */
+/* Aim: "Return Safety" - Wrapping the return statement causes UB.     */
+/*            "Address-of" - Must guard 'max', not '&max'.                   */
+/* ========================================================================= */
+
+struct Person { int age; };
+
+int simple_null_pointer_bad() {
+  struct Person* max = NULL;
+  return max->age; // Crash here
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-ALLOC-FAIL (Allocator Failure Fallthrough)                    */
+/* Aim: Handling 'realloc' returning null while preserving original ptr*/
+/* ========================================================================= */
+
+void FPuseafterfree_no_check_for_null_after_realloc_bad() {
+  int* p = (int*)malloc(sizeof(int) * 5);
+  if (p) p[0] = 1;
+  
+  // realloc returns NULL on failure, but p remains valid (if not freed)
+  int* q = (int*)realloc(p, sizeof(int) * 10);
+  
+  if (!q) free(p); // Error handling exists...
+  
+  q[7] = 0; // ...but execution falls through to here. Crash on q.
+  free(q);
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-ARRAY-DECAY (Array to Pointer Decay)                          */
+/* Aim: Inter-procedural trace where NULL is passed as array arg.      */
+/*            Currently fails due to ViaCall Location Mapping (FIX-02).      */
+/* ========================================================================= */
+
+void set_ptr(int* ptr, int val) { *ptr = val; }
+
+void set_ptr_param_array_get_null_bad() {
+  set_ptr(NULL, 42); // Passing NULL where an array/pointer is expected
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-ANGELIC-SKIP (Unknown/Skipped Functions)                      */
+/* Aim: Tool must respect side-effects of unknown calls or ignore them */
+/*            safely. Currently causes Unsafe Return wrapping (FIX-04).      */
+/* ========================================================================= */
+
+struct delicious { int* ptr; };
+extern void struct_ptr_skip(struct delicious* s); // Unknown function
+
+int struct_value_by_ref_ptr_write_bad() {
+  struct delicious x;
+  struct_ptr_skip(&x);
+  x.ptr = NULL; 
+  return *x.ptr; // Crash
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-ARITH (Path Sensitivity & Scoping)                            */
+/* Aim: "Scoping Bug" (FIX-03) - Tool tries to guard 'p' (callee var)  */
+/*            inside 'call_...' (caller function).                           */
+/* ========================================================================= */
+
+void exit_if_neg(int x) { if (x < 0) exit(1); }
+
+void if_negative_then_crash_latent(int x) {
+  exit_if_neg(-x); // Exits if x > 0
+  int* p = NULL;
+  *p = 42; // Crashes if x <= 0
+}
+
+void call_if_negative_then_crash_with_local_bad() {
+  int x = rand();
+  if_negative_then_crash_latent(x);
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-FILE-API (Library API Misuse)                                 */
+/* Aim: "ViaCall Mapping" (FIX-02) - Crash happens inside library.     */
+/*            Tool currently returns NoPlanGenerated.                        */
+/* ========================================================================= */
+
+void no_fopen_check_getc_bad() {
+  FILE* f = fopen("nonexistent", "r"); // Returns NULL
+  getc(f); // Crash inside libc
+  if (f) fclose(f);
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-FUNPTR-INDIRECT (Function Pointer Arguments)                  */
+/* Aim: "Address-of Bug" (FIX-01) - Tool guards '&ptr' (stack) instead */
+/*            of 'ptr' (argument value).                                     */
+/* ========================================================================= */
+
+void assign_NULL(int** ptr) { *ptr = NULL; }
+void call_funptr(void (*funptr)(int**), int** ptr) { (*funptr)(ptr); }
+
+void test_syntactic_specialization_bad(int* ptr) {
+  call_funptr(&assign_NULL, &ptr);
+  *ptr = 42; // Crash
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-STRUCT-CALLBACK (Structs with Function Pointers)              */
+/* Aim: "Address-of Bug" - Tracing through struct fields.              */
+/* ========================================================================= */
+
+typedef struct { void (*f)(int**); } callback_s;
+void apply_callback(callback_s* cb, int** ptr) { (*cb->f)(ptr); }
+
+void test_assign_NULL_callback_bad(int* ptr) {
+  callback_s cb = {.f = &assign_NULL};
+  apply_callback(&cb, &ptr);
+  *ptr = 42; // Crash
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-CYCLE (Cyclic Data Structures)                                */
+/* Aim: "Scoping Bug" - Crash inside loop in helper function.          */
+/*            Tool tries to patch caller 'q' instead of callee logic.        */
+/* ========================================================================= */
+
+struct node { int data; struct node* next; };
+
+void traverse_and_crash(struct node* p) {
+  struct node* root = p;
+  while (p != NULL) {
+    p = p->next;
+    if (p == root) {
+      int* crash = NULL;
+      *crash = 42; // Crash
+    }
+  }
+}
+
+void crash_after_one_node_bad(struct node* q) {
+  q->next = q; // Cycle
+  traverse_and_crash(q);
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-MANIFEST (Latent Bug becoming Manifest)                       */
+/* Aim: "Scoping Bug" - Tool tries to guard 'x' in 'main', but bug     */
+/*            requires guarding logic inside 'latent_use'.                   */
+/* ========================================================================= */
+
+void latent_use(int* x) {
+  *x = 42; // Crash if x is null
+}
+
+void main_manifest_bad() {
+  int* x = NULL;
+  latent_use(x);
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-SHORT-CIRCUIT (Logic Ordering)                                */
+/* Aim: "Fragmentation" - Tool generates multiple patches for one bug. */
+/* ========================================================================= */
+
+struct data { int flag; };
+static struct data d;
+
+int ternary2_bad(int x) {
+  struct data* p = x ? &d : 0;
+  // Bug: Dereference 'p->flag' happens BEFORE check 'p'
+  return p->flag && p; 
+}
+
+/* ========================================================================= */
+/* CATEGORY: B-STACK-STRUCT (Stack Struct vs Heap Content)                   */
+/* Aim: "Address-of Bug" - Tool guards '&l' (safe stack addr) instead  */
+/*            of 'l.next' (null heap ptr).                                   */
+/* ========================================================================= */
+
+struct list { struct list* next; int data; };
+
+void access_null_deref_bad() {
+  struct list l = {NULL, 44};
+  l.next->next = NULL; // Crash on l.next
+}
+
+
+struct Node {
+    int val;
+    struct Node* next;
+    struct Node* prev;
+};
+
+struct Container {
+    struct Node* inner;
+};
+
+/* ========================================================================= */
+/* GROUP 1: CONTROL FLOW COMPLEXITY                                          */
+/* Aim: Can the LCA algorithm find the correct scope in switches/loops?*/
+/* ========================================================================= */
+
+// VARIATION: Switch statement (Fallthrough)
+// Expected: SKIP (Guard case 1) or REPLACE
+void switch_npe_bad(int x) {
+    int* p = &x;
+    switch (x) {
+        case 0:
+            p = NULL;
+            // fallthrough
+        case 1:
+            *p = 42; // Crash here if x was 0
+            break;
+    }
+}
+
+// VARIATION: Switch with Default
+void switch_default_bad(int x) {
+    int* p;
+    switch (x) {
+        case 1: p = &x; break;
+        default: p = NULL; break;
+    }
+    *p = 10; // Crash if x != 1
+}
+
+// VARIATION: For-loop initialization
+void for_loop_init_bad() {
+    int* p = NULL;
+    // Crash in the init/condition check logic
+    for (int i = *p; i < 10; i++) { 
+        printf("%d", i);
+    }
+}
+
+// VARIATION: For-loop body (conditional null)
+void for_loop_body_bad() {
+    int* p = malloc(sizeof(int));
+    for (int i = 0; i < 5; i++) {
+        if (i == 3) {
+            free(p);
+            p = NULL;
+        }
+        if (i == 4) {
+            *p = 5; // Crash on last iteration
+        }
+    }
+    if (p) free(p);
+}
+
+// VARIATION: While loop condition
+void while_cond_bad() {
+    int* p = NULL;
+    while (*p != 0) { // Crash immediately
+        p++;
+    }
+}
+
+// VARIATION: Do-While loop
+void do_while_bad() {
+    int* p = NULL;
+    do {
+        *p = 1; // Crash
+    } while (0);
+}
+
+// VARIATION: Goto (Unstructured Flow)
+// Aim: Compaction logic often fails on jumps
+void goto_npe_bad() {
+    int* p = NULL;
+    goto jump;
+    
+    p = malloc(sizeof(int)); // Skipped
+    
+jump:
+    *p = 42; // Crash
+    if (p) free(p);
+}
+
+/* ========================================================================= */
+/* GROUP 2: ALIASING DEPTH & POINTER ARITHMETIC                              */
+/* Aim: Can 'is_local' and alias analysis track deep chains?           */
+/* ========================================================================= */
+
+// VARIATION: Alias Chain Depth 3
+void alias_chain_3_bad() {
+    int* p = NULL;
+    int* q = p;
+    int* r = q;
+    *r = 10; // Crash
+}
+
+// VARIATION: Double Pointer Indirection
+void double_ptr_bad() {
+    int* p = NULL;
+    int** pp = &p;
+    **pp = 5; // Crash
+}
+
+// VARIATION: Triple Pointer Indirection
+void triple_ptr_bad() {
+    int* p = NULL;
+    int** pp = &p;
+    int*** ppp = &pp;
+    ***ppp = 5; // Crash
+}
+
+// VARIATION: Array Aliasing
+void array_alias_bad() {
+    int* arr[2];
+    arr[0] = NULL;
+    int* p = arr[0];
+    *p = 1; // Crash
+}
+
+// VARIATION: Pointer Arithmetic (Invalid offset)
+void ptr_arithmetic_bad() {
+    int arr[2] = {0, 1};
+    int* p = arr;
+    p = NULL; 
+    // Pulse might track this as arithmetic on NULL
+    *(p + 1) = 5; // Crash
+}
+
+/* ========================================================================= */
+/* GROUP 3: NESTED STRUCTURES & FIELDS                                       */
+/* Aim: Smart Guard Selection (Must guard p->next, not p)              */
+/* ========================================================================= */
+
+// VARIATION: Nested Struct Pointer (p->inner->val)
+void nested_struct_ptr_bad() {
+    struct Node inner = {0, NULL, NULL};
+    struct Container c;
+    c.inner = NULL;
+    
+    // Crash on dereferencing c.inner
+    int x = c.inner->val; 
+}
+
+// VARIATION: Triple Nesting (c->inner->next->val)
+void triple_nested_bad() {
+    struct Container* c = malloc(sizeof(struct Container));
+    c->inner = malloc(sizeof(struct Node));
+    c->inner->next = NULL;
+    
+    // Crash on c->inner->next
+    c->inner->next->val = 5; 
+    
+    free(c->inner);
+    free(c);
+}
+
+// VARIATION: Stack Struct with Null Field (Requires Field Guard)
+void stack_struct_null_field_bad() {
+    struct Node n;
+    n.next = NULL;
+    
+    // &n is valid, n.next is NULL
+    int val = n.next->val; // Crash
+}
+
+// VARIATION: Struct Array Access
+void struct_array_bad() {
+    struct Node nodes[5];
+    nodes[0].next = NULL;
+    
+    // Crash on nodes[0].next
+    nodes[0].next->val = 10;
+}
+
+/* ========================================================================= */
+/* GROUP 4: LIBRARY & STRING API MISUSE                                      */
+/* Aim: ViaCall Location Mapping (FIX-02)                              */
+/* ========================================================================= */
+
+// VARIATION: strlen
+void lib_strlen_bad() {
+    char* s = NULL;
+    int len = strlen(s); // Crash inside libc
+}
+
+// VARIATION: strcmp (First Arg)
+void lib_strcmp_1_bad() {
+    char* s = NULL;
+    if (strcmp(s, "test") == 0) { } // Crash
+}
+
+// VARIATION: strcmp (Second Arg)
+void lib_strcmp_2_bad() {
+    char* s = NULL;
+    if (strcmp("test", s) == 0) { } // Crash
+}
+
+// VARIATION: strdup
+void lib_strdup_bad() {
+    char* s = NULL;
+    char* copy = strdup(s); // Crash
+    if (copy) free(copy);
+}
+
+// VARIATION: memcpy (Source Null)
+void lib_memcpy_src_bad() {
+    char buf[10];
+    char* src = NULL;
+    memcpy(buf, src, 5); // Crash
+}
+
+// VARIATION: memcpy (Dest Null)
+void lib_memcpy_dest_bad() {
+    char* dest = NULL;
+    memcpy(dest, "test", 4); // Crash
+}
+
+/* ========================================================================= */
+/* GROUP 5: RETURN SAFETY & VOID CONTEXT                                     */
+/* Aim: Safety Check (FIX-04) - Must avoid UB                        */
+/* ========================================================================= */
+
+// VARIATION: Void function return (Skip is Safe)
+void void_return_bad() {
+    int* p = NULL;
+    *p = 10; // Crash
+    return;
+}
+
+// VARIATION: Int function return (Skip is Unsafe -> Needs Evade)
+int int_return_bad() {
+    int* p = NULL;
+    *p = 10; // Crash
+    return *p;
+}
+
+// VARIATION: Pointer return (Skip is Unsafe -> Needs Evade)
+int* ptr_return_bad() {
+    int* p = NULL;
+    *p = 10; // Crash
+    return p;
+}
+
+// VARIATION: Return in middle of block
+int mid_block_return_bad(int x) {
+    int* p = NULL;
+    if (x > 5) {
+        *p = 10; // Crash
+        return 1;
+    }
+    return 0;
+}
+
+/* ========================================================================= */
+/* GROUP 6: CALLER / CALLEE SCOPING                                          */
+/* Aim: Scoping Check (FIX-03) - Ensure visibility                   */
+/* ========================================================================= */
+
+void helper_deref(int* p) {
+    *p = 10; // Crash
+}
+
+// VARIATION: Pass Null Literal (Caller)
+void call_literal_bad() {
+    helper_deref(NULL);
+}
+
+// VARIATION: Pass Local Null (Caller)
+void call_local_bad() {
+    int* p = NULL;
+    helper_deref(p);
+}
+
+// VARIATION: Pass Global Null (Caller)
+int* g_ptr = NULL;
+void call_global_bad() {
+    helper_deref(g_ptr);
+}
+
+// VARIATION: Deep Call Chain
+void helper_2(int* p) { *p = 5; }
+void helper_1(int* p) { helper_2(p); }
+void call_deep_bad() {
+    helper_1(NULL);
+}
+
+/* ========================================================================= */
+/* GROUP 7: TYPE CONFUSION (ARITHMETIC & CASTS)                              */
+/* Aim: PulseX Analysis & Guard Logic                                  */
+/* ========================================================================= */
+
+// VARIATION: Void* Cast
+void void_cast_bad() {
+    void* p = NULL;
+    int* i = (int*)p;
+    *i = 10; // Crash
+}
+
+// VARIATION: Long to Ptr cast
+void long_cast_bad() {
+    long l = 0;
+    int* p = (int*)l;
+    *p = 10; // Crash
+}
+
+// VARIATION: Boolean Logic (De Morgan's)
+void boolean_logic_bad(int x, int y) {
+    int* p = NULL;
+    // (x || y) being true doesn't save p
+    if (x || y) {
+        *p = 10; // Crash
+    }
+}
+
+// VARIATION: Ternary Assignment
+void ternary_assign_bad(int flag) {
+    int x = 5;
+    int* p = flag ? &x : NULL;
+    *p = 10; // Crash if flag is false
+}
+
+// VARIATION: Short-circuit Assignment
+void short_circuit_assign_bad(int* input) {
+    // If input is null, p becomes null
+    int* p = input;
+    if (p && *p > 0) { 
+        // Safe
+    }
+    
+    // Reset p
+    p = NULL;
+    
+    // Bad check
+    int val = (p != NULL) || *p; // Crash on RHS
+}
+
+// VARIATION: Comma Operator
+void comma_op_bad() {
+    int* p = NULL;
+    int x = (p = NULL, *p); // Crash
 }

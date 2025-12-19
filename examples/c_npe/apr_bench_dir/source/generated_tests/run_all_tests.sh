@@ -9,15 +9,15 @@ echo "=============================================="
 TOTAL=0
 DETECTED=0
 
-for i in {01..20}; do
-    TEST_FILE=$(ls test${i}_*.c 2>/dev/null | head -1)
+for filename in *c; do
+    TEST_FILE=$filename
     if [ -f "$TEST_FILE" ]; then
         echo ""
         echo "Testing: $TEST_FILE"
         echo "-------------------"
         
         # Run infer and capture output
-        OUTPUT=$(sudo ~/repos/infer/infer/bin/infer --keep-going --debug --pulse-only -- cc -c "../../examples/c_npe/$TEST_FILE" 2>&1)
+        OUTPUT=$(sudo ~/repos/infer/infer/bin/infer --keep-going --debug --pulse-only -- cc -c "$TEST_FILE" 2>&1)
         echo "$OUTPUT" 
         # Check if null dereference was detected
         if echo "$OUTPUT" | grep -q "Null Dereference"; then

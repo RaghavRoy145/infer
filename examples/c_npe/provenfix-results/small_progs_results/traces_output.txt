@@ -1,0 +1,50 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/traces.c
+annalysing simple_deref
+/home/infer_TempFix/small_progs/traces.c
+
+=====> Actual effects of function: simple_deref ======>
+(true /\ deref(p)@14,0)
+Arguments are 
+/home/infer_TempFix/small_progs/traces.c
+annalysing simple_deref_via_alias
+/home/infer_TempFix/small_progs/traces.c
+
+=====> Actual effects of function: simple_deref_via_alias ======>
+(true /\ deref(q)@20,0)
+Arguments are ,utf16String,utf16StringLen,utf8StringOut,utf8StringLenOut
+/home/infer_TempFix/small_progs/traces.c
+annalysing something_about_strings_latent
+CallingFunction: malloc @34
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is utf8StringOut
+current states: 2
+checking futurecondition ... 1|-1
+ = LHS: (true /\ deref(utf8StringOut)@35 · deref(utf8StringLenOut)@37 · RET()@38,1)
+|- RHS: (utf8StringOut=0 /\ (!_(utf8StringOut))^*)
+deref(utf8StringOut)@35 |- (!_(utf8StringOut))^*
+ ------- 
+/home/infer_TempFix/small_progs/traces.c
+
+=====> Actual effects of function: something_about_strings_latent ======>
+(true /\ emp,0) \/ (true /\ deref(utf8StringOut)@34 · deref(utf8StringOut)@35 · deref(utf8StringLenOut)@37 · RET()@38,1) \/ (true /\ deref(utf8StringOut)@28 · RET()@29,1)
+Arguments are 
+/home/infer_TempFix/small_progs/traces.c
+annalysing call_makes_null_deref_manifest_bad
+CallingFunction: something_about_strings_latent @46
+CallingFunction: free @47
+/home/infer_TempFix/small_progs/traces.c
+
+=====> Actual effects of function: call_makes_null_deref_manifest_bad ======>
+(true /\ free(utf8String)@47,0)
+Arguments are 
+/home/infer_TempFix/small_progs/traces.c
+annalysing access_null_deref_bad
+Arguments are ,l
+/home/infer_TempFix/small_progs/traces.c
+annalysing access_use_after_free_bad
+CallingFunction: free @61
+/home/infer_TempFix/small_progs/traces.c
+
+=====> Actual effects of function: access_use_after_free_bad ======>
+(true /\ free(l.next)@61,0)

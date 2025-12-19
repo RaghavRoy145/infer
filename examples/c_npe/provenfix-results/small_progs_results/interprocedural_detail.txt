@@ -1,0 +1,24 @@
+
+In /home/infer_TempFix/small_progs/interprocedural.c:
+
+~~~~~~~~~ In function: conditional_free_then_use_latent ~~~~~~~~~
+Future-condition checking for 'malloc @16': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+y=0 /\ free(y)@25 ~~~> (!_(y))^*;
+[Patches]
+ @ line 25 can be inserted with code: if (y==0){ return; }
+
+
+~~~~~~~~~ In function: conditional_free_then_use_latent ~~~~~~~~~
+Future-condition checking for 'malloc @16': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(y!=0) /\ emp ~~~> (!free(y))^* · free(y) · (_)^*;
+[Patches]
+ @ line 21 can be inserted with code: if ((y!=0)){free(y); }
+

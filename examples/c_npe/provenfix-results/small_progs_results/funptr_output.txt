@@ -1,0 +1,205 @@
+Capturing in make/cc mode ...
+Arguments are ,_ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing do_nothing
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: do_nothing ======>
+(true /\ RET()@9,1)
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing assign_NULL
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: assign_NULL ======>
+(true /\ deref(ptr)@11,0)
+Arguments are ,funptr,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing call_funptr
+extractEventFromFUnctionCallUnaryOperatornone
+Arguments are ,funptr,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing call_call_funptr
+CallingFunction: call_funptr @16
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing test_syntactic_specialization_bad
+CallingFunction: call_call_funptr @22
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: test_syntactic_specialization_bad ======>
+(true /\ deref(ptr)@23,0)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing return_funptr
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: return_funptr ======>
+(.ret=assign_NULL /\ CONSUME(assign_NULL)@28 · RET(assign_NULL)@28 · RET(assign_NULL)@28,1)
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing test_returned_funptr_specialization_bad
+CallingFunction: return_funptr @31
+CallingFunction: call_call_funptr @32
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: test_returned_funptr_specialization_bad ======>
+(true /\ deref(ptr)@33,0)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_if_bad
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_if_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@48 · RET(ptr)@48,1)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_if_good
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_if_good ======>
+(.ret=ptr /\ CONSUME(ptr)@61 · RET(ptr)@61,1)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_else_bad
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_else_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@74 · RET(ptr)@74,1)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_else_good
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_else_good ======>
+(.ret=ptr /\ CONSUME(ptr)@87 · RET(ptr)@87,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_conditional_call_bad
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_conditional_call_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@99 · RET(ptr)@99,1)
+Arguments are ,funptr,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing apply_funptr_with_intptrptr
+extractEventFromFUnctionCallUnaryOperatornone
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_apply_funptr_with_intptrptr_specialized_bad
+CallingFunction: apply_funptr_with_intptrptr @115
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_apply_funptr_with_intptrptr_specialized_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@117 · RET(ptr)@117,1)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_apply_funptr_with_intptrptr_specialized_good
+CallingFunction: apply_funptr_with_intptrptr @129
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_apply_funptr_with_intptrptr_specialized_good ======>
+(.ret=ptr /\ CONSUME(ptr)@131 · RET(ptr)@131,1)
+Arguments are ,funptr,after,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing apply_funptr_with_intptrptr_and_after
+CallingFunction: apply_funptr_with_intptrptr @141
+extractEventFromFUnctionCallUnaryOperatornone
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing dereference_dereference_ptr
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: dereference_dereference_ptr ======>
+(true /\ deref(ptr)@145,0)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_apply_funptr_with_intptrptr_and_after_specialized_bad
+CallingFunction: apply_funptr_with_intptrptr_and_after @159
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_apply_funptr_with_intptrptr_and_after_specialized_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@163 · RET(ptr)@163,1)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_apply_funptr_with_intptrptr_and_after_respecialized_bad
+CallingFunction: apply_funptr_with_intptrptr_and_after @175
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_apply_funptr_with_intptrptr_and_after_respecialized_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@179 · RET(ptr)@179,1)
+Arguments are ,x,ptr,funptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing conditionnaly_apply_funptr_with_intptrptr
+extractEventFromFUnctionCallUnaryOperatornone
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: conditionnaly_apply_funptr_with_intptrptr ======>
+(true /\ deref(ptr)@188,0)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad
+CallingFunction: conditionnaly_apply_funptr_with_intptrptr @200
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_conditionnaly_apply_funptr_with_intptrptr_unspecialized_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@202 · RET(ptr)@202,1)
+Arguments are 
+/home/infer_TempFix/small_progs/funptr.c
+annalysing funptr_conditionnaly_apply_funptr_with_intptrptr_specialized_bad
+CallingFunction: conditionnaly_apply_funptr_with_intptrptr @214
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: funptr_conditionnaly_apply_funptr_with_intptrptr_specialized_bad ======>
+(.ret=ptr /\ CONSUME(ptr)@216 · RET(ptr)@216,1)
+Arguments are ,callback,f
+/home/infer_TempFix/small_progs/funptr.c
+annalysing set_callback
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: set_callback ======>
+(true /\ deref(callback)@225,0)
+Arguments are ,callback,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing apply_callback
+extractEventFromFUnctionCallUnaryOperatornone
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing test_assign_NULL_callback_bad
+CallingFunction: apply_callback @230
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: test_assign_NULL_callback_bad ======>
+(true /\ deref(ptr)@231,0)
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing test_do_nothing_callback_good
+CallingFunction: apply_callback @236
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: test_do_nothing_callback_good ======>
+(true /\ deref(ptr)@237,0)
+Arguments are ,callback,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing test_update_callback_bad
+CallingFunction: set_callback @241
+CallingFunction: apply_callback @242
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: test_update_callback_bad ======>
+(true /\ deref(ptr)@243,0)
+Arguments are ,callback,ptr
+/home/infer_TempFix/small_progs/funptr.c
+annalysing test_update_callback_good
+CallingFunction: set_callback @247
+CallingFunction: apply_callback @248
+/home/infer_TempFix/small_progs/funptr.c
+
+=====> Actual effects of function: test_update_callback_good ======>
+(true /\ deref(ptr)@249,0)

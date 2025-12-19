@@ -1,0 +1,13 @@
+
+In /home/infer_TempFix/small_progs/fopen.c:
+
+~~~~~~~~~ In function: fopen_no_fclose_bad ~~~~~~~~~
+Future-condition checking for 'fopen @34': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(f!=0) /\ f>0 /\ (f!=stdout) /\ (f!=stdin) /\ emp ~~~> (!fclose(f))^* · fclose(f) · (_)^*;
+[Patches]
+ @ line 36 can be inserted with code: if ((f!=0) /\ f>0 /\ (f!=stdout) /\ (f!=stdin)){fclose(f); }
+

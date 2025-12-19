@@ -1,0 +1,65 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing FP_nonnegative_int_ok
+CallingFunction: returnUnsigned @15
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: FP_nonnegative_int_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@19,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing signed_int_bad
+CallingFunction: returnSigned @26
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: signed_int_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@30,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing FP_nonnegative_int_ptr_ok
+CallingFunction: returnUnsignedPointer @39
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: FP_nonnegative_int_ptr_ok ======>
+(true /\ deref(x)@40,0) \/ (true /\ deref(x)@40 · deref(p)@43,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing signed_int_ptr_bad
+CallingFunction: returnSigned @50
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: signed_int_ptr_bad ======>
+(true /\ deref(x)@51,0) \/ (true /\ deref(x)@51 · deref(p)@54,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing FP_nonnegative_field_ok
+CallingFunction: returnFoo @68
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: FP_nonnegative_field_ok ======>
+(true /\ deref(x)@69,0) \/ (true /\ deref(x)@69 · deref(p)@72,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing signed_field_bad
+CallingFunction: returnFoo @77
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: signed_field_bad ======>
+(true /\ deref(x)@78,0) \/ (true /\ deref(x)@78 · deref(p)@81,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing FP_nonnegative_array_ok
+CallingFunction: returnUnsignedArray @90
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: FP_nonnegative_array_ok ======>
+(true /\ deref(a)@91,0) \/ (true /\ deref(a)@91 · deref(p)@94,0)
+Arguments are 
+/home/infer_TempFix/small_progs/unsigned_values.c
+annalysing signed_array_bad
+CallingFunction: returnSignedArray @101
+/home/infer_TempFix/small_progs/unsigned_values.c
+
+=====> Actual effects of function: signed_array_bad ======>
+(true /\ deref(a)@102,0) \/ (true /\ deref(a)@102 · deref(p)@105,0)

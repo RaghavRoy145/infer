@@ -1,0 +1,161 @@
+Capturing in make/cc mode ...
+Arguments are ,cake
+/home/infer_TempFix/small_progs/angelism.c
+annalysing bake
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: bake ======>
+(true /\ deref(zero)@17 · RET(NULL)@18,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing skip_function_with_no_spec_ok
+CallingFunction: bake @25
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: skip_function_with_no_spec_ok ======>
+(.ret=cake /\ deref(cake)@29 · CONSUME(cake)@30 · RET(cake)@30,1) \/ (.ret=0 /\ RET()@26,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing skip_external_function_ok
+CallingFunction: bakery @43
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: skip_external_function_ok ======>
+(.ret=cake /\ deref(cake)@47 · CONSUME(cake)@48 · RET(cake)@48,1) \/ (.ret=0 /\ RET()@44,1)
+Arguments are ,param
+/home/infer_TempFix/small_progs/angelism.c
+annalysing by_ref_actual_already_in_footprint
+CallingFunction: bakery @53
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: by_ref_actual_already_in_footprint ======>
+(true /\ deref(param)@54,0)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing call_by_ref_actual_already_in_footprint_ok
+CallingFunction: by_ref_actual_already_in_footprint @58
+Arguments are ,param
+/home/infer_TempFix/small_progs/angelism.c
+annalysing by_ref_actual_already_in_footprint2
+CallingFunction: bakery @64
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: by_ref_actual_already_in_footprint2 ======>
+(true /\ deref(param)@63 · deref(param)@65,0)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing call_by_ref_actual_already_in_footprint_bad
+CallingFunction: by_ref_actual_already_in_footprint2 @69
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing passByRefTwiceOk
+CallingFunction: bakery2 @74
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: passByRefTwiceOk ======>
+(true /\ deref(param)@75,0)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing returnPassByRef2Ok
+CallingFunction: bakery @80
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: returnPassByRef2Ok ======>
+(.ret=param /\ deref(param)@81 · CONSUME(param)@82 · RET(param)@82,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing returnPassByRefDerefOk
+CallingFunction: returnPassByRef @86
+CallingFunction: free @88
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: returnPassByRefDerefOk ======>
+(true /\ deref(ret)@87 · free(ret)@88,0)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_by_ref_ptr_ok
+CallingFunction: struct_ptr_skip @97
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_by_ref_ptr_ok ======>
+(.ret=x.ptr /\ CONSUME(x.ptr)@98 · RET(x)@98 · RET(x.ptr)@98,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_by_ref_ptr_write_before_ok
+CallingFunction: struct_ptr_skip @104
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_by_ref_ptr_write_before_ok ======>
+(.ret=x.ptr /\ deref(x)@103 · CONSUME(x.ptr)@105 · RET(x)@105 · RET(x.ptr)@105,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_by_ref_ptr_write_bad
+CallingFunction: struct_ptr_skip @110
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_by_ref_ptr_write_bad ======>
+(.ret=x.ptr /\ deref(x)@111 · CONSUME(x.ptr)@112 · RET(x)@112 · RET(x.ptr)@112,1)
+Arguments are ,x,val
+/home/infer_TempFix/small_progs/angelism.c
+annalysing setF
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: setF ======>
+(true /\ deref(x)@115,0)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_by_ref_callee_write_no_skip_bad
+CallingFunction: setF @119
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_by_ref_callee_write_no_skip_bad ======>
+(.ret=x.ptr /\ CONSUME(x.ptr)@120 · RET(x)@120 · RET(x.ptr)@120,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_by_ref_callee_write_skip_bad
+CallingFunction: struct_ptr_skip @125
+CallingFunction: setF @126
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_by_ref_callee_write_skip_bad ======>
+(.ret=x.ptr /\ CONSUME(x.ptr)@127 · RET(x)@127 · RET(x.ptr)@127,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_by_ref_write_then_skip_ok
+CallingFunction: struct_ptr_skip @133
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_by_ref_write_then_skip_ok ======>
+(.ret=x.ptr /\ deref(x)@132 · CONSUME(x.ptr)@134 · RET(x)@134 · RET(x.ptr)@134,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_skip_null_deref_bad
+CallingFunction: struct_val_skip @140
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_skip_null_deref_bad ======>
+(.ret=x.ptr /\ deref(x)@139 · CONSUME(x.ptr)@141 · RET(x)@141 · RET(x.ptr)@141,1)
+Arguments are 
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_skip_ok
+CallingFunction: struct_val_skip @147
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_skip_ok ======>
+(true /\ deref(x)@146 · RET()@148,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_from_pointer_skip_ok
+CallingFunction: struct_val_skip @152
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_from_pointer_skip_ok ======>
+(true /\ RET()@153,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/angelism.c
+annalysing struct_value_from_pointer_skip_bad
+CallingFunction: struct_val_skip @158
+/home/infer_TempFix/small_progs/angelism.c
+
+=====> Actual effects of function: struct_value_from_pointer_skip_bad ======>
+(true /\ deref(x)@157 · RET()@159,1)

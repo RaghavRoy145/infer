@@ -1,0 +1,60 @@
+Capturing in make/cc mode ...
+Arguments are ,p
+/home/infer_TempFix/small_progs/abduce.c
+annalysing const_local_no_abduce
+CallingFunction: external_func @13
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: const_local_no_abduce ======>
+(.ret=p /\ CONSUME(p)@14 · RET(p)@14 · RET(p)@14,1)
+Arguments are ,ptr,val
+/home/infer_TempFix/small_progs/abduce.c
+annalysing set_ptr
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: set_ptr ======>
+(true /\ deref(ptr)@18,0)
+Arguments are 
+/home/infer_TempFix/small_progs/abduce.c
+annalysing set_ptr_local_array
+CallingFunction: set_ptr @22
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: set_ptr_local_array ======>
+(true /\ deref(buf)@23 · RET()@23,1)
+Arguments are 
+/home/infer_TempFix/small_progs/abduce.c
+annalysing FP_set_ptr_local_array_return_true_ok
+CallingFunction: set_ptr_local_array @28
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: FP_set_ptr_local_array_return_true_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@30,0)
+Arguments are ,buf
+/home/infer_TempFix/small_progs/abduce.c
+annalysing set_ptr_param_array
+CallingFunction: set_ptr @34
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: set_ptr_param_array ======>
+(true /\ deref(buf)@35 · RET()@35,1)
+Arguments are 
+/home/infer_TempFix/small_progs/abduce.c
+annalysing FP_set_ptr_param_array_return_true_ok
+CallingFunction: set_ptr_param_array @41
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: FP_set_ptr_param_array_return_true_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@43,0)
+Arguments are 
+/home/infer_TempFix/small_progs/abduce.c
+annalysing FP_set_ptr_param_array_get_ptr_ok
+CallingFunction: set_ptr_param_array @49
+/home/infer_TempFix/small_progs/abduce.c
+
+=====> Actual effects of function: FP_set_ptr_param_array_get_ptr_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@51,0)
+Arguments are 
+/home/infer_TempFix/small_progs/abduce.c
+annalysing set_ptr_param_array_get_null_bad
+CallingFunction: set_ptr_param_array @56

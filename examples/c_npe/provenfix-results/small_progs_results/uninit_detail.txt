@@ -1,0 +1,57 @@
+
+In /home/infer_TempFix/small_progs/uninit.c:
+
+~~~~~~~~~ In function: malloc_good ~~~~~~~~~
+Future-condition checking for 'malloc @29': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+p=0 /\ free(p)@34 ~~~> (!_(p))^*;
+[Patches]
+ @ line 34 can be inserted with code: if (p==0){ return; }
+
+
+~~~~~~~~~ In function: malloc_bad ~~~~~~~~~
+Future-condition checking for 'malloc @38': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+p=0 /\ free(p)@42 ~~~> (!_(p))^*;
+[Patches]
+ @ line 42 can be inserted with code: if (p==0){ return; }
+
+
+~~~~~~~~~ In function: get_field_address_good ~~~~~~~~~
+Future-condition checking for 'malloc @84': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+s=0 /\ free(s)@88 ~~~> (!_(s))^*;
+[Patches]
+ @ line 88 can be inserted with code: if (s==0){ return; }
+
+
+~~~~~~~~~ In function: malloc_array_good ~~~~~~~~~
+Future-condition checking for 'malloc @106': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+o=0 /\ free(o)@111 ~~~> (!_(o))^*;
+[Patches]
+ @ line 111 can be inserted with code: if (o==0){ return; }
+
+
+~~~~~~~~~ In function: malloc_array_bad_FN ~~~~~~~~~
+Future-condition checking for 'malloc @124': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+o=0 /\ free(o)@129 ~~~> (!_(o))^*;
+[Patches]
+ @ line 129 can be inserted with code: if (o==0){ return; }
+

@@ -1,0 +1,54 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/list_api.c
+annalysing list_init
+CallingFunction: calloc @19
+/home/infer_TempFix/small_progs/list_api.c
+
+=====> Actual effects of function: list_init ======>
+(.ret=r0 /\ CONSUME(r0)@19 · RET(r0)@19 · RET(r0)@19,1)
+Arguments are ,lst,elem
+/home/infer_TempFix/small_progs/list_api.c
+annalysing list_append
+/home/infer_TempFix/small_progs/list_api.c
+
+=====> Actual effects of function: list_append ======>
+(true /\ deref(lst)@24 · deref(lst)@27 · deref(iter)@28 · deref(iter)@29 · deref(iter)@31,0) \/ (true /\ deref(lst)@24 · deref(lst)@25,0)
+Arguments are ,lst,data
+/home/infer_TempFix/small_progs/list_api.c
+annalysing list_add
+CallingFunction: calloc @38
+CallingFunction: list_append @43
+/home/infer_TempFix/small_progs/list_api.c
+
+=====> Actual effects of function: list_add ======>
+(.ret=entry /\ deref(entry)@42 · CONSUME(entry)@44 · RET(entry)@44,1) \/ (true /\ RET(NULL)@40,1)
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/list_api.c
+annalysing list_elem_free
+CallingFunction: list_elem_free @52
+CallingFunction: free @53
+/home/infer_TempFix/small_progs/list_api.c
+
+=====> Actual effects of function: list_elem_free ======>
+(true /\ free(ptr)@53,0) \/ (true /\ RET()@49,1)
+Arguments are ,ptr
+/home/infer_TempFix/small_progs/list_api.c
+annalysing list_free
+CallingFunction: list_elem_free @57
+CallingFunction: free @58
+/home/infer_TempFix/small_progs/list_api.c
+
+=====> Actual effects of function: list_free ======>
+(true /\ free(ptr)@58,0)
+Arguments are 
+/home/infer_TempFix/small_progs/list_api.c
+annalysing list_build_and_free_ok
+CallingFunction: list_init @64
+CallingFunction: list_add @68
+CallingFunction: list_free @69
+CallingFunction: list_free @72
+/home/infer_TempFix/small_progs/list_api.c
+
+=====> Actual effects of function: list_build_and_free_ok ======>
+(.ret=0 /\ RET()@73,1) \/ (.ret=1 /\ RET()@70,1) \/ (.ret=1 /\ RET()@66,1)

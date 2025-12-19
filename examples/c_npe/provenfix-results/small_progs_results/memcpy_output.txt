@@ -1,0 +1,49 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/memcpy.c
+annalysing memcpy_ok
+CallingFunction: malloc @18
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: memcpy @20
+CallingFunction: free @21
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ free(p)@21,0) \/ ((p!=0) /\ memcpy(p)@20 · free(p)@21,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+free(p)@21 |- (!_(p))^*
+ ------- 
+/home/infer_TempFix/small_progs/memcpy.c
+
+=====> Actual effects of function: memcpy_ok ======>
+(!((p!=0)) /\ free(p)@21,0) \/ ((p!=0) /\ memcpy(p)@20 · free(p)@21,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memcpy.c
+annalysing memcpy_to_null_bad
+CallingFunction: memcpy @27
+/home/infer_TempFix/small_progs/memcpy.c
+
+=====> Actual effects of function: memcpy_to_null_bad ======>
+(true /\ memcpy(p)@27,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memcpy.c
+annalysing memcpy_to_null_indirect_bad
+CallingFunction: memcpy @35
+/home/infer_TempFix/small_progs/memcpy.c
+
+=====> Actual effects of function: memcpy_to_null_indirect_bad ======>
+(true /\ memcpy(r)@35,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memcpy.c
+annalysing memcpy_from_null_bad
+CallingFunction: malloc @40
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: memcpy @42
+CallingFunction: free @43
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ emp,0) \/ ((p!=0) /\ memcpy(p)@42 · free(p)@43,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/memcpy.c
+
+=====> Actual effects of function: memcpy_from_null_bad ======>
+(!((p!=0)) /\ emp,0) \/ ((p!=0) /\ memcpy(p)@42 · free(p)@43,0)

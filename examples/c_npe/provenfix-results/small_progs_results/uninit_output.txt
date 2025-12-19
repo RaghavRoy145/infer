@@ -1,0 +1,330 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing dereference_bad
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: dereference_bad ======>
+(.ret=p /\ CONSUME(p)@13 · RET(p)@13,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing self_assign_bad
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing call_to_use_and_mayinit_bad
+CallingFunction: use_and_mayinit @25
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing malloc_good
+CallingFunction: malloc @29
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: free @34
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ free(p)@34,0) \/ ((p!=0) /\ deref(p)@31 · deref(p)@32 · free(p)@34,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+free(p)@34 |- (!_(p))^*
+ ------- 
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: malloc_good ======>
+(!((p!=0)) /\ free(p)@34,0) \/ ((p!=0) /\ deref(p)@31 · deref(p)@32 · free(p)@34,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing malloc_bad
+CallingFunction: malloc @38
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: free @42
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ free(p)@42,0) \/ ((p!=0) /\ deref(p)@40 · free(p)@42,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+free(p)@42 |- (!_(p))^*
+ ------- 
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: malloc_bad ======>
+(!((p!=0)) /\ free(p)@42,0) \/ ((p!=0) /\ deref(p)@40 · free(p)@42,0)
+Arguments are ,p
+/home/infer_TempFix/small_progs/uninit.c
+annalysing init_int_ref
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: init_int_ref ======>
+(true /\ deref(p)@45,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing interprocedural_init_in_callee_good
+CallingFunction: init_int_ref @49
+Arguments are ,p
+/home/infer_TempFix/small_progs/uninit.c
+annalysing nop
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing interprocedural_nop_in_callee_bad
+CallingFunction: nop @57
+Arguments are ,p
+/home/infer_TempFix/small_progs/uninit.c
+annalysing read_int_ref
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: read_int_ref ======>
+(true /\ deref(p)@61,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing interprocedural_read_in_callee_bad
+CallingFunction: read_int_ref @65
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing uninit
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: uninit ======>
+(.ret=malloc_string_of_stmt not yet UnaryExprOrTypeTraitExpr_ /\ CONSUME(malloc_string_of_stmt not yet UnaryExprOrTypeTraitExpr_)@68 · RET(malloc_string_of_stmt not yet UnaryExprOrTypeTraitExpr_)@68 · RET(malloc_string_of_stmt not yet UnaryExprOrTypeTraitExpr_)@68,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing interprocedural_uninit_in_callee_bad
+CallingFunction: uninit @71
+CallingFunction: free @75
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: interprocedural_uninit_in_callee_bad ======>
+(true /\ free(p)@75,0) \/ (true /\ deref(p)@73 · free(p)@75,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing get_field_address_good
+CallingFunction: malloc @84
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is s
+CallingFunction: free @88
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((s!=0)) /\ free(s)@88,0) \/ ((s!=0) /\ deref(s)@86 · free(s)@88,0)
+|- RHS: ((s!=0) /\ (!free(s))^* · free(s) · (_)^*) \/ (s=0 /\ (!_(s))^*)
+free(s)@88 |- (!_(s))^*
+ ------- 
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: get_field_address_good ======>
+(!((s!=0)) /\ free(s)@88,0) \/ ((s!=0) /\ deref(s)@86 · free(s)@88,0)
+Arguments are ,p
+/home/infer_TempFix/small_progs/uninit.c
+annalysing init_f1
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: init_f1 ======>
+(true /\ deref(p)@91,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing interprocedural_struct_good
+CallingFunction: init_f1 @95
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: interprocedural_struct_good ======>
+(true /\ deref(s)@96,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing interprocedural_struct_bad
+CallingFunction: init_f1 @101
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: interprocedural_struct_bad ======>
+(true /\ deref(s)@102,0)
+Arguments are ,len
+/home/infer_TempFix/small_progs/uninit.c
+annalysing malloc_array_good
+CallingFunction: malloc @106
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is o
+CallingFunction: free @111
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((o!=0)) /\ free(o)@111,0) \/ ((o!=0) /\ deref(o)@108 · deref(o)@109 · free(o)@111,0)
+|- RHS: ((o!=0) /\ (!free(o))^* · free(o) · (_)^*) \/ (o=0 /\ (!_(o))^*)
+free(o)@111 |- (!_(o))^*
+ ------- 
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: malloc_array_good ======>
+(!((o!=0)) /\ free(o)@111,0) \/ ((o!=0) /\ deref(o)@108 · deref(o)@109 · free(o)@111,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing unknown_wrapper
+CallingFunction: unknown_struct @116
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: unknown_wrapper ======>
+(.ret=r0 /\ CONSUME(r0)@116 · RET(r0)@116 · RET(r0)@116,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing havoc_calling_unknown_struct_good
+CallingFunction: unknown_wrapper @119
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: havoc_calling_unknown_struct_good ======>
+(true /\ deref(x)@120,0)
+Arguments are ,len
+/home/infer_TempFix/small_progs/uninit.c
+annalysing malloc_array_bad_FN
+CallingFunction: malloc @124
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is o
+CallingFunction: free @129
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((o!=0)) /\ free(o)@129,0) \/ ((o!=0) /\ deref(o)@126 · deref(o)@127 · free(o)@129,0)
+|- RHS: ((o!=0) /\ (!free(o))^* · free(o) · (_)^*) \/ (o=0 /\ (!_(o))^*)
+free(o)@129 |- (!_(o))^*
+ ------- 
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: malloc_array_bad_FN ======>
+(!((o!=0)) /\ free(o)@129,0) \/ ((o!=0) /\ deref(o)@126 · deref(o)@127 · free(o)@129,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing local_array_good
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: local_array_good ======>
+(true /\ deref(o)@134 · deref(o)@135,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing local_array_bad_FN
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: local_array_bad_FN ======>
+(true /\ deref(o)@140 · deref(o)@141,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/uninit.c
+annalysing read_g1_f1
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing nested_struct_good
+CallingFunction: read_g1_f1 @154
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing nested_struct_bad
+CallingFunction: read_g1_f1 @160
+Arguments are ,ptr,i
+/home/infer_TempFix/small_progs/uninit.c
+annalysing init_ptr_zero
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: init_ptr_zero ======>
+(true /\ emp,0) \/ (true /\ deref(ptr)@165,0)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing call_init_ptr_zero_good
+CallingFunction: init_ptr_zero @173
+Arguments are ,a
+/home/infer_TempFix/small_progs/uninit.c
+annalysing uninit_if_zero_bad
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: uninit_if_zero_bad ======>
+(.ret=10 /\ RET()@184,1) \/ (.ret=z /\ CONSUME(z)@182 · RET(z)@182,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing uninit_interproc_manifest_bad
+CallingFunction: uninit_if_zero_bad @188
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: uninit_interproc_manifest_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@191,0)
+Arguments are ,range_var_valid,range_var
+/home/infer_TempFix/small_progs/uninit.c
+annalysing check_range
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: check_range ======>
+(true /\ emp,0) \/ (true /\ deref(range_var)@199,0)
+Arguments are ,range_var_valid,range_var
+/home/infer_TempFix/small_progs/uninit.c
+annalysing check_range_wrapper
+CallingFunction: check_range @206
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing uninit_var_not_read_interproc_ok
+CallingFunction: check_range_wrapper @212
+Arguments are ,b
+/home/infer_TempFix/small_progs/uninit.c
+annalysing init_by_conditional_exp
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: init_by_conditional_exp ======>
+(.ret=global_uninit_s1 /\ CONSUME(global_uninit_s1)@220 · RET(global_uninit_s1)@220 · RET(global_uninit_s1)@220,1)
+Arguments are ,b
+/home/infer_TempFix/small_progs/uninit.c
+annalysing call_init_by_conditionaql_exp_ok
+CallingFunction: init_by_conditional_exp @224
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: call_init_by_conditionaql_exp_ok ======>
+(true /\ deref(x)@225 · RET()@225,1)
+Arguments are ,x,y
+/home/infer_TempFix/small_progs/uninit.c
+annalysing make_pair
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: make_pair ======>
+(.ret=pair /\ deref(pair)@237 · deref(pair)@238 · CONSUME(pair)@239 · RET(pair)@239,1)
+Arguments are ,n
+/home/infer_TempFix/small_progs/uninit.c
+annalysing twice
+CallingFunction: make_pair @242
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: twice ======>
+(.ret=r1 /\ CONSUME(r1)@242 · RET(r1)@242 · RET(r1)@242,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing FP_build_struct_after_var_init_ok
+CallingFunction: twice @246
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: FP_build_struct_after_var_init_ok ======>
+(true /\ RET()@247,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing build_struct_during_var_init_ok
+CallingFunction: twice @251
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: build_struct_during_var_init_ok ======>
+(true /\ RET()@252,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/uninit.c
+annalysing init_only_x_bad
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: init_only_x_bad ======>
+(.ret=pair /\ deref(pair)@257 · CONSUME(pair)@258 · RET(pair)@258,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing memset_init_ok
+CallingFunction: memset @263
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: memset_init_ok ======>
+(true /\ memset(pair)@263 · RET()@264,1)
+Arguments are ,pair
+/home/infer_TempFix/small_progs/uninit.c
+annalysing set_pair_to_zero
+CallingFunction: memset @268
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: set_pair_to_zero ======>
+(.ret=r2 /\ memset(pair)@268 · CONSUME(r2)@268 · RET(r2)@268,1)
+Arguments are 
+/home/infer_TempFix/small_progs/uninit.c
+annalysing memset_wrapper_init_ok
+CallingFunction: set_pair_to_zero @273
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: memset_wrapper_init_ok ======>
+(true /\ RET()@274,1)
+Arguments are ,pair
+/home/infer_TempFix/small_progs/uninit.c
+annalysing memset_wrapper_value_bad
+CallingFunction: set_pair_to_zero @278
+/home/infer_TempFix/small_progs/uninit.c
+
+=====> Actual effects of function: memset_wrapper_value_bad ======>
+(true /\ deref(pair)@279,0) \/ (true /\ deref(pair)@279 · deref(p)@281,0)

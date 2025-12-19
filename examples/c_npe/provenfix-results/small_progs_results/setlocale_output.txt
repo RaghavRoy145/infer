@@ -1,0 +1,11 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/setlocale.c
+annalysing FP_setlocale_null_impossible_ok
+CallingFunction: setlocale @11
+CallingFunction: setlocale @16
+CallingFunction: setlocale @17
+/home/infer_TempFix/small_progs/setlocale.c
+
+=====> Actual effects of function: FP_setlocale_null_impossible_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@14,0)

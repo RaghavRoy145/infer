@@ -1,0 +1,129 @@
+Capturing in make/cc mode ...
+Arguments are ,x,y
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing conditional_free
+CallingFunction: free @11
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: conditional_free ======>
+(true /\ emp,0) \/ (true /\ free(y)@11,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing conditional_free_then_use_latent
+CallingFunction: malloc @16
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is y
+CallingFunction: conditional_free @17
+CallingFunction: free @25
+current states: 1
+checking futurecondition ... 4|-2
+ = LHS: (!((y!=0)) /\ emp,0) \/ (!((y!=0)) /\ free(y)@25,0) \/ ((y!=0) /\ deref(y)@21,0) \/ ((y!=0) /\ deref(y)@21 · free(y)@25,0)
+|- RHS: ((y!=0) /\ (!free(y))^* · free(y) · (_)^*) \/ (y=0 /\ (!_(y))^*)
+free(y)@25 |- (!_(y))^*
+ ------- 
+emp |- (!free(y))^* · free(y) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: conditional_free_then_use_latent ======>
+(!((y!=0)) /\ emp,0) \/ (!((y!=0)) /\ free(y)@25,0) \/ ((y!=0) /\ deref(y)@21,0) \/ ((y!=0) /\ deref(y)@21 · free(y)@25,0)
+Arguments are 
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing call_conditional_free_then_use_bad
+CallingFunction: conditional_free_then_use_latent @30
+Arguments are ,x
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing test_modified_value_then_error_bad
+CallingFunction: random @36
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: test_modified_value_then_error_bad ======>
+(true /\ deref(x)@36 · deref(x)@37,0) \/ (true /\ deref(x)@36 · deref(x)@37 · deref(p)@39,0)
+Arguments are ,a,p
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing latent_dereference
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: latent_dereference ======>
+(true /\ emp,0) \/ (true /\ deref(p)@48,0)
+Arguments are ,a1
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing propagate_latent_1_latent
+CallingFunction: latent_dereference @52
+Arguments are ,a2
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing propagate_latent_2_latent
+CallingFunction: propagate_latent_1_latent @54
+Arguments are ,a3
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing propagate_latent_3_latent
+CallingFunction: propagate_latent_2_latent @56
+Arguments are 
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing make_latent_manifest
+CallingFunction: propagate_latent_3_latent @58
+Arguments are ,x,a,out
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing return_first
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: return_first ======>
+(.ret=w /\ deref(out)@62 · CONSUME(w)@63 · RET(w)@63,1)
+Arguments are ,out
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing return_null
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: return_null ======>
+(.ret=p /\ deref(out)@68 · CONSUME(p)@69 · RET(p)@69,1)
+Arguments are 
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing follow_value_by_ref_bad
+CallingFunction: return_null @75
+CallingFunction: return_first @77
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: follow_value_by_ref_bad ======>
+(true /\ deref(z)@78,0)
+Arguments are 
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing follow_value_by_ret_bad
+CallingFunction: return_null @84
+CallingFunction: return_first @85
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: follow_value_by_ret_bad ======>
+(true /\ deref(z)@86,0)
+Arguments are 
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing malloc_wrapper_1
+CallingFunction: malloc @91
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (.ret=x /\ CONSUME(x)@92 · RET(x)@92 · RET(x)@92,1)
+|- RHS: ((x!=0) /\ (!free(x))^* · free(x) · (_)^*) \/ (x=0 /\ (!_(x))^*)
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: malloc_wrapper_1 ======>
+(.ret=x /\ CONSUME(x)@92 · RET(x)@92,1)
+Arguments are ,b
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing malloc_wrapper_2
+CallingFunction: malloc_wrapper_1 @97
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: malloc_wrapper_2 ======>
+(true /\ RET(NULL)@99,1) \/ (.ret=r0 /\ CONSUME(r0)@97 · RET(r0)@97,1)
+Arguments are ,p,b
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing free_wrapper
+CallingFunction: free @104
+/home/infer_TempFix/small_progs/interprocedural.c
+
+=====> Actual effects of function: free_wrapper ======>
+(true /\ emp,0) \/ (true /\ free(p)@104,0)
+Arguments are 
+/home/infer_TempFix/small_progs/interprocedural.c
+annalysing trace_correctly_through_wrappers_bad
+CallingFunction: malloc_wrapper_2 @109
+CallingFunction: free_wrapper @112

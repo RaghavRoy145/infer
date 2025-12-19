@@ -1,0 +1,13 @@
+
+In /home/infer_TempFix/small_progs/latent.c:
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @57': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(x!=0) /\ emp ~~~> (!free(x))^* · free(x) · (_)^*;
+[Patches]
+ @ line 56 can be inserted with code: if ((x!=0)){free(x); }
+

@@ -1,0 +1,214 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing simple_null_pointer_bad
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: simple_null_pointer_bad ======>
+(true /\ deref(max)@18 · RET()@18,1)
+Arguments are ,age,height,weight
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing Person_create
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: Person_create ======>
+(.ret=who /\ CONSUME(who)@23 · RET(who)@23,1)
+Arguments are ,who
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing get_age
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: get_age ======>
+(true /\ deref(who)@26 · RET()@26,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing null_pointer_interproc_bad
+CallingFunction: Person_create @29
+CallingFunction: get_age @30
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: null_pointer_interproc_bad ======>
+(.ret=r0 /\ CONSUME(r0)@30 · RET(r0)@30 · RET(r0)@30,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing negation_in_conditional_ok
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: negation_in_conditional_ok ======>
+(.ret=x /\ CONSUME(x)@38 · RET(x)@38,1) \/ (.ret=0 /\ RET()@36,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing return_null
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: return_null ======>
+(true /\ RET(NULL)@41,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing null_pointer_with_function_pointer_bad
+CallingFunction: fp @46
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: null_pointer_with_function_pointer_bad ======>
+(true /\ deref(x)@47,0)
+Arguments are ,htbl
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing exit_if_null_ok
+CallingFunction: exit @52
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: exit_if_null_ok ======>
+(true /\ deref(htbl)@53,0) \/ (true /\ RET()@52,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing FPuseafterfree_no_check_for_null_after_realloc_bad
+CallingFunction: malloc @58
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: realloc @62
+|- futurec_raw (.ret=0 /\ (!_(.ret))^*), and the handler is q
+CallingFunction: free @64
+CallingFunction: free @66
+current states: 2
+checking futurecondition ... 2|-1
+ = LHS: ((q!=0) /\ deref(q)@65 · free(q)@66,0) \/ (q=0 /\ free(p)@64 · deref(q)@65 · free(q)@66,0)
+|- RHS: (q=0 /\ (!_(q))^*)
+deref(q)@65 · free(q)@66 |- (!_(q))^*
+ ------- 
+current states: 1
+checking futurecondition ... 4|-2
+ = LHS: (!((p!=0)) /\ (q!=0) /\ deref(q)@65 · free(q)@66,0) \/ (!((p!=0)) /\ q=0 /\ free(p)@64 · deref(q)@65 · free(q)@66,0) \/ ((p!=0) /\ (q!=0) /\ deref(p)@60 · deref(q)@65 · free(q)@66,0) \/ ((p!=0) /\ q=0 /\ deref(p)@60 · free(p)@64 · deref(q)@65 · free(q)@66,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+free(p)@64 |- (!_(p))^*
+ ------- 
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: FPuseafterfree_no_check_for_null_after_realloc_bad ======>
+(!((p!=0)) /\ (q!=0) /\ deref(q)@65 · free(q)@66,0) \/ (!((p!=0)) /\ q=0 /\ free(p)@64 · deref(q)@65 · free(q)@66,0) \/ ((p!=0) /\ (q!=0) /\ deref(p)@60 · deref(q)@65 · free(q)@66,0) \/ ((p!=0) /\ q=0 /\ deref(p)@60 · free(p)@64 · deref(q)@65 · free(q)@66,0)
+Arguments are ,p,n
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing assign
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: assign ======>
+(true /\ deref(p)@69,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing potentially_null_pointer_passed_as_argument_bad
+CallingFunction: malloc @73
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: assign @74
+CallingFunction: free @75
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ free(p)@75,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+free(p)@75 |- (!_(p))^*
+ ------- 
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: potentially_null_pointer_passed_as_argument_bad ======>
+(true /\ free(p)@75,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing null_passed_as_argument_bad
+CallingFunction: assign @79
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing allocated_pointer_passed_as_argument_ok
+CallingFunction: malloc @84
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: assign @86
+CallingFunction: free @87
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ emp,0) \/ ((p!=0) /\ free(p)@87,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: allocated_pointer_passed_as_argument_ok ======>
+(!((p!=0)) /\ emp,0) \/ ((p!=0) /\ free(p)@87,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing unsafe_allocate
+CallingFunction: malloc @93
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (.ret=p /\ CONSUME(p)@94 · RET(p)@94 · RET(p)@94,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: unsafe_allocate ======>
+(.ret=p /\ CONSUME(p)@94 · RET(p)@94,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing safe_allocate
+CallingFunction: malloc @100
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (.ret=p /\ CONSUME(p)@102 · RET(p)@102 · RET(p)@102,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+aiyouahhahhahahhah: (.ret=p /\ CONSUME(p)@102 · RET(p)@102,1)
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: safe_allocate ======>
+(.ret=p /\ CONSUME(p)@102 · RET(p)@102,1)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing function_call_can_return_null_pointer_bad
+CallingFunction: unsafe_allocate @107
+CallingFunction: assign @108
+CallingFunction: free @109
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: function_call_can_return_null_pointer_bad ======>
+(true /\ free(p)@109,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing function_call_returns_allocated_pointer_ok
+CallingFunction: safe_allocate @114
+CallingFunction: assign @115
+CallingFunction: free @116
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: function_call_returns_allocated_pointer_ok ======>
+(true /\ free(p)@116,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing sizeof_expr_ok
+CallingFunction: malloc @120
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: free @124
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ free(p)@124,0) \/ ((p!=0) /\ deref(p)@122 · free(p)@124,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+free(p)@124 |- (!_(p))^*
+ ------- 
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: sizeof_expr_ok ======>
+(!((p!=0)) /\ free(p)@124,0) \/ ((p!=0) /\ deref(p)@122 · free(p)@124,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing unreachable_null_ok
+CallingFunction: will_not_return @132
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: unreachable_null_ok ======>
+(true /\ deref(p)@134,0)
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing no_ret
+CallingFunction: will_not_return @137
+Arguments are 
+/home/infer_TempFix/small_progs/nullptr_more.c
+annalysing unreachable_null_no_return_ok
+CallingFunction: no_ret @142
+/home/infer_TempFix/small_progs/nullptr_more.c
+
+=====> Actual effects of function: unreachable_null_no_return_ok ======>
+(true /\ deref(p)@144,0)

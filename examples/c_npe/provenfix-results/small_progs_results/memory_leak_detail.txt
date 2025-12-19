@@ -1,0 +1,112 @@
+
+In /home/infer_TempFix/small_progs/memory_leak.c:
+
+~~~~~~~~~ In function: malloc_no_free_bad ~~~~~~~~~
+Future-condition checking for 'malloc @9': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 9 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: malloc_out_parameter_local_mutation_bad ~~~~~~~~~
+Future-condition checking for 'malloc @24': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ x=0 /\ deref(x)@25 ~~~> (!_(x))^*;
+[Patches]
+ @ line 25 can be inserted with code: if (x==0){ return; }
+
+
+~~~~~~~~~ In function: malloc_interproc_no_free_bad2 ~~~~~~~~~
+Future-condition checking for 'malloc @44': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 43 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: report_leak_in_correct_line_bad ~~~~~~~~~
+Future-condition checking for 'malloc @98': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+x=0 /\ free(x)@102 ~~~> (!_(x))^*;
+[Patches]
+ @ line 102 can be inserted with code: if (x==0){ return; }
+
+
+~~~~~~~~~ In function: realloc_free_ok ~~~~~~~~~
+Future-condition checking for 'malloc @108': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 110 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: realloc_no_free_bad ~~~~~~~~~
+Future-condition checking for 'malloc @114': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 113 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: realloc_no_check_bad ~~~~~~~~~
+Future-condition checking for 'malloc @119': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 122 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: test_config_options_1_ok ~~~~~~~~~
+Future-condition checking for 'malloc @133': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 132 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: alloc_ref_counted_ok ~~~~~~~~~
+Future-condition checking for 'malloc @158': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(p!=0) /\ RET(p)@161 · RET(p.data)@161 ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 161 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: alloc_ref_counted_bad ~~~~~~~~~
+Future-condition checking for 'malloc @170': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(p!=0) /\ RET()@174 ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 174 can be inserted with code: if ((p!=0)){free(p); }
+

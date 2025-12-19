@@ -1,0 +1,95 @@
+Capturing in make/cc mode ...
+Arguments are ,f,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing invoke
+extractEventFromFUnctionCallUnaryOperatornone
+extractEventFromFUnctionCallUnaryOperatornone
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: invoke ======>
+(.ret=r0 /\ CONSUME(r0)@10 · RET(r0)@10 · RET(r0)@10,1)
+Arguments are ,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing id
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: id ======>
+(.ret=i /\ CONSUME(i)@12 · RET(i)@12 · RET(i)@12,1)
+Arguments are ,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing add_one
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: add_one ======>
+(true /\ RET()@14,1)
+Arguments are ,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing add_two
+CallingFunction: invoke @17
+CallingFunction: add_one @18
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: add_two ======>
+(true /\ RET()@19,1)
+Arguments are ,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing add_more_bad
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: add_more_bad ======>
+(.ret=0 /\ RET()@27,1) \/ (true /\ RET()@25,1)
+Arguments are 
+/home/infer_TempFix/small_progs/specialization.c
+annalysing test_invoke_ok
+CallingFunction: add_one @31
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: test_invoke_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@33,0)
+Arguments are 
+/home/infer_TempFix/small_progs/specialization.c
+annalysing test_invoke_bad
+CallingFunction: add_one @38
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: test_invoke_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@40,0)
+Arguments are 
+/home/infer_TempFix/small_progs/specialization.c
+annalysing test_recursive_invoke_ok
+CallingFunction: add_two @45
+CallingFunction: add_one @45
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: test_recursive_invoke_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@47,0)
+Arguments are 
+/home/infer_TempFix/small_progs/specialization.c
+annalysing test_recursive_invoke_bad
+CallingFunction: add_two @52
+CallingFunction: add_one @52
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: test_recursive_invoke_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@54,0)
+Arguments are ,x,y,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing two_pointers_recursion_bad
+/home/infer_TempFix/small_progs/specialization.c
+
+=====> Actual effects of function: two_pointers_recursion_bad ======>
+(.ret=0 /\ RET()@63,1) \/ (true /\ RET()@61,1)
+Arguments are ,z
+/home/infer_TempFix/small_progs/specialization.c
+annalysing alias_recursion
+CallingFunction: two_pointers_recursion_bad @66
+Arguments are ,f,i
+/home/infer_TempFix/small_progs/specialization.c
+annalysing invoke_itself_bad
+extractEventFromFUnctionCallUnaryOperatornone
+extractEventFromFUnctionCallUnaryOperatornone
+CallingFunction: invoke_itself_bad @72
+Arguments are 
+/home/infer_TempFix/small_progs/specialization.c
+annalysing specialize_invoke_itself_ok
+CallingFunction: invoke_itself_bad @76

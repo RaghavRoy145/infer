@@ -1,0 +1,43 @@
+Capturing in make/cc mode ...
+Arguments are ,x,p
+/home/infer_TempFix/small_progs/shift.c
+annalysing return_depends_on_lshift
+/home/infer_TempFix/small_progs/shift.c
+
+=====> Actual effects of function: return_depends_on_lshift ======>
+(.ret=p /\ CONSUME(p)@14 · RET(p)@14,1) \/ (true /\ RET(NULL)@12,1)
+Arguments are 
+/home/infer_TempFix/small_progs/shift.c
+annalysing return_nonnull_deref1_ok
+/home/infer_TempFix/small_progs/shift.c
+
+=====> Actual effects of function: return_nonnull_deref1_ok ======>
+(.ret=return_depends_on_lshift_1000_y_ /\ CONSUME(return_depends_on_lshift_1000_y_)@19 · RET(return_depends_on_lshift_1000_y_)@19,1)
+Arguments are 
+/home/infer_TempFix/small_progs/shift.c
+annalysing return_null_deref1_bad
+/home/infer_TempFix/small_progs/shift.c
+
+=====> Actual effects of function: return_null_deref1_bad ======>
+(.ret=return_depends_on_lshift_0_y_ /\ CONSUME(return_depends_on_lshift_0_y_)@24 · RET(return_depends_on_lshift_0_y_)@24,1)
+Arguments are ,x,p
+/home/infer_TempFix/small_progs/shift.c
+annalysing return_depends_on_rshift
+/home/infer_TempFix/small_progs/shift.c
+
+=====> Actual effects of function: return_depends_on_rshift ======>
+(.ret=p /\ CONSUME(p)@31 · RET(p)@31,1) \/ (true /\ RET(NULL)@29,1)
+Arguments are 
+/home/infer_TempFix/small_progs/shift.c
+annalysing return_nonnull_deref2_ok
+/home/infer_TempFix/small_progs/shift.c
+
+=====> Actual effects of function: return_nonnull_deref2_ok ======>
+(.ret=return_depends_on_rshift_2_y_ /\ CONSUME(return_depends_on_rshift_2_y_)@36 · RET(return_depends_on_rshift_2_y_)@36,1)
+Arguments are 
+/home/infer_TempFix/small_progs/shift.c
+annalysing return_null_deref2_bad
+/home/infer_TempFix/small_progs/shift.c
+
+=====> Actual effects of function: return_null_deref2_bad ======>
+(.ret=return_depends_on_rshift_0_y_ /\ CONSUME(return_depends_on_rshift_0_y_)@41 · RET(return_depends_on_rshift_0_y_)@41,1)

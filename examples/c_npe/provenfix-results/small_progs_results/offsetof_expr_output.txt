@@ -1,0 +1,15 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/offsetof_expr.c
+annalysing test_offsetof_expr_bad
+/home/infer_TempFix/small_progs/offsetof_expr.c
+
+=====> Actual effects of function: test_offsetof_expr_bad ======>
+(.ret=42 /\ RET()@23,1) \/ (.ret=42 /\ deref(p)@21 · RET()@23,1)
+Arguments are 
+/home/infer_TempFix/small_progs/offsetof_expr.c
+annalysing FN_test_offsetof_expr_nonlit_bad
+/home/infer_TempFix/small_progs/offsetof_expr.c
+
+=====> Actual effects of function: FN_test_offsetof_expr_nonlit_bad ======>
+(.ret=42 /\ RET()@35,1) \/ (.ret=42 /\ deref(p)@33 · RET()@35,1)

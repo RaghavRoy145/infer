@@ -1,0 +1,18 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/enum.c
+annalysing other_enum_main
+Arguments are 
+/home/infer_TempFix/small_progs/enum.c
+annalysing enum_values_ok
+/home/infer_TempFix/small_progs/enum.c
+
+=====> Actual effects of function: enum_values_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@27,0)
+Arguments are 
+/home/infer_TempFix/small_progs/enum.c
+annalysing enum_values_bad
+/home/infer_TempFix/small_progs/enum.c
+
+=====> Actual effects of function: enum_values_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@36,0)

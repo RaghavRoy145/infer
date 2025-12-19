@@ -1,0 +1,38 @@
+Capturing in make/cc mode ...
+Arguments are ,p
+/home/infer_TempFix/small_progs/aliasing.c
+annalysing FP_local_addr_noalias_ok
+/home/infer_TempFix/small_progs/aliasing.c
+
+=====> Actual effects of function: FP_local_addr_noalias_ok ======>
+(true /\ emp,0) \/ (true /\ deref(q)@14,0)
+Arguments are ,p
+/home/infer_TempFix/small_progs/aliasing.c
+annalysing local_addr_noalias_bad
+/home/infer_TempFix/small_progs/aliasing.c
+
+=====> Actual effects of function: local_addr_noalias_bad ======>
+(true /\ emp,0) \/ (true /\ deref(q)@22,0)
+Arguments are ,p
+/home/infer_TempFix/small_progs/aliasing.c
+annalysing global_addr_alias_bad
+/home/infer_TempFix/small_progs/aliasing.c
+
+=====> Actual effects of function: global_addr_alias_bad ======>
+(true /\ emp,0) \/ (true /\ deref(q)@30,0)
+Arguments are ,fun_pointer
+/home/infer_TempFix/small_progs/aliasing.c
+annalysing angelic_treatment_of_funcction_pointers_ok
+CallingFunction: fun_pointer @35
+/home/infer_TempFix/small_progs/aliasing.c
+
+=====> Actual effects of function: angelic_treatment_of_funcction_pointers_ok ======>
+(true /\ deref(p)@36,0)
+Arguments are ,fun_pointer
+/home/infer_TempFix/small_progs/aliasing.c
+annalysing null_dereference_following_function_pointer_call_bad
+CallingFunction: fun_pointer @41
+/home/infer_TempFix/small_progs/aliasing.c
+
+=====> Actual effects of function: null_dereference_following_function_pointer_call_bad ======>
+(true /\ deref(p)@43,0)

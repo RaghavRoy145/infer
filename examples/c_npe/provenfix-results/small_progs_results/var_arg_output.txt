@@ -1,0 +1,58 @@
+Capturing in make/cc mode ...
+Arguments are ,n
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing sum
+CallingFunction: __builtin_va_start @13
+CallingFunction: __builtin_va_end @18
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: sum ======>
+(.ret=sum /\ CONSUME(sum)@19 · RET(sum)@19,1)
+Arguments are 
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing sum_one_then_npe_bad
+CallingFunction: sum @23
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: sum_one_then_npe_bad ======>
+(true /\ deref(p)@25,0)
+Arguments are 
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing FN_sum_four_then_npe_bad
+CallingFunction: sum @30
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: FN_sum_four_then_npe_bad ======>
+(true /\ deref(p)@32,0)
+Arguments are 
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing FN_sum_then_reachable_npe_bad
+CallingFunction: sum @37
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: FN_sum_then_reachable_npe_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@40,0)
+Arguments are 
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing FP_sum_then_unreachable_npe_ok
+CallingFunction: sum @46
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: FP_sum_then_unreachable_npe_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@49,0)
+Arguments are 
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing unknown_sum_one_then_npe_bad
+CallingFunction: unknown_sum @56
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: unknown_sum_one_then_npe_bad ======>
+(true /\ deref(p)@58,0)
+Arguments are 
+/home/infer_TempFix/small_progs/var_arg.c
+annalysing unknown_sum_four_then_npe_bad
+CallingFunction: unknown_sum @62
+/home/infer_TempFix/small_progs/var_arg.c
+
+=====> Actual effects of function: unknown_sum_four_then_npe_bad ======>
+(true /\ deref(p)@64,0)

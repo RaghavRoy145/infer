@@ -1,0 +1,15 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_compound_literal.c
+annalysing init_with_compound_literal_npe_bad
+/home/infer_TempFix/small_progs/frontend_compound_literal.c
+
+=====> Actual effects of function: init_with_compound_literal_npe_bad ======>
+(true /\ deref(p)@17,0) \/ (true /\ deref(p)@17 · deref(pointer)@19,0)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_compound_literal.c
+annalysing init_with_compound_literal_npe_good
+/home/infer_TempFix/small_progs/frontend_compound_literal.c
+
+=====> Actual effects of function: init_with_compound_literal_npe_good ======>
+(true /\ deref(p)@25,0) \/ (true /\ deref(p)@25 · deref(pointer)@27,0)

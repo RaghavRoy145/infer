@@ -1,0 +1,71 @@
+Capturing in make/cc mode ...
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary1_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary1_ok ======>
+(true /\ RET()@16,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary2_bad
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary2_bad ======>
+(true /\ RET()@21,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary3_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary3_ok ======>
+(true /\ RET()@26,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary4_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary4_ok ======>
+(true /\ RET()@31,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary4_bad
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary4_bad ======>
+(true /\ RET()@36,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary5_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary5_ok ======>
+(true /\ RET()@41,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary6_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary6_ok ======>
+(true /\ RET()@46,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary7_bad
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary7_bad ======>
+(true /\ RET()@51,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary8_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary8_ok ======>
+(true /\ RET()@56,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/ternary.c
+annalysing ternary9_ok
+/home/infer_TempFix/small_progs/ternary.c
+
+=====> Actual effects of function: ternary9_ok ======>
+(true /\ RET()@61,1)

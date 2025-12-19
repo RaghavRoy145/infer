@@ -1,0 +1,104 @@
+Capturing in make/cc mode ...
+Arguments are ,b,x
+/home/infer_TempFix/small_progs/latent.c
+annalysing conditional_free2
+CallingFunction: free @12
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: conditional_free2 ======>
+(true /\ emp,0) \/ (true /\ free(x)@12,0)
+Arguments are ,b,x
+/home/infer_TempFix/small_progs/latent.c
+annalysing latent_use_after_free
+CallingFunction: conditional_free2 @17
+CallingFunction: free @21
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: latent_use_after_free ======>
+(true /\ deref(x)@18,0) \/ (true /\ deref(x)@18 · free(x)@21,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/latent.c
+annalysing manifest_use_after_free
+CallingFunction: latent_use_after_free @25
+Arguments are ,x
+/home/infer_TempFix/small_progs/latent.c
+annalysing deref_then_free_then_deref_bad
+CallingFunction: free @29
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: deref_then_free_then_deref_bad ======>
+(true /\ deref(x)@28 · free(x)@29 · deref(x)@30,0)
+Arguments are ,b
+/home/infer_TempFix/small_progs/latent.c
+annalysing create_branching
+Arguments are ,b,x
+/home/infer_TempFix/small_progs/latent.c
+annalysing FN_nonlatent_use_after_free_bad
+CallingFunction: create_branching @42
+CallingFunction: free @43
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: FN_nonlatent_use_after_free_bad ======>
+(true /\ free(x)@43 · deref(x)@44,0)
+Arguments are ,b,x
+/home/infer_TempFix/small_progs/latent.c
+annalysing FN_nonlatent_use_after_free_bad2
+CallingFunction: free @49
+CallingFunction: create_branching @50
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: FN_nonlatent_use_after_free_bad2 ======>
+(true /\ free(x)@49 · deref(x)@51,0)
+Arguments are ,argc,argv
+/home/infer_TempFix/small_progs/latent.c
+annalysing main
+CallingFunction: malloc @57
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+CallingFunction: latent_use_after_free @59
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((x!=0)) /\ emp,0) \/ ((x!=0) /\ emp,0)
+|- RHS: ((x!=0) /\ (!free(x))^* · free(x) · (_)^*) \/ (x=0 /\ (!_(x))^*)
+emp |- (!free(x))^* · free(x) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: main ======>
+(!((x!=0)) /\ emp,0) \/ ((x!=0) /\ emp,0)
+Arguments are ,x,y
+/home/infer_TempFix/small_progs/latent.c
+annalysing equal_to_stack_address_test_then_crash_bad
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: equal_to_stack_address_test_then_crash_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@68,0)
+Arguments are ,x,y
+/home/infer_TempFix/small_progs/latent.c
+annalysing crash_if_different_addresses
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: crash_if_different_addresses ======>
+(true /\ deref(x)@73 · deref(y)@74,0) \/ (true /\ deref(x)@73 · deref(y)@74 · deref(p)@77,0)
+Arguments are ,p
+/home/infer_TempFix/small_progs/latent.c
+annalysing traverse_and_crash_if_equal_to_root
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: traverse_and_crash_if_equal_to_root ======>
+(true /\ deref(p)@89,0) \/ (true /\ deref(p)@89 · deref(crash)@92,0)
+Arguments are ,q
+/home/infer_TempFix/small_progs/latent.c
+annalysing crash_after_one_node_bad
+CallingFunction: traverse_and_crash_if_equal_to_root @99
+/home/infer_TempFix/small_progs/latent.c
+
+=====> Actual effects of function: crash_after_one_node_bad ======>
+(true /\ deref(q)@98,0)
+Arguments are ,q
+/home/infer_TempFix/small_progs/latent.c
+annalysing crash_after_two_nodes_bad
+CallingFunction: traverse_and_crash_if_equal_to_root @104
+Arguments are ,q
+/home/infer_TempFix/small_progs/latent.c
+annalysing FN_crash_after_six_nodes_bad
+CallingFunction: traverse_and_crash_if_equal_to_root @109

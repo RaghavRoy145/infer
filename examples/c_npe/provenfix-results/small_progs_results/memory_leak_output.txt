@@ -1,0 +1,447 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_no_free_bad
+CallingFunction: malloc @9
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ emp,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_returned_ok
+CallingFunction: malloc @12
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (.ret=p /\ CONSUME(p)@13 · RET(p)@13 · RET(p)@13,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_returned_ok ======>
+(.ret=p /\ CONSUME(p)@13 · RET(p)@13 · RET(p)@13,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_out_parameter_ok
+CallingFunction: malloc @16
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (x=0 /\ (!_(x))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_out_parameter_ok ======>
+(true /\ deref(x)@16,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_out_parameter_local_mutation_ok
+CallingFunction: malloc @19
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (x=0 /\ (!_(x))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_out_parameter_local_mutation_ok ======>
+(true /\ deref(x)@19,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_out_parameter_local_mutation_bad
+CallingFunction: malloc @24
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ deref(x)@25,0)
+|- RHS: (x=0 /\ (!_(x))^*)
+deref(x)@25 |- (!_(x))^*
+ ------- 
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_out_parameter_local_mutation_bad ======>
+(true /\ deref(x)@24 · deref(x)@25,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_then_free_ok
+CallingFunction: malloc @29
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: free @32
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ emp,0) \/ ((p!=0) /\ deref(p)@31 · free(p)@32,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_then_free_ok ======>
+(!((p!=0)) /\ emp,0) \/ ((p!=0) /\ deref(p)@31 · free(p)@32,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing create_p
+CallingFunction: malloc @37
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (.ret=p /\ CONSUME(p)@38 · RET(p)@38 · RET(p)@38,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: create_p ======>
+(.ret=p /\ CONSUME(p)@38 · RET(p)@38 · RET(p)@38,1)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_interproc_no_free_bad
+CallingFunction: create_p @41
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_interproc_no_free_bad2
+CallingFunction: malloc @44
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ emp,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_formal_leak_bad
+CallingFunction: malloc @50
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (x=0 /\ (!_(x))^*)
+Arguments are ,size
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_via_ptr
+CallingFunction: malloc_func @62
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_via_ptr ======>
+(.ret=ret /\ CONSUME(ret)@63 · RET(ret)@63,1) \/ (true /\ RET(NULL)@59,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing free_via_ptr
+CallingFunction: free_func @66
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_ptr_leak_bad
+CallingFunction: malloc_via_ptr @68
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_ptr_no_check_leak_bad
+CallingFunction: malloc_via_ptr @71
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_ptr_no_check_leak_bad ======>
+(true /\ deref(p)@72,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_ptr_free_ok
+CallingFunction: malloc_via_ptr @76
+CallingFunction: free @77
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: malloc_ptr_free_ok ======>
+(true /\ free(p)@77,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing malloc_ptr_free_ptr_ok
+CallingFunction: malloc_via_ptr @81
+CallingFunction: free_via_ptr @82
+Arguments are ,out,flag
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alias_ptr_free_ok
+CallingFunction: malloc @88
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is y
+CallingFunction: free @93
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((y!=0)) /\ emp,0) \/ ((y!=0) /\ free(y)@93,0)
+|- RHS: ((y!=0) /\ (!free(y))^* · free(y) · (_)^*) \/ (y=0 /\ (!_(y))^*)
+CallingFunction: free @93
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: alias_ptr_free_ok ======>
+(!((y!=0)) /\ emp,0) \/ ((y!=0) /\ free(y)@93,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing report_leak_in_correct_line_bad
+CallingFunction: malloc @98
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x
+CallingFunction: free @102
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((x!=0)) /\ free(x)@102,0) \/ ((x!=0) /\ RET()@100,1)
+|- RHS: (x=0 /\ (!_(x))^*)
+free(x)@102 |- (!_(x))^*
+ ------- 
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: report_leak_in_correct_line_bad ======>
+(!((x!=0)) /\ free(x)@102,0) \/ ((x!=0) /\ RET()@100,1)
+Arguments are ,p,size
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing realloc_wrapper
+CallingFunction: realloc @105
+|- futurec_raw (.ret=0 /\ (!_(.ret))^*), and the handler is r0
+checking  ((ret=0), (!_(ret))^* ) for r0
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (.ret=r0 /\ CONSUME(r0)@105 · RET(r0)@105 · RET(r0)@105,1)
+|- RHS: (r0=0 /\ (!_(r0))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: realloc_wrapper ======>
+(.ret=r0 /\ CONSUME(r0)@105 · RET(r0)@105 · RET(r0)@105,1)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing realloc_free_ok
+CallingFunction: malloc @108
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: realloc_wrapper @109
+CallingFunction: free @110
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ free(q)@110,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: realloc_free_ok ======>
+(true /\ free(q)@110,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing realloc_no_free_bad
+CallingFunction: malloc @114
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: realloc_wrapper @115
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ emp,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing realloc_no_check_bad
+CallingFunction: malloc @119
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: realloc_wrapper @120
+CallingFunction: free @122
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ deref(q)@121 · free(q)@122,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: realloc_no_check_bad ======>
+(true /\ deref(q)@121 · free(q)@122,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing user_malloc_leak_bad
+CallingFunction: a_malloc @130
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing test_config_options_1_ok
+CallingFunction: malloc @133
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+CallingFunction: my_realloc @134
+CallingFunction: my_free @135
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ emp,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing test_config_options_2_ok
+CallingFunction: my_malloc @139
+CallingFunction: realloc @140
+|- futurec_raw (.ret=0 /\ (!_(.ret))^*), and the handler is q
+CallingFunction: my_free @141
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (q=0 /\ (!_(q))^*)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing test_config_options_no_free_bad
+CallingFunction: my_malloc @145
+CallingFunction: my_realloc @146
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_ref_counted_ok
+CallingFunction: malloc @158
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ RET(NULL)@163,1) \/ ((p!=0) /\ .ret=p.data /\ deref(p)@160 · CONSUME(p.data)@161 · RET(p)@161 · RET(p.data)@161,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+RET(p)@161 · RET(p.data)@161 |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: alloc_ref_counted_ok ======>
+(!((p!=0)) /\ RET(NULL)@163,1) \/ ((p!=0) /\ .ret=p.data /\ deref(p)@160 · CONSUME(p.data)@161 · RET(p)@161 · RET(p.data)@161,1)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_ref_counted_bad
+CallingFunction: malloc @170
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ .ret=0 /\ RET()@176,1) \/ ((p!=0) /\ deref(p)@172 · deref(p)@173 · deref(p)@174 · RET()@174,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+RET()@174 |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: alloc_ref_counted_bad ======>
+(!((p!=0)) /\ .ret=0 /\ RET()@176,1) \/ ((p!=0) /\ deref(p)@172 · deref(p)@173 · deref(p)@174 · RET()@174,1)
+Arguments are ,size
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_ref_counted_arith_ok
+CallingFunction: malloc @183
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ .ret=p /\ CONSUME(p)@188 · RET(p)@188,1) \/ ((p!=0) /\ .ret=p /\ deref(p)@186 · CONSUME(p)@188 · RET(p)@188,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: alloc_ref_counted_arith_ok ======>
+(!((p!=0)) /\ .ret=p /\ CONSUME(p)@188 · RET(p)@188,1) \/ ((p!=0) /\ .ret=p /\ deref(p)@186 · CONSUME(p)@188 · RET(p)@188,1)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing return_malloc_deref_bad
+CallingFunction: malloc @192
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 2|-2
+ = LHS: (!((p!=0)) /\ .ret=10 /\ RET()@197,1) \/ ((p!=0) /\ .ret=p /\ deref(p)@194 · CONSUME(p)@195 · RET(p)@195,1)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: return_malloc_deref_bad ======>
+(!((p!=0)) /\ .ret=10 /\ RET()@197,1) \/ ((p!=0) /\ .ret=p /\ deref(p)@194 · CONSUME(p)@195 · RET(p)@195,1)
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing mutual_recursion
+CallingFunction: mutual_recursion_2 @206
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing mutual_recursion_2
+CallingFunction: mutual_recursion @208
+Arguments are ,x
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing interproc_mutual_recusion_leak
+CallingFunction: malloc @213
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is x.data
+CallingFunction: mutual_recursion @215
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (x.data=0 /\ (!_(x.data))^*)
+CallingFunction: mutual_recursion @215
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: interproc_mutual_recusion_leak ======>
+(true /\ deref(x)@212,0) \/ (true /\ deref(x)@212 · deref(x)@213,0)
+Arguments are ,array
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing allocate_all_in_array
+CallingFunction: malloc @220
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is array.i
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (array.i=0 /\ (!_(array.i))^*)
+aiyouahhahhahahhah: (true /\ deref(array)@220,0)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: allocate_all_in_array ======>
+(true /\ deref(array)@220,0)
+Arguments are ,array
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing free_all_in_array
+CallingFunction: free @226
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: free_all_in_array ======>
+(true /\ free(array.i)@226,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_then_free_all_in_array_ok
+CallingFunction: allocate_all_in_array @232
+CallingFunction: free_all_in_array @233
+Arguments are ,array
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing allocate_42_in_array
+CallingFunction: malloc @236
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is array.42
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (array.42=0 /\ (!_(array.42))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: allocate_42_in_array ======>
+(true /\ deref(array)@236,0)
+Arguments are ,array
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing free_42_in_array
+CallingFunction: free @238
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: free_42_in_array ======>
+(true /\ free(array.42)@238,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_then_free_42_in_array_ok
+CallingFunction: allocate_42_in_array @242
+CallingFunction: free_42_in_array @243
+Arguments are ,array,i
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing allocate_in_array
+CallingFunction: malloc @246
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is array.i
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ emp,0)
+|- RHS: (array.i=0 /\ (!_(array.i))^*)
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: allocate_in_array ======>
+(true /\ deref(array)@246,0)
+Arguments are ,array,i
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing free_in_array
+CallingFunction: free @248
+/home/infer_TempFix/small_progs/memory_leak.c
+
+=====> Actual effects of function: free_in_array ======>
+(true /\ free(array.i)@248,0)
+Arguments are 
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_then_free_fixed_index_ok
+CallingFunction: allocate_in_array @252
+CallingFunction: free_in_array @253
+Arguments are ,array,i
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_then_free_parameter_array_ok
+CallingFunction: allocate_in_array @257
+CallingFunction: free_in_array @258
+Arguments are ,i
+/home/infer_TempFix/small_progs/memory_leak.c
+annalysing alloc_then_free_at_index_ok
+CallingFunction: allocate_in_array @263
+CallingFunction: free_in_array @264

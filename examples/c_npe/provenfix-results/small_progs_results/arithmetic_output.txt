@@ -1,0 +1,84 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing return_non_negative
+CallingFunction: random @12
+CallingFunction: exit @14
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: return_non_negative ======>
+(.ret=x /\ CONSUME(x)@16 · RET(x)@16,1) \/ (true /\ RET()@14,1)
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing return_non_negative_is_non_negative_ok
+CallingFunction: return_non_negative @20
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: return_non_negative_is_non_negative_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@22,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing assume_non_negative
+CallingFunction: exit @28
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: assume_non_negative ======>
+(true /\ emp,0) \/ (true /\ RET()@28,1)
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing assume_non_negative_is_non_negative_ok
+CallingFunction: random @33
+CallingFunction: assume_non_negative @34
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: assume_non_negative_is_non_negative_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@37,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing if_negative_then_crash_latent
+CallingFunction: assume_non_negative @42
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: if_negative_then_crash_latent ======>
+(true /\ deref(p)@44,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing FN_call_if_negative_then_crash_with_negative_bad
+CallingFunction: if_negative_then_crash_latent @49
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing call_if_negative_then_crash_with_local_bad
+CallingFunction: random @54
+CallingFunction: if_negative_then_crash_latent @55
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing return_non_negative_float
+CallingFunction: exit @61
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: return_non_negative_float ======>
+(.ret=x /\ CONSUME(x)@63 · RET(x)@63,1) \/ (true /\ RET()@61,1)
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing return_non_negative_float_is_non_negative_ok
+CallingFunction: return_non_negative_float @67
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: return_non_negative_float_is_non_negative_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@69,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing assume_non_negative_float
+CallingFunction: exit @75
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: assume_non_negative_float ======>
+(true /\ emp,0) \/ (true /\ RET()@75,1)
+Arguments are 
+/home/infer_TempFix/small_progs/arithmetic.c
+annalysing assume_non_negative_float_is_non_negative_ok
+CallingFunction: assume_non_negative_float @81
+/home/infer_TempFix/small_progs/arithmetic.c
+
+=====> Actual effects of function: assume_non_negative_float_is_non_negative_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@84,0)

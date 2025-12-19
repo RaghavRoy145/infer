@@ -1,0 +1,27 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/issues_abort_execution.c
+annalysing uninit_continues_execution_bad
+/home/infer_TempFix/small_progs/issues_abort_execution.c
+
+=====> Actual effects of function: uninit_continues_execution_bad ======>
+(true /\ deref(p)@15,0)
+Arguments are 
+/home/infer_TempFix/small_progs/issues_abort_execution.c
+annalysing leak_bad
+CallingFunction: malloc @19
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is p
+current states: 1
+checking futurecondition ... 1|-2
+ = LHS: (true /\ emp,0)
+|- RHS: ((p!=0) /\ (!free(p))^* · free(p) · (_)^*) \/ (p=0 /\ (!_(p))^*)
+emp |- (!free(p))^* · free(p) · (_)^*
+ ------- 
+Arguments are 
+/home/infer_TempFix/small_progs/issues_abort_execution.c
+annalysing memleak_continues_execution_bad
+CallingFunction: leak_bad @24
+/home/infer_TempFix/small_progs/issues_abort_execution.c
+
+=====> Actual effects of function: memleak_continues_execution_bad ======>
+(true /\ deref(p)@26,0)

@@ -1,0 +1,8 @@
+Capturing in make/cc mode ...
+Arguments are ,p
+/home/infer_TempFix/small_progs/assert.c
+annalysing report_on_line_offset_6_bad
+/home/infer_TempFix/small_progs/assert.c
+
+=====> Actual effects of function: report_on_line_offset_6_bad ======>
+(true /\ deref(q)@19,0) \/ (true /\ deref(p)@16 · deref(q)@19,0)

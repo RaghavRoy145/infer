@@ -1,0 +1,13 @@
+
+In /home/infer_TempFix/small_progs/memcpy.c:
+
+~~~~~~~~~ In function: memcpy_ok ~~~~~~~~~
+Future-condition checking for 'malloc @18': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+p=0 /\ free(p)@21 ~~~> (!_(p))^*;
+[Patches]
+ @ line 21 can be inserted with code: if (p==0){ return; }
+

@@ -1,0 +1,15 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/initlistexpr.c
+annalysing array_init_bad
+/home/infer_TempFix/small_progs/initlistexpr.c
+
+=====> Actual effects of function: array_init_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@14,0)
+Arguments are 
+/home/infer_TempFix/small_progs/initlistexpr.c
+annalysing array_init_ok
+/home/infer_TempFix/small_progs/initlistexpr.c
+
+=====> Actual effects of function: array_init_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@22,0)

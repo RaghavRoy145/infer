@@ -1,0 +1,57 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/frontend.c
+annalysing assign_implicit_cast_ok
+CallingFunction: malloc @13
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is b
+CallingFunction: free @22
+current states: 1
+checking futurecondition ... 3|-2
+ = LHS: (!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@16 · deref(b)@17 · deref(b)@18 · free(b)@22,0) \/ ((b!=0) /\ deref(b)@16 · deref(b)@17 · deref(b)@18 · deref(p)@20 · free(b)@22,0)
+|- RHS: ((b!=0) /\ (!free(b))^* · free(b) · (_)^*) \/ (b=0 /\ (!_(b))^*)
+/home/infer_TempFix/small_progs/frontend.c
+
+=====> Actual effects of function: assign_implicit_cast_ok ======>
+(!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@16 · deref(b)@17 · deref(b)@18 · free(b)@22,0) \/ ((b!=0) /\ deref(b)@16 · deref(b)@17 · deref(b)@18 · deref(p)@20 · free(b)@22,0)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend.c
+annalysing assign_implicit_cast_bad
+CallingFunction: malloc @27
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is b
+CallingFunction: free @36
+current states: 1
+checking futurecondition ... 3|-2
+ = LHS: (!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@30 · deref(b)@31 · deref(b)@32 · free(b)@36,0) \/ ((b!=0) /\ deref(b)@30 · deref(b)@31 · deref(b)@32 · deref(p)@34 · free(b)@36,0)
+|- RHS: ((b!=0) /\ (!free(b))^* · free(b) · (_)^*) \/ (b=0 /\ (!_(b))^*)
+/home/infer_TempFix/small_progs/frontend.c
+
+=====> Actual effects of function: assign_implicit_cast_bad ======>
+(!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@30 · deref(b)@31 · deref(b)@32 · free(b)@36,0) \/ ((b!=0) /\ deref(b)@30 · deref(b)@31 · deref(b)@32 · deref(p)@34 · free(b)@36,0)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend.c
+annalysing assign_paren_ok
+CallingFunction: malloc @41
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is b
+CallingFunction: free @50
+current states: 1
+checking futurecondition ... 3|-2
+ = LHS: (!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@44 · deref(b)@45 · deref(b)@46 · free(b)@50,0) \/ ((b!=0) /\ deref(b)@44 · deref(b)@45 · deref(b)@46 · deref(p)@48 · free(b)@50,0)
+|- RHS: ((b!=0) /\ (!free(b))^* · free(b) · (_)^*) \/ (b=0 /\ (!_(b))^*)
+/home/infer_TempFix/small_progs/frontend.c
+
+=====> Actual effects of function: assign_paren_ok ======>
+(!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@44 · deref(b)@45 · deref(b)@46 · free(b)@50,0) \/ ((b!=0) /\ deref(b)@44 · deref(b)@45 · deref(b)@46 · deref(p)@48 · free(b)@50,0)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend.c
+annalysing assign_paren_bad
+CallingFunction: malloc @55
+|- futurec_raw ((.ret!=0) /\ (!free(.ret))^* · free(.ret) · (_)^*) \/ (.ret=0 /\ (!_(.ret))^*), and the handler is b
+CallingFunction: free @64
+current states: 1
+checking futurecondition ... 3|-2
+ = LHS: (!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@58 · deref(b)@59 · deref(b)@60 · free(b)@64,0) \/ ((b!=0) /\ deref(b)@58 · deref(b)@59 · deref(b)@60 · deref(p)@62 · free(b)@64,0)
+|- RHS: ((b!=0) /\ (!free(b))^* · free(b) · (_)^*) \/ (b=0 /\ (!_(b))^*)
+/home/infer_TempFix/small_progs/frontend.c
+
+=====> Actual effects of function: assign_paren_bad ======>
+(!((b!=0)) /\ emp,0) \/ ((b!=0) /\ deref(b)@58 · deref(b)@59 · deref(b)@60 · free(b)@64,0) \/ ((b!=0) /\ deref(b)@58 · deref(b)@59 · deref(b)@60 · deref(p)@62 · free(b)@64,0)

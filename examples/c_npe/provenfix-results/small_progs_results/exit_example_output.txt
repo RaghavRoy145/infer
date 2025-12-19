@@ -1,0 +1,53 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing exit_example_bad
+CallingFunction: exit @12
+/home/infer_TempFix/small_progs/exit_example.c
+
+=====> Actual effects of function: exit_example_bad ======>
+(true /\ deref(p)@14,0) \/ (true /\ RET()@12,1)
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing direct_exit_example_ok
+CallingFunction: exit @19
+/home/infer_TempFix/small_progs/exit_example.c
+
+=====> Actual effects of function: direct_exit_example_ok ======>
+(true /\ RET()@19,1)
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing exit_wrapper
+CallingFunction: exit @23
+/home/infer_TempFix/small_progs/exit_example.c
+
+=====> Actual effects of function: exit_wrapper ======>
+(true /\ RET()@23,1)
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing indirect_exit_example_ok
+CallingFunction: exit_wrapper @27
+/home/infer_TempFix/small_progs/exit_example.c
+
+=====> Actual effects of function: indirect_exit_example_ok ======>
+(true /\ deref(p)@28,0)
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing direct_abort_example_ok
+CallingFunction: abort @33
+/home/infer_TempFix/small_progs/exit_example.c
+
+=====> Actual effects of function: direct_abort_example_ok ======>
+(true /\ deref(p)@34,0)
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing abort_wrapper
+CallingFunction: abort @37
+Arguments are 
+/home/infer_TempFix/small_progs/exit_example.c
+annalysing indirect_abort_example_ok
+CallingFunction: abort_wrapper @41
+/home/infer_TempFix/small_progs/exit_example.c
+
+=====> Actual effects of function: indirect_abort_example_ok ======>
+(true /\ deref(p)@42,0)

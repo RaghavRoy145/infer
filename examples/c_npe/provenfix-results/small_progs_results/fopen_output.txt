@@ -1,0 +1,603 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_getc_bad
+CallingFunction: fopen @14
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: getc @15
+CallingFunction: printf @16
+CallingFunction: fclose @17
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@17,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_getc_bad ======>
+(true /\ fclose(f)@17,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_getc_ok
+CallingFunction: fopen @23
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: getc @25
+CallingFunction: printf @26
+CallingFunction: fclose @27
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@27,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_getc_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@27,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_no_fclose_bad
+CallingFunction: fopen @34
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: getc @36
+CallingFunction: printf @37
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ emp,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+emp |- (!fclose(f))^* · fclose(f) · (_)^*
+ ------- 
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_no_fclose_bad ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ emp,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fgetc_bad
+CallingFunction: fopen @44
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fgetc @45
+CallingFunction: printf @46
+CallingFunction: fclose @47
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@47,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fgetc_bad ======>
+(true /\ fclose(f)@47,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fgetc_ok
+CallingFunction: fopen @53
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fgetc @55
+CallingFunction: printf @56
+CallingFunction: fclose @57
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@57,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fgetc_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@57,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_ungetc_bad
+CallingFunction: fopen @63
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: ungetc @64
+CallingFunction: fclose @65
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@65,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_ungetc_bad ======>
+(true /\ fclose(f)@65,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_ungetc_ok
+CallingFunction: fopen @70
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: ungetc @72
+CallingFunction: fclose @73
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@73,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_ungetc_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@73,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fputs_bad
+CallingFunction: fopen @79
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fputs @80
+CallingFunction: fclose @81
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fputs(f)@80 · fclose(f)@81,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fputs_bad ======>
+(true /\ fputs(f)@80 · fclose(f)@81,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fputs_ok
+CallingFunction: fopen @87
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fputs @89
+CallingFunction: fclose @90
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fputs(f)@89 · fclose(f)@90,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fputs_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fputs(f)@89 · fclose(f)@90,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fputc_bad
+CallingFunction: fopen @97
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fputc @98
+CallingFunction: fclose @99
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@99,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fputc_bad ======>
+(true /\ fclose(f)@99,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fputc_ok
+CallingFunction: fopen @105
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fputc @107
+CallingFunction: fclose @108
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@108,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fputc_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@108,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_putc_bad
+CallingFunction: fopen @115
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: putc @116
+CallingFunction: fclose @117
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@117,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_putc_bad ======>
+(true /\ fclose(f)@117,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_putc_ok
+CallingFunction: fopen @123
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: putc @125
+CallingFunction: fclose @126
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@126,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_putc_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@126,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fseek_bad
+CallingFunction: fopen @133
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fseek @134
+CallingFunction: fclose @135
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@135,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fseek_bad ======>
+(true /\ fclose(f)@135,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fseek_ok
+CallingFunction: fopen @141
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fseek @143
+CallingFunction: fclose @144
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@144,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fseek_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@144,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_ftell_bad
+CallingFunction: fopen @151
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: ftell @152
+CallingFunction: fclose @153
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@153,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_ftell_bad ======>
+(true /\ fclose(f)@153,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_ftell_ok
+CallingFunction: fopen @159
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: ftell @161
+CallingFunction: fclose @162
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@162,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_ftell_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@162,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fgets_bad
+CallingFunction: fopen @170
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fgets @171
+CallingFunction: fclose @172
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@172,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fgets_bad ======>
+(true /\ fclose(f)@172,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fgets_ok
+CallingFunction: fopen @179
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fgets @181
+CallingFunction: fclose @182
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@182,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fgets_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@182,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_rewind_bad
+CallingFunction: fopen @189
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: rewind @190
+CallingFunction: fclose @191
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@191,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_rewind_bad ======>
+(true /\ fclose(f)@191,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_rewind_ok
+CallingFunction: fopen @197
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: rewind @199
+CallingFunction: fclose @200
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@200,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_rewind_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@200,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fileno_bad
+CallingFunction: fopen @207
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fileno @208
+CallingFunction: fclose @209
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@209,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fileno_bad ======>
+(true /\ fclose(f)@209,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fileno_ok
+CallingFunction: fopen @215
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fileno @217
+CallingFunction: fclose @218
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@218,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fileno_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@218,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_clearerr_bad
+CallingFunction: fopen @225
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: clearerr @226
+CallingFunction: fclose @227
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@227,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_clearerr_bad ======>
+(true /\ fclose(f)@227,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_clearerr_ok
+CallingFunction: fopen @233
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: clearerr @235
+CallingFunction: fclose @236
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@236,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_clearerr_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@236,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_ferror_bad
+CallingFunction: fopen @243
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: ferror @244
+CallingFunction: fclose @245
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@245,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_ferror_bad ======>
+(true /\ fclose(f)@245,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_ferror_ok
+CallingFunction: fopen @251
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: ferror @253
+CallingFunction: fclose @254
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@254,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_ferror_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@254,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_feof_bad
+CallingFunction: fopen @261
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: feof @262
+CallingFunction: fclose @263
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@263,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_feof_bad ======>
+(true /\ fclose(f)@263,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_feof_ok
+CallingFunction: fopen @269
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: feof @271
+CallingFunction: fclose @272
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@272,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_feof_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@272,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fprintf_bad
+CallingFunction: fopen @279
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fprintf @280
+CallingFunction: fclose @281
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@281,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fprintf_bad ======>
+(true /\ fclose(f)@281,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fprintf_ok
+CallingFunction: fopen @287
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fprintf @289
+CallingFunction: fclose @290
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@290,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fprintf_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@290,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fgetpos_bad
+CallingFunction: fopen @321
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fgetpos @322
+CallingFunction: fclose @323
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@323,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fgetpos_bad ======>
+(true /\ fclose(f)@323,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fgetpos_ok
+CallingFunction: fopen @330
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fgetpos @332
+CallingFunction: fclose @333
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@333,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fgetpos_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@333,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing no_fopen_check_fsetpos_bad
+CallingFunction: fopen @341
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fsetpos @342
+CallingFunction: fclose @343
+current states: 1
+checking futurecondition ... 1|-1
+ = LHS: (true /\ fclose(f)@343,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: no_fopen_check_fsetpos_bad ======>
+(true /\ fclose(f)@343,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fopen_check_fsetpos_ok
+CallingFunction: fopen @350
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is f
+CallingFunction: fsetpos @352
+CallingFunction: fclose @353
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: (!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@353,0)
+|- RHS: (f>0 /\ (f!=stdout) /\ (f!=stdin) /\ (!fclose(f))^* · fclose(f) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fopen_check_fsetpos_ok ======>
+(!((f!=0)) /\ emp,0) \/ ((f!=0) /\ fclose(f)@353,0)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing file_operations_propagate_taint_bad
+CallingFunction: string_source @363
+CallingFunction: fopen @364
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is file
+CallingFunction: fgets @369
+CallingFunction: sink_string @370
+CallingFunction: sink_int @371
+CallingFunction: sink_int @372
+CallingFunction: sink_int @373
+CallingFunction: fclose @374
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: ((file!=0) /\ fclose(file)@374,0) \/ (file=0 /\ RET()@366,1)
+|- RHS: (file>0 /\ (file!=stdout) /\ (file!=stdin) /\ (!fclose(file))^* · fclose(file) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: file_operations_propagate_taint_bad ======>
+((file!=0) /\ fclose(file)@374,0) \/ (file=0 /\ RET()@366,1)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fprintf_propagate_taint_bad
+CallingFunction: string_source @378
+CallingFunction: fopen @379
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is file
+CallingFunction: fprintf @383
+CallingFunction: sink_int @384
+CallingFunction: fclose @385
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: ((file!=0) /\ fclose(file)@385,0) \/ (file=0 /\ RET()@381,1)
+|- RHS: (file>0 /\ (file!=stdout) /\ (file!=stdin) /\ (!fclose(file))^* · fclose(file) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fprintf_propagate_taint_bad ======>
+((file!=0) /\ fclose(file)@385,0) \/ (file=0 /\ RET()@381,1)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing fputs_propagate_taint_bad
+CallingFunction: string_source @389
+CallingFunction: fopen @390
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is file
+CallingFunction: fputs @394
+CallingFunction: sink_int @395
+CallingFunction: fclose @396
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: ((file!=0) /\ fputs(file)@394 · fclose(file)@396,0) \/ (file=0 /\ RET()@392,1)
+|- RHS: (file>0 /\ (file!=stdout) /\ (file!=stdin) /\ (!fclose(file))^* · fclose(file) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: fputs_propagate_taint_bad ======>
+((file!=0) /\ fputs(file)@394 · fclose(file)@396,0) \/ (file=0 /\ RET()@392,1)
+Arguments are 
+/home/infer_TempFix/small_progs/fopen.c
+annalysing FN_fputc_propagate_taint_bad
+CallingFunction: string_source @400
+CallingFunction: fopen @401
+|- futurec_raw (.ret>0 /\ (.ret!=stdout) /\ (.ret!=stdin) /\ (!fclose(.ret))^* · fclose(.ret) · (_)^*), and the handler is file
+CallingFunction: fputc @405
+CallingFunction: sink_int @406
+CallingFunction: fclose @407
+current states: 1
+checking futurecondition ... 2|-1
+ = LHS: ((file!=0) /\ fclose(file)@407,0) \/ (file=0 /\ RET()@403,1)
+|- RHS: (file>0 /\ (file!=stdout) /\ (file!=stdin) /\ (!fclose(file))^* · fclose(file) · (_)^*)
+/home/infer_TempFix/small_progs/fopen.c
+
+=====> Actual effects of function: FN_fputc_propagate_taint_bad ======>
+((file!=0) /\ fclose(file)@407,0) \/ (file=0 /\ RET()@403,1)

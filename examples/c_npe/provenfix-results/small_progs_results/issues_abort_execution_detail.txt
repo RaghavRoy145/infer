@@ -1,0 +1,13 @@
+
+In /home/infer_TempFix/small_progs/issues_abort_execution.c:
+
+~~~~~~~~~ In function: leak_bad ~~~~~~~~~
+Future-condition checking for 'malloc @19': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 18 can be inserted with code: if ((p!=0)){free(p); }
+

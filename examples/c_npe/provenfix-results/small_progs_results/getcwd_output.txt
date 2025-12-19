@@ -1,0 +1,36 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/getcwd.c
+annalysing getcwd_ok
+CallingFunction: getcwd @12
+CallingFunction: free @15
+CallingFunction: getcwd @19
+/home/infer_TempFix/small_progs/getcwd.c
+
+=====> Actual effects of function: getcwd_ok ======>
+(.ret=char /\ CONSUME(char)@23 · RET(char)@23,1) \/ (true /\ deref(cwd)@21 · RET()@21,1) \/ (.ret=result /\ deref(cwd)@14 · free(cwd)@15 · CONSUME(result)@16 · RET(result)@16,1)
+Arguments are 
+/home/infer_TempFix/small_progs/getcwd.c
+annalysing getcwd_no_buf_no_check_bad
+CallingFunction: getcwd @27
+CallingFunction: free @29
+/home/infer_TempFix/small_progs/getcwd.c
+
+=====> Actual effects of function: getcwd_no_buf_no_check_bad ======>
+(.ret=result /\ deref(cwd)@28 · free(cwd)@29 · CONSUME(result)@30 · RET(result)@30,1)
+Arguments are 
+/home/infer_TempFix/small_progs/getcwd.c
+annalysing getcwd_no_buf_no_free_bad
+CallingFunction: getcwd @34
+/home/infer_TempFix/small_progs/getcwd.c
+
+=====> Actual effects of function: getcwd_no_buf_no_free_bad ======>
+(.ret=char /\ CONSUME(char)@38 · RET(char)@38,1) \/ (true /\ deref(cwd)@36 · RET()@36,1)
+Arguments are 
+/home/infer_TempFix/small_progs/getcwd.c
+annalysing getcwd_no_check_bad
+CallingFunction: getcwd @43
+/home/infer_TempFix/small_progs/getcwd.c
+
+=====> Actual effects of function: getcwd_no_check_bad ======>
+(true /\ deref(cwd)@44 · RET()@44,1)

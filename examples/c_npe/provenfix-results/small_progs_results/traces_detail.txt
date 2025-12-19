@@ -1,0 +1,13 @@
+
+In /home/infer_TempFix/small_progs/traces.c:
+
+~~~~~~~~~ In function: something_about_strings_latent ~~~~~~~~~
+Future-condition checking for 'malloc @34': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ utf8StringOut=0 /\ deref(utf8StringOut)@35 ~~~> (!_(utf8StringOut))^*;
+[Patches]
+ @ line 35 can be inserted with code: if (utf8StringOut==0){ return; }
+

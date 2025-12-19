@@ -1,0 +1,24 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/compound_literal.c
+annalysing return_zero
+/home/infer_TempFix/small_progs/compound_literal.c
+
+=====> Actual effects of function: return_zero ======>
+(true /\ RET()@15,1)
+Arguments are 
+/home/infer_TempFix/small_progs/compound_literal.c
+annalysing detect_zero_bad
+CallingFunction: return_zero @18
+/home/infer_TempFix/small_progs/compound_literal.c
+
+=====> Actual effects of function: detect_zero_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@20,0)
+Arguments are 
+/home/infer_TempFix/small_progs/compound_literal.c
+annalysing detect_zero_ok
+CallingFunction: return_zero @25
+/home/infer_TempFix/small_progs/compound_literal.c
+
+=====> Actual effects of function: detect_zero_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@27,0)

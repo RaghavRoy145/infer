@@ -1,0 +1,64 @@
+Capturing in make/cc mode ...
+Arguments are ,y
+/home/infer_TempFix/small_progs/integers.c
+annalysing even_cannot_be_odd_local_ok
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: even_cannot_be_odd_local_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@14,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/integers.c
+annalysing even_cannot_be_odd_parameter_ok
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: even_cannot_be_odd_parameter_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@21,0)
+Arguments are 
+/home/infer_TempFix/small_progs/integers.c
+annalysing even_cannot_be_odd_float_conv_ok
+CallingFunction: random @26
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: even_cannot_be_odd_float_conv_ok ======>
+(true /\ emp,0) \/ (true /\ deref(p)@29,0)
+Arguments are 
+/home/infer_TempFix/small_progs/integers.c
+annalysing FN_even_can_be_even_float_conv_bad
+CallingFunction: random @34
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: FN_even_can_be_even_float_conv_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@37,0)
+Arguments are 
+/home/infer_TempFix/small_progs/integers.c
+annalysing FN_int_conversions_feasible_bad
+CallingFunction: random @42
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: FN_int_conversions_feasible_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@48,0)
+Arguments are ,x
+/home/infer_TempFix/small_progs/integers.c
+annalysing FP_even_cannot_be_odd_fields_ok
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: FP_even_cannot_be_odd_fields_ok ======>
+(true /\ deref(x)@58,0) \/ (true /\ deref(x)@58 · deref(p)@62,0)
+Arguments are 
+/home/infer_TempFix/small_progs/integers.c
+annalysing float_div_bad
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: float_div_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@70,0)
+Arguments are ,f
+/home/infer_TempFix/small_progs/integers.c
+annalysing float_comparison_bad
+/home/infer_TempFix/small_progs/integers.c
+
+=====> Actual effects of function: float_comparison_bad ======>
+(true /\ emp,0) \/ (true /\ deref(p)@77,0)
+Arguments are 
+/home/infer_TempFix/small_progs/integers.c
+annalysing FN_call_float_comparison_bad
+CallingFunction: float_comparison_latent @83

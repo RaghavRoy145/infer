@@ -1,0 +1,35 @@
+Capturing in make/cc mode ...
+Arguments are ,head
+/home/infer_TempFix/small_progs/list_checks.c
+annalysing go_to_next
+/home/infer_TempFix/small_progs/list_checks.c
+
+=====> Actual effects of function: go_to_next ======>
+(true /\ deref(head)@15,0) \/ (true /\ deref(head)@15 · deref(head)@16,0)
+Arguments are 
+/home/infer_TempFix/small_progs/list_checks.c
+annalysing null_ptr_deref_bad
+CallingFunction: go_to_next @20
+Arguments are ,head
+/home/infer_TempFix/small_progs/list_checks.c
+annalysing go_to_end_of_list
+/home/infer_TempFix/small_progs/list_checks.c
+
+=====> Actual effects of function: go_to_end_of_list ======>
+(true /\ deref(head)@23 · deref(head)@24,0)
+Arguments are 
+/home/infer_TempFix/small_progs/list_checks.c
+annalysing null_ptr_deref2_bad
+CallingFunction: go_to_end_of_list @28
+Arguments are ,head
+/home/infer_TempFix/small_progs/list_checks.c
+annalysing check_next
+CallingFunction: whatever @32
+/home/infer_TempFix/small_progs/list_checks.c
+
+=====> Actual effects of function: check_next ======>
+(true /\ deref(head)@31,0)
+Arguments are 
+/home/infer_TempFix/small_progs/list_checks.c
+annalysing null_ptr_deref3_bad
+CallingFunction: check_next @36

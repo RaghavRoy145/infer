@@ -1,0 +1,57 @@
+
+In /home/infer_TempFix/small_progs/nullptr_more.c:
+
+~~~~~~~~~ In function: FPuseafterfree_no_check_for_null_after_realloc_bad ~~~~~~~~~
+Future-condition checking for 'realloc @62': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+q=0 /\ deref(q)@65 · free(q)@66 ~~~> (!_(q))^*;
+[Patches]
+ @ line 64 can be inserted with code: if (q==0){ return; }
+
+
+~~~~~~~~~ In function: FPuseafterfree_no_check_for_null_after_realloc_bad ~~~~~~~~~
+Future-condition checking for 'malloc @58': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+p=0 /\ free(p)@64 ~~~> (!_(p))^*;
+[Patches]
+ @ line 64 can be inserted with code: if (p==0){ return; }
+
+
+~~~~~~~~~ In function: FPuseafterfree_no_check_for_null_after_realloc_bad ~~~~~~~~~
+Future-condition checking for 'malloc @58': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(p!=0) /\ emp ~~~> (!free(p))^* · free(p) · (_)^*;
+[Patches]
+ @ line 66 can be inserted with code: if ((p!=0)){free(p); }
+
+
+~~~~~~~~~ In function: potentially_null_pointer_passed_as_argument_bad ~~~~~~~~~
+Future-condition checking for 'malloc @73': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ p=0 /\ free(p)@75 ~~~> (!_(p))^*;
+[Patches]
+ @ line 75 can be inserted with code: if (p==0){ return; }
+
+
+~~~~~~~~~ In function: sizeof_expr_ok ~~~~~~~~~
+Future-condition checking for 'malloc @120': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+p=0 /\ free(p)@124 ~~~> (!_(p))^*;
+[Patches]
+ @ line 124 can be inserted with code: if (p==0){ return; }
+

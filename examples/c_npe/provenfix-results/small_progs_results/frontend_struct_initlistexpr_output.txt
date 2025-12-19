@@ -1,0 +1,53 @@
+Capturing in make/cc mode ...
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing return_5
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: return_5 ======>
+(.ret=5 /\ RET()@15,1)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing init_Point
+Arguments are ,p
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing point_coords_set_correctly_npe_bad
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: point_coords_set_correctly_npe_bad ======>
+(.ret=0 /\ deref(p)@20 · deref(p)@22 · RET()@25,1) \/ (.ret=pointer /\ deref(p)@20 · deref(p)@22 · CONSUME(pointer)@23 · RET(pointer)@23,1)
+Arguments are ,p
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing point_coords_set_correctly_npe_good
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: point_coords_set_correctly_npe_good ======>
+(.ret=0 /\ deref(p)@29 · deref(p)@31 · RET()@34,1) \/ (.ret=pointer /\ deref(p)@29 · deref(p)@31 · CONSUME(pointer)@32 · RET(pointer)@32,1)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing field_set_correctly_npe_bad
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: field_set_correctly_npe_bad ======>
+(.ret=0 /\ deref(e)@50 · RET()@53,1) \/ (.ret=p /\ deref(e)@50 · CONSUME(p)@51 · RET(p)@51,1)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing field_set_correctly_npe_good
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: field_set_correctly_npe_good ======>
+(.ret=0 /\ deref(e)@59 · RET()@62,1) \/ (.ret=p /\ deref(e)@59 · CONSUME(p)@60 · RET(p)@60,1)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing implicit_expr_set_correctly_npe_bad
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: implicit_expr_set_correctly_npe_bad ======>
+(.ret=0 /\ RET()@89,1) \/ (.ret=p /\ CONSUME(p)@87 · RET(p)@87,1)
+Arguments are 
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+annalysing implicit_expr_set_correctly_npe_good
+/home/infer_TempFix/small_progs/frontend_struct_initlistexpr.c
+
+=====> Actual effects of function: implicit_expr_set_correctly_npe_good ======>
+(.ret=0 /\ RET()@99,1) \/ (.ret=p /\ CONSUME(p)@97 · RET(p)@97,1)

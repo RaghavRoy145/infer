@@ -1,0 +1,13 @@
+Files that have repairs (10/34)
+
+1. fopen.c
+2. interprocedural.c
+3. issues_abort_execution.c
+4. latent.c
+5. memcpy.c
+6. memory_leak.c
+7. nullptr.c
+8. nullptr_more.c
+9. traces.c
+10. ununit.c
+

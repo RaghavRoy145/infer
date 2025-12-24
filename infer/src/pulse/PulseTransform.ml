@@ -1040,13 +1040,25 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       climb_dominators (idom node)
   in
   let total_aliases_in_proc = List.length all_ptrs_to_guard in
+  let get_instr_loc (instr : Sil.instr) : Location.t =
+    match instr with
+    | Load {loc; _} -> loc
+    | Store {loc; _} -> loc
+    | Prune (_, loc, _, _) -> loc
+    | Call (_, _, _, loc, _) -> loc
+    | Metadata _ -> Location.dummy (* Metadata usually doesn't have a source location *)
+  in
   let unified_crash_slice =
     match bug.diag_trace with
     | Trace.ViaCall {location= crash_loc; _} ->
-        (* INTER-PROCEDURAL CASE: The crash is the call site itself. No syntactic search needed. *)
-        L.d_printfln "[transformation-log]   Trace is ViaCall. The crash site is the call location.";
+        L.d_printfln "[transformation-log] Trace is ViaCall at %a." Location.pp crash_loc;
+        (* FIX-02: Scan instructions using the new helper *)
         List.filter (Procdesc.get_nodes proc_desc) ~f:(fun node ->
-            Location.equal (Procdesc.Node.get_loc node) crash_loc )
+            let instrs = Procdesc.Node.get_instrs node in
+            Instrs.exists instrs ~f:(fun instr ->
+                Location.equal (get_instr_loc instr) crash_loc
+            )
+        )
 
     | Trace.Immediate _ ->
         (* INTRA-PROCEDURAL CASE: The crash is the union of all syntactic dereferences
@@ -1447,7 +1459,12 @@ let save_all_plans proc_desc plans =
                   | [] ->
                       `String "unknown_pointer_due_to_empty_list"
                   | hd :: _ ->
-                      `String (Format.asprintf "%a" Exp.pp hd) )
+                  let pp_expr_value fmt e =
+                    match e with
+                    | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar (* Print 'x', not '&x' *)
+                    | _ -> Exp.pp fmt e
+                  in
+                  `String (Format.asprintf "%a" pp_expr_value hd) )
               ; ( "metrics"
                 , `Assoc
                     [ ("cost_l_imprecision", `Int metrics.imprecision_cost)
@@ -1527,7 +1544,12 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
         L.d_printfln "[transformation-plan]STRATEGY: SKIP (malformed)"
     | guard_ptr_expr :: _ ->
-        (* This is the normal, expected case. *)
+        (* FIX-01: Unwrap Lvar addresses for display *)
+        let pp_expr_value fmt e =
+          match e with
+          | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar (* Print 'x', not '&x' *)
+          | _ -> Exp.pp fmt e
+        in
         let line1 = (Procdesc.Node.get_loc lca_node).line in
         let line2 = (Procdesc.Node.get_loc join_node).line in
         let start_line = min line1 line2 in
@@ -1539,7 +1561,7 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]        (Scope starts at node %d and ends at node %d)"
           (Procdesc.Node.get_id lca_node :> int)
           (Procdesc.Node.get_id join_node :> int) ;
-        L.d_printfln "[transformation-plan]        with the condition: if (%a != NULL) { ... }" Exp.pp guard_ptr_expr ;
+        L.d_printfln "[transformation-plan]        with the condition: if (%a != NULL) { ... }" pp_expr_value guard_ptr_expr ;
         L.d_printfln "[transformation-plan]        This guard protects pointers: [%a]"
           (Pp.seq ~sep:", " Exp.pp) pointer_exprs ;
         L.d_printfln "[transformation-plan]--------------------------" )
@@ -1609,10 +1631,6 @@ let equal_transformation_plan p1 p2 =
 let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
   clear_cache_if_new_proc (Procdesc.get_proc_name proc_desc);
 
-  (*
-    Step 1: Perform the complete alias analysis ONCE, at the top level.
-  *)
-
   (* Step 1a. Get the initial abstract value for the bug *)
   let av_opt =
     match bug.ptr_var with
@@ -1622,8 +1640,8 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
         get_ptr_address ~astate:bug.astate v
   in
 
-  (* Step 1b. Compute the full set of aliased pointers. *)
-  let all_ptrs_to_guard =
+  (* Step 1b. Compute the full set of aliased pointers (RAW) *)
+  let all_ptrs_to_guard_raw =
     let stack_aliases =
       match av_opt with
       | None -> []
@@ -1632,29 +1650,38 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
     let initial_ptr = (bug.ptr_var |> Option.value_map ~f:Var.to_exp ~default:bug.ptr_expr) in
     let semantic_alias_exps = List.map stack_aliases ~f:snd in
     let seed_pointers = List.dedup_and_sort ~compare:Exp.compare (initial_ptr :: semantic_alias_exps) in
-    (* Call the now top-level syntactic alias collector. *)
     find_syntactic_aliases proc_desc seed_pointers
   in
-  L.d_printfln "[transformation-plan] Found %d total pointers in alias set." (List.length all_ptrs_to_guard);
-  if List.is_empty all_ptrs_to_guard then
-    L.d_printfln
-      "[transformation-warning] Alias analysis found no pointers to guard for procedure %a. Aborting plan generation for this bug."
-      Procname.pp (Procdesc.get_proc_name proc_desc)
-  else (
-    (*
-      Step 2: Now that we have the complete alias set, dispatch to the correct planner.
-    *)
-    (* let plans : transformation_plan list =
-      if is_local ~proc_desc ~bug all_ptrs_to_guard then (
-        let replace_plans = plan_replace_transformation proc_desc bug all_ptrs_to_guard in
-        if not (List.is_empty replace_plans) then replace_plans
-        else (
-          L.d_printfln "[transformation-plan] REPLACE planning failed. Falling back to SKIP/EVADE.";
-          plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard ) )
-      else
-        plan_skip_or_evade_transformation proc_desc bug all_ptrs_to_guard
-    in *)
 
+  (* === FIX-03: SCOPE FILTERING === *)
+  let all_ptrs_to_guard =
+    let locals = Procdesc.get_locals proc_desc in
+    let formals = Procdesc.get_formals proc_desc in
+    
+    let is_visible pvar =
+       let name = Pvar.get_name pvar in
+       (* Check if variable exists in Locals *)
+       let in_locals = List.exists locals ~f:(fun (data: ProcAttributes.var_data) -> Mangled.equal data.name name) in
+       (* Check if variable exists in Formals *)
+       let in_formals = List.exists formals ~f:(fun (mangled, _, _) -> Mangled.equal mangled name) in
+       in_locals || in_formals
+    in
+
+    List.filter all_ptrs_to_guard_raw ~f:(fun ptr ->
+      match ptr with
+      | Exp.Lvar pvar ->
+          if is_visible pvar then true
+          else (
+            L.d_printfln "[transformation-scope] Dropping invisible pointer %a (not found in locals or formals of %a)" 
+              (Pvar.pp Pp.text) pvar Procname.pp (Procdesc.get_proc_name proc_desc);
+            false
+          )
+      | _ -> true
+    )
+  in
+
+  L.d_printfln "[transformation-plan] Found %d total VALID pointers in alias set." (List.length all_ptrs_to_guard);
+  
   (* Step 2: Generate plans OR a "NoPlanGenerated" reason. *)
   let final_plans : transformation_plan list =
     if List.is_empty all_ptrs_to_guard then (
@@ -1679,7 +1706,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
       in
 
       if List.is_empty generated_plans then (
-        (* SCENARIO 2: Planners ran but produced no plans (e.g., all sites guarded). *)
+        (* SCENARIO 2: Planners ran but produced no plans. *)
         L.d_printfln
           "[transformation-warning] Planners generated ZERO plans for procedure %a. Logging as NoPlanGenerated."
           Procname.pp (Procdesc.get_proc_name proc_desc) ;
@@ -1687,17 +1714,16 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
             { reason= "All potential crash sites were found to be already syntactically guarded."
             ; npe_location= Trace.get_start_location bug.diag_trace
             ; pointer_expr_str= Format.asprintf "%a" Exp.pp bug.ptr_expr } ] )
-      else (* Success! We have one or more valid repair plans. *)
+      else (* Success! *)
         generated_plans
     )
-  in
+  in 
     
-    (* The rest of the function iterates through the generated list of plans. *)
-    List.iter final_plans ~f:(fun plan ->
-      if not (List.mem !logged_transformations_cache plan ~equal:equal_transformation_plan) then (
-        L.d_printfln "[transformation] Found new unique plan.";
-        report_transformation_plan proc_desc plan;
-        logged_transformations_cache := plan :: !logged_transformations_cache
-      )
+  (* Step 3: Iterate through the generated list and log them. *)
+  List.iter final_plans ~f:(fun plan ->
+    if not (List.mem !logged_transformations_cache plan ~equal:equal_transformation_plan) then (
+      L.d_printfln "[transformation] Found new unique plan.";
+      report_transformation_plan proc_desc plan;
+      logged_transformations_cache := plan :: !logged_transformations_cache
     )
   )

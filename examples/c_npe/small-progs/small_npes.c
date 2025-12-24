@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
+#include <stdio.h>
+#include <string.h>
 
 /* ========================================================================= */
 /* GROUP 1: BASELINE & LOCAL NPEs (Tool works well here)                     */
@@ -15,8 +17,7 @@
 
 // BUG_TYPE: B-INTRA
 // EXPECTED_STRATEGY: REPLACE (or SKIP/EVADE if return issue fixed)
-// CURRENT_STATUS: UNSAFE (Wraps return p, causing Use-After-Return)
-// FIX_REQUIRED: FIX-04 (Return Safety) or FIX-08 (Escape Analysis)
+// CURRENT_STATUS: Works as expected
 int* malloc_no_check_bad() {
   int* p = (int*)malloc(sizeof(int));
   *p = 42;
@@ -25,7 +26,7 @@ int* malloc_no_check_bad() {
 
 // BUG_TYPE: B-INTRA
 // EXPECTED_STRATEGY: REPLACE
-// CURRENT_STATUS: OPTIMAL
+// CURRENT_STATUS: Works as expected
 void bug_with_allocation_bad(int* x) {
   x = (int*)malloc(sizeof(int));
   int* y = NULL;
@@ -34,7 +35,7 @@ void bug_with_allocation_bad(int* x) {
 
 // BUG_TYPE: B-ALIAS
 // EXPECTED_STRATEGY: REPLACE
-// CURRENT_STATUS: OPTIMAL
+// CURRENT_STATUS: Works as expected
 void no_invalidation_compare_to_NULL_bad() {
   int x;
   int* p = &x; // Simulating unknown source
@@ -167,7 +168,7 @@ int simple_null_pointer_bad() {
 // CURRENT_STATUS: UNSAFE (Wraps return)
 // FIX_REQUIRED: FIX-04 & FIX-06
 struct delicious { int* ptr; };
-extern void struct_ptr_skip(struct delicious* s);
+extern void struct_ptr_skip(struct delicious* s){return;};
 int struct_value_by_ref_ptr_write_bad() {
   struct delicious x;
   struct_ptr_skip(&x);
@@ -234,53 +235,6 @@ int ternary2_bad(int x) {
   return p->flag && p; // Deref before check
 }
 
-
-
-/* ========================================================================= */
-/* CATEGORY: B-FUNC-PTR (Function Pointers)                                  */
-/* Aim: Tracking null values through indirect calls.                   */
-/* ========================================================================= */
-
-static int* return_null() { return NULL; }
-
-void null_pointer_with_function_pointer_bad() {
-  int* (*fp)();
-  fp = return_null;
-  int* x = fp();
-  *x = 3; 
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-STRUCT (Struct Field Access vs Struct Pointer)                */
-/* Aim: "Return Safety" - Wrapping the return statement causes UB.     */
-/*            "Address-of" - Must guard 'max', not '&max'.                   */
-/* ========================================================================= */
-
-struct Person { int age; };
-
-int simple_null_pointer_bad() {
-  struct Person* max = NULL;
-  return max->age; // Crash here
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-ALLOC-FAIL (Allocator Failure Fallthrough)                    */
-/* Aim: Handling 'realloc' returning null while preserving original ptr*/
-/* ========================================================================= */
-
-void FPuseafterfree_no_check_for_null_after_realloc_bad() {
-  int* p = (int*)malloc(sizeof(int) * 5);
-  if (p) p[0] = 1;
-  
-  // realloc returns NULL on failure, but p remains valid (if not freed)
-  int* q = (int*)realloc(p, sizeof(int) * 10);
-  
-  if (!q) free(p); // Error handling exists...
-  
-  q[7] = 0; // ...but execution falls through to here. Crash on q.
-  free(q);
-}
-
 /* ========================================================================= */
 /* CATEGORY: B-ARRAY-DECAY (Array to Pointer Decay)                          */
 /* Aim: Inter-procedural trace where NULL is passed as array arg.      */
@@ -291,67 +245,6 @@ void set_ptr(int* ptr, int val) { *ptr = val; }
 
 void set_ptr_param_array_get_null_bad() {
   set_ptr(NULL, 42); // Passing NULL where an array/pointer is expected
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-ANGELIC-SKIP (Unknown/Skipped Functions)                      */
-/* Aim: Tool must respect side-effects of unknown calls or ignore them */
-/*            safely. Currently causes Unsafe Return wrapping (FIX-04).      */
-/* ========================================================================= */
-
-struct delicious { int* ptr; };
-extern void struct_ptr_skip(struct delicious* s); // Unknown function
-
-int struct_value_by_ref_ptr_write_bad() {
-  struct delicious x;
-  struct_ptr_skip(&x);
-  x.ptr = NULL; 
-  return *x.ptr; // Crash
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-ARITH (Path Sensitivity & Scoping)                            */
-/* Aim: "Scoping Bug" (FIX-03) - Tool tries to guard 'p' (callee var)  */
-/*            inside 'call_...' (caller function).                           */
-/* ========================================================================= */
-
-void exit_if_neg(int x) { if (x < 0) exit(1); }
-
-void if_negative_then_crash_latent(int x) {
-  exit_if_neg(-x); // Exits if x > 0
-  int* p = NULL;
-  *p = 42; // Crashes if x <= 0
-}
-
-void call_if_negative_then_crash_with_local_bad() {
-  int x = rand();
-  if_negative_then_crash_latent(x);
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-FILE-API (Library API Misuse)                                 */
-/* Aim: "ViaCall Mapping" (FIX-02) - Crash happens inside library.     */
-/*            Tool currently returns NoPlanGenerated.                        */
-/* ========================================================================= */
-
-void no_fopen_check_getc_bad() {
-  FILE* f = fopen("nonexistent", "r"); // Returns NULL
-  getc(f); // Crash inside libc
-  if (f) fclose(f);
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-FUNPTR-INDIRECT (Function Pointer Arguments)                  */
-/* Aim: "Address-of Bug" (FIX-01) - Tool guards '&ptr' (stack) instead */
-/*            of 'ptr' (argument value).                                     */
-/* ========================================================================= */
-
-void assign_NULL(int** ptr) { *ptr = NULL; }
-void call_funptr(void (*funptr)(int**), int** ptr) { (*funptr)(ptr); }
-
-void test_syntactic_specialization_bad(int* ptr) {
-  call_funptr(&assign_NULL, &ptr);
-  *ptr = 42; // Crash
 }
 
 /* ========================================================================= */
@@ -369,30 +262,6 @@ void test_assign_NULL_callback_bad(int* ptr) {
 }
 
 /* ========================================================================= */
-/* CATEGORY: B-CYCLE (Cyclic Data Structures)                                */
-/* Aim: "Scoping Bug" - Crash inside loop in helper function.          */
-/*            Tool tries to patch caller 'q' instead of callee logic.        */
-/* ========================================================================= */
-
-struct node { int data; struct node* next; };
-
-void traverse_and_crash(struct node* p) {
-  struct node* root = p;
-  while (p != NULL) {
-    p = p->next;
-    if (p == root) {
-      int* crash = NULL;
-      *crash = 42; // Crash
-    }
-  }
-}
-
-void crash_after_one_node_bad(struct node* q) {
-  q->next = q; // Cycle
-  traverse_and_crash(q);
-}
-
-/* ========================================================================= */
 /* CATEGORY: B-MANIFEST (Latent Bug becoming Manifest)                       */
 /* Aim: "Scoping Bug" - Tool tries to guard 'x' in 'main', but bug     */
 /*            requires guarding logic inside 'latent_use'.                   */
@@ -405,33 +274,6 @@ void latent_use(int* x) {
 void main_manifest_bad() {
   int* x = NULL;
   latent_use(x);
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-SHORT-CIRCUIT (Logic Ordering)                                */
-/* Aim: "Fragmentation" - Tool generates multiple patches for one bug. */
-/* ========================================================================= */
-
-struct data { int flag; };
-static struct data d;
-
-int ternary2_bad(int x) {
-  struct data* p = x ? &d : 0;
-  // Bug: Dereference 'p->flag' happens BEFORE check 'p'
-  return p->flag && p; 
-}
-
-/* ========================================================================= */
-/* CATEGORY: B-STACK-STRUCT (Stack Struct vs Heap Content)                   */
-/* Aim: "Address-of Bug" - Tool guards '&l' (safe stack addr) instead  */
-/*            of 'l.next' (null heap ptr).                                   */
-/* ========================================================================= */
-
-struct list { struct list* next; int data; };
-
-void access_null_deref_bad() {
-  struct list l = {NULL, 44};
-  l.next->next = NULL; // Crash on l.next
 }
 
 
@@ -784,4 +626,8 @@ void short_circuit_assign_bad(int* input) {
 void comma_op_bad() {
     int* p = NULL;
     int x = (p = NULL, *p); // Crash
+}
+
+int main() {
+    return 0;
 }

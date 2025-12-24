@@ -58,7 +58,7 @@ type transformation_plan =
 | NoPlanGenerated of {
     reason: string;
     npe_location: Location.t;
-    pointer_expr_str: string
+    pointer_expr: Exp.t
   }
 
 
@@ -1459,12 +1459,12 @@ let save_all_plans proc_desc plans =
                   | [] ->
                       `String "unknown_pointer_due_to_empty_list"
                   | hd :: _ ->
-                  let pp_expr_value fmt e =
-                    match e with
-                    | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar (* Print 'x', not '&x' *)
-                    | _ -> Exp.pp fmt e
-                  in
-                  `String (Format.asprintf "%a" pp_expr_value hd) )
+                      let ptr_str = 
+                        match hd with
+                        | Exp.Lvar pvar -> Pvar.to_string pvar (* Clean string "ptr" *)
+                        | _ -> Format.asprintf "%a" Exp.pp hd    (* Fallback "((int*)p)" *)
+                      in
+                      `String ptr_str )
               ; ( "metrics"
                 , `Assoc
                     [ ("cost_l_imprecision", `Int metrics.imprecision_cost)
@@ -1494,12 +1494,17 @@ let save_all_plans proc_desc plans =
                 , `Assoc
                     [ ("cost_rep_modification", `Int metrics.cost)
                     ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
-          | NoPlanGenerated {reason; npe_location; pointer_expr_str} ->
+          | NoPlanGenerated {reason; npe_location; pointer_expr} ->
+              let ptr_str = 
+                match pointer_expr with 
+                | Exp.Lvar pvar -> Pvar.to_string pvar 
+                | _ -> Format.asprintf "%a" Exp.pp pointer_expr 
+              in
               `Assoc
                 [ ("reason", `String reason)
                 ; ("npe_file", `String (SourceFile.to_string npe_location.file))
                 ; ("npe_line", `Int npe_location.line)
-                ; ("original_pointer", `String pointer_expr_str) ] ) ]
+                ; ("original_pointer", `String ptr_str) ] ) ]
     in
     let new_plans_json = List.map plans ~f:plan_to_json in
     (* let all_plans_json = `List (List.map plans ~f:plan_to_json) in *)
@@ -1599,13 +1604,18 @@ let report_transformation_plan proc_desc plan =
             (Pvar.pp Pp.text) pvar (Pvar.pp Pp.text) reused_pvar;
         L.d_printfln "[transformation-plan]          (Reusing non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
     ) 
-| NoPlanGenerated {reason; npe_location; pointer_expr_str} ->
+| NoPlanGenerated {reason; npe_location; pointer_expr} ->
+  let pp_expr_value fmt e =
+    match e with
+    | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar
+    | _ -> Exp.pp fmt e
+  in
   L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
   L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
   L.d_printfln "[transformation-plan]STRATEGY: NO PLAN GENERATED" ;
   L.d_printfln "[transformation-plan]REASON: %s" reason ;
   L.d_printfln "[transformation-plan]ORIGINAL NPE LOCATION: %a" Location.pp npe_location ;
-  L.d_printfln "[transformation-plan]ORIGINAL POINTER: %s" pointer_expr_str ;
+  L.d_printfln "[transformation-plan]ORIGINAL POINTER: %a" pp_expr_value pointer_expr ;
   L.d_printfln "[transformation-plan]--------------------------"
   (* in *)
 
@@ -1692,7 +1702,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
       [ NoPlanGenerated
           { reason= "Alias analysis found no pointers to guard."
           ; npe_location= Trace.get_start_location bug.diag_trace
-          ; pointer_expr_str= Format.asprintf "%a" Exp.pp bug.ptr_expr } ] )
+          ; pointer_expr= bug.ptr_expr } ] ) 
     else (
       (* Alias analysis succeeded, now run the actual planners. *)
       let generated_plans =
@@ -1713,7 +1723,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
         [ NoPlanGenerated
             { reason= "All potential crash sites were found to be already syntactically guarded."
             ; npe_location= Trace.get_start_location bug.diag_trace
-            ; pointer_expr_str= Format.asprintf "%a" Exp.pp bug.ptr_expr } ] )
+            ; pointer_expr= bug.ptr_expr } ] )
       else (* Success! *)
         generated_plans
     )

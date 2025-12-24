@@ -23,7 +23,7 @@
       "end_node": 3,
       "start_line": 163,
       "end_line": 163,
-      "guard_with_pointer": "&max",
+      "guard_with_pointer": "max",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -44,7 +44,7 @@
       "end_node": 4,
       "start_line": 235,
       "end_line": 235,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 2,
@@ -65,7 +65,7 @@
       "end_node": 9,
       "start_line": 235,
       "end_line": 235,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 2,
@@ -86,7 +86,7 @@
       "end_node": 4,
       "start_line": 235,
       "end_line": 235,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 2,
@@ -107,7 +107,7 @@
       "end_node": 9,
       "start_line": 235,
       "end_line": 235,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 2,
@@ -128,7 +128,7 @@
       "end_node": 3,
       "start_line": 276,
       "end_line": 276,
-      "guard_with_pointer": "&x",
+      "guard_with_pointer": "x",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -191,7 +191,7 @@
       "end_node": 3,
       "start_line": 607,
       "end_line": 607,
-      "guard_with_pointer": "&x",
+      "guard_with_pointer": "x",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -226,7 +226,7 @@
       "end_node": 3,
       "start_line": 176,
       "end_line": 176,
-      "guard_with_pointer": "&x",
+      "guard_with_pointer": "x",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -274,7 +274,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 198,
-      "original_pointer": "&p"
+      "original_pointer": "p"
     }
   },
   {
@@ -286,7 +286,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 198,
-      "original_pointer": "&p"
+      "original_pointer": "p"
     }
   },
   {
@@ -299,7 +299,7 @@
       "end_node": 4,
       "start_line": 202,
       "end_line": 202,
-      "guard_with_pointer": "&q",
+      "guard_with_pointer": "q",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -320,7 +320,7 @@
       "end_node": 8,
       "start_line": 368,
       "end_line": 368,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -354,7 +354,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 496,
-      "original_pointer": "&src"
+      "original_pointer": "src"
     }
   },
   {
@@ -395,7 +395,7 @@
       "end_node": 3,
       "start_line": 261,
       "end_line": 261,
-      "guard_with_pointer": "&ptr",
+      "guard_with_pointer": "ptr",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -416,7 +416,7 @@
       "end_node": 3,
       "start_line": 429,
       "end_line": 429,
-      "guard_with_pointer": "&c",
+      "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -465,7 +465,7 @@
       "end_node": 3,
       "start_line": 224,
       "end_line": 224,
-      "guard_with_pointer": "&ptr",
+      "guard_with_pointer": "ptr",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -485,7 +485,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 412,
-      "original_pointer": "&p"
+      "original_pointer": "p"
     }
   },
   {
@@ -498,7 +498,7 @@
       "end_node": 3,
       "start_line": 559,
       "end_line": 559,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -533,7 +533,7 @@
       "end_node": 3,
       "start_line": 213,
       "end_line": 213,
-      "guard_with_pointer": "&l",
+      "guard_with_pointer": "l",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -554,7 +554,7 @@
       "end_node": 3,
       "start_line": 460,
       "end_line": 460,
-      "guard_with_pointer": "&nodes",
+      "guard_with_pointer": "nodes",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -574,7 +574,7 @@
       "reason": "Alias analysis found no pointers to guard.",
       "npe_file": "small_npes.c",
       "npe_line": 150,
-      "original_pointer": "&crash"
+      "original_pointer": "crash"
     }
   },
   {
@@ -587,7 +587,7 @@
       "end_node": 3,
       "start_line": 316,
       "end_line": 316,
-      "guard_with_pointer": "&p",
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -649,7 +649,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 488,
-      "original_pointer": "&s"
+      "original_pointer": "s"
     }
   },
   {
@@ -662,7 +662,7 @@
       "end_node": 3,
       "start_line": 81,
       "end_line": 81,
-      "guard_with_pointer": "&vec",
+      "guard_with_pointer": "vec",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -696,7 +696,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 502,
-      "original_pointer": "&dest"
+      "original_pointer": "dest"
     }
   },
   {
@@ -722,7 +722,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 95,
-      "original_pointer": "&f"
+      "original_pointer": "f"
     }
   },
   {
@@ -734,7 +734,7 @@
       "reason": "Alias analysis found no pointers to guard.",
       "npe_file": "small_npes.c",
       "npe_line": 130,
-      "original_pointer": "&p"
+      "original_pointer": "p"
     }
   },
   {
@@ -747,7 +747,7 @@
       "end_node": 4,
       "start_line": 435,
       "end_line": 441,
-      "guard_with_pointer": "&c",
+      "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -768,7 +768,7 @@
       "end_node": 4,
       "start_line": 435,
       "end_line": 441,
-      "guard_with_pointer": "&c",
+      "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -789,7 +789,7 @@
       "end_node": 4,
       "start_line": 435,
       "end_line": 441,
-      "guard_with_pointer": "&c",
+      "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -810,7 +810,7 @@
       "end_node": 4,
       "start_line": 435,
       "end_line": 441,
-      "guard_with_pointer": "&c",
+      "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -943,7 +943,7 @@
       "end_node": 3,
       "start_line": 451,
       "end_line": 451,
-      "guard_with_pointer": "&n",
+      "guard_with_pointer": "n",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -963,7 +963,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 470,
-      "original_pointer": "&s"
+      "original_pointer": "s"
     }
   },
   {
@@ -976,7 +976,7 @@
       "end_node": 3,
       "start_line": 69,
       "end_line": 69,
-      "guard_with_pointer": "&x",
+      "guard_with_pointer": "x",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -996,7 +996,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 476,
-      "original_pointer": "&s"
+      "original_pointer": "s"
     }
   },
   {
@@ -1008,7 +1008,7 @@
       "reason": "All potential crash sites were found to be already syntactically guarded.",
       "npe_file": "small_npes.c",
       "npe_line": 482,
-      "original_pointer": "&s"
+      "original_pointer": "s"
     }
   },
   {
@@ -1049,7 +1049,7 @@
       "end_node": 3,
       "start_line": 111,
       "end_line": 111,
-      "guard_with_pointer": "&joe",
+      "guard_with_pointer": "joe",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,

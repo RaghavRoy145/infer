@@ -17,7 +17,7 @@ for filename in *c; do
         echo "-------------------"
         
         # Run infer and capture output
-        OUTPUT=$(sudo ~/repos/infer/infer/bin/infer --keep-going --debug --pulse-only -- cc -c "$TEST_FILE" 2>&1)
+        OUTPUT=$(sudo ~/repos/infer/infer/bin/infer --keep-going --pulse-only -j 1 -- cc -c "$TEST_FILE" 2>&1)
         echo "$OUTPUT" 
         # Check if null dereference was detected
         if echo "$OUTPUT" | grep -q "Null Dereference"; then

@@ -2,20 +2,20 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
-    "source_file": "test16_ternary_null.c",
+    "source_file": "test03_struct_field_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 6,
-      "end_node": 5,
-      "start_line": 10,
-      "end_line": 12,
-      "guard_with_pointer": "&value",
+      "end_node": 4,
+      "start_line": 13,
+      "end_line": 16,
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 2,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
+        "nodes_in_scope": 3,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
         "total_aliases": 1
       }
     }

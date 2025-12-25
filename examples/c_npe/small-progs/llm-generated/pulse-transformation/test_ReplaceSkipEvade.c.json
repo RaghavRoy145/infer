@@ -1,0 +1,58 @@
+[
+  {
+    "procedure_name": "test_fallback_to_skip",
+    "procedure_id": "test_fallback_to_skip",
+    "source_file": "test_ReplaceSkipEvade.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 31,
+      "end_line": 31,
+      "guard_with_pointer": "escaping_ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "test_replace_success",
+    "procedure_id": "test_replace_success",
+    "source_file": "test_ReplaceSkipEvade.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 15,
+      "target_pvar": "local_ptr",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test_ReplaceSkipEvade.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 51,
+      "end_line": 51,
+      "guard_with_pointer": "t",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

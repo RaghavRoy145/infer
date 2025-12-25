@@ -2,21 +2,21 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
-    "source_file": "test03_struct_field_null.c",
+    "source_file": "test09_linked_list_null.c",
     "plan_type": "Skip",
     "details": {
-      "start_node": 6,
+      "start_node": 11,
       "end_node": 4,
-      "start_line": 13,
-      "end_line": 16,
-      "guard_with_pointer": "&p",
+      "start_line": 14,
+      "end_line": 18,
+      "guard_with_pointer": "current",
       "metrics": {
-        "cost_l_imprecision": 0,
+        "cost_l_imprecision": 3,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 3,
+        "nodes_in_scope": 6,
         "true_slice_size": 3,
         "initial_candidate_plans": 3,
-        "total_aliases": 1
+        "total_aliases": 2
       }
     }
   }

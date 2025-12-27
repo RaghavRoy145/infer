@@ -9,6 +9,7 @@ int main() {
     data = realloc(data, SIZE_MAX);
     
     // Bug: not checking if realloc failed
+
     data[0] = 1;
     data[1] = 2;
     

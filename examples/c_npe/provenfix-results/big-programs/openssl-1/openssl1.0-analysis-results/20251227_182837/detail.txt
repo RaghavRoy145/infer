@@ -1,0 +1,124 @@
+
+In /home/openssl-OpenSSL_1_0_2u/crypto/rand/randfile.c:
+
+~~~~~~~~~ In function: RAND_write_file ~~~~~~~~~
+Future-condition checking for 'open @264': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fd!=-1) /\ (out!=0) /\ .ret=-1 /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin) /\ RET()@321 ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 321 can be inserted with code: if ((fd!=-1) /\ (out!=0) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
+
+
+In /home/openssl-OpenSSL_1_0_2u/crypto/asn1/asn1_gen.c:
+
+~~~~~~~~~ In function: parse_tagging ~~~~~~~~~
+Future-condition checking for 'strtoul @407': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(tag_num<0) /\ .ret=1 /\ eptr=0 /\ deref(eptr)@409 ~~~> (!_(eptr))^*;
+[Patches]
+ @ line 409 can be inserted with code: if (!(tag_num<0) /\ eptr==0){ return; }
+
+
+~~~~~~~~~ In function: bitstr_cb ~~~~~~~~~
+Future-condition checking for 'strtoul @819': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(bitnum<0) /\ .ret=1 /\ eptr=0 /\ deref(eptr)@820 · RET()@830 ~~~> (!_(eptr))^*;
+[Patches]
+ @ line 820 can be inserted with code: if (!(bitnum<0) /\ eptr==0){ return; }
+
+
+In /home/openssl-OpenSSL_1_0_2u/crypto/ocsp/ocsp_ht.c:
+
+~~~~~~~~~ In function: parse_http_line1 ~~~~~~~~~
+Future-condition checking for 'strtoul @295': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((retcode!=200)) /\ .ret=1 /\ r=0 /\ deref(r)@297 ~~~> (!_(r))^*;
+[Patches]
+ @ line 297 can be inserted with code: if (!((retcode!=200)) /\ r==0){ return; }
+
+
+In /home/openssl-OpenSSL_1_0_2u/apps/speed.c:
+
+~~~~~~~~~ In function: do_multi ~~~~~~~~~
+Future-condition checking for 'malloc @2618': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fds!=0) /\ RET()@2638 ~~~> (!free(fds))^* · free(fds) · (_)^*;
+[Patches]
+ @ line 2638 can be inserted with code: if ((fds!=0)){free(fds); }
+
+
+~~~~~~~~~ In function: do_multi ~~~~~~~~~
+Future-condition checking for 'malloc @2618': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fds!=0) /\ RET()@2626 ~~~> (!free(fds))^* · free(fds) · (_)^*;
+[Patches]
+ @ line 2626 can be inserted with code: if ((fds!=0)){free(fds); }
+
+
+In /home/openssl-OpenSSL_1_0_2u/apps/s_socket.c:
+
+~~~~~~~~~ In function: init_server_long ~~~~~~~~~
+Future-condition checking for 'socket @350': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(s!=-1) /\ .ret=ret /\ s>0 /\ RET(ret)@377 ~~~> (!close(s))^* · close(s) · (_)^*;
+[Patches]
+ @ line 377 can be inserted with code: if ((s!=-1) /\ s>0){close(s); }
+
+
+~~~~~~~~~ In function: init_server_long ~~~~~~~~~
+Future-condition checking for 'socket @352': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(s!=-1) /\ .ret=ret /\ s>0 /\ RET(ret)@377 ~~~> (!close(s))^* · close(s) · (_)^*;
+[Patches]
+ @ line 377 can be inserted with code: if ((s!=-1) /\ s>0){close(s); }
+
+
+In /home/openssl-OpenSSL_1_0_2u/test/evp_test.c:
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'fopen @468': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(f!=0) /\ f>0 /\ (f!=stdout) /\ (f!=stdin) /\ RET()@583 ~~~> (!fclose(f))^* · fclose(f) · (_)^*;
+[Patches]
+ @ line 583 can be inserted with code: if ((f!=0) /\ f>0 /\ (f!=stdout) /\ (f!=stdin)){fclose(f); }
+
+
+In /home/openssl-OpenSSL_1_0_2u/test/v3nametest.c:
+
+~~~~~~~~~ In function: run_cert ~~~~~~~~~
+Future-condition checking for 'malloc @276': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ name=0 /\ memcpy(name)@278 · deref(fn)@285 · deref(fn)@300 · deref(fn)@311 · free(name)@320 ~~~> (!_(name))^*;
+[Patches]
+ @ line 278 can be inserted with code: if (name==0){ return; }
+

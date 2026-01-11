@@ -283,7 +283,7 @@ let count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node ~end_node =
   in
   let all_nodes = Procdesc.get_nodes proc_desc in
   List.fold all_nodes ~init:0 ~f:(fun acc node ->
-      (* Change: Instead of counting instructions, just count the node itself. *)
+      (* Instead of counting instructions, just count the node itself. *)
       if is_inside_scope node then acc + 1 else acc )
 
 (** {3. Alias & State Analysis} *)
@@ -683,7 +683,7 @@ match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
     total number of guards. The decision to merge is a heuristic that balances minimizing
     guard count against avoiding wrapping unrelated code with side-effects. *)
 
-(** [FIX-Struct] Scans the crash node for field/index accesses rooted in the candidate pointers. 
+(** Scans the crash node for field/index accesses rooted in the candidate pointers. 
     If found, returns the more specific expression (e.g., x.f instead of x). *)
 let refine_guard_exprs node candidate_exprs =
   let instrs = Procdesc.Node.get_instrs node in
@@ -691,7 +691,7 @@ let refine_guard_exprs node candidate_exprs =
      (* Helper to check if an expression is a field/index access rooted in 'root' *)
      let rec find_rooted_access e = 
        match e with
-       (* FIX: Unpack the record for Lfield to get the actual base expression *)
+       (* Unpack the record for Lfield to get the actual base expression *)
        | Exp.Lfield ({exp=base}, _, _) ->
            if Exp.equal base root then Some e
            else find_rooted_access base
@@ -712,7 +712,7 @@ let refine_guard_exprs node candidate_exprs =
   in
   List.dedup_and_sort ~compare:Exp.compare refined
 
-(** [FIX-04 Helper] Checks if a specific scope contains a return statement. *)
+(** Checks if a specific scope contains a return statement. *)
 let scope_contains_return proc_desc idom ipdom_fun start_node end_node =
   let ipdom = Lazy.force ipdom_fun in
   let is_inside_scope node =
@@ -799,7 +799,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                     is_source_tainted base_exp
                 | Cast (_, base_exp) ->
                     is_source_tainted base_exp
-                (* FIX: Propagate taint through pointer arithmetic *)
+                (* Propagate taint through pointer arithmetic *)
                 | BinOp (op, e1, _e2) -> (
                     match op with
                     (* Pointer arithmetic preserves the null-ness of the base pointer *)
@@ -870,7 +870,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                 Ident.Set.mem id null_carrying_idents
             | Lfield ({exp= base_exp}, _, _) | Lindex (base_exp, _) | Cast (_, base_exp) ->
                 is_base_of_dereference base_exp
-            (* FIX: Handle pointer arithmetic (p+1) in the usage check *)
+            (* Handle pointer arithmetic (p+1) in the usage check *)
             | BinOp (op, e1, _) -> (
                 match op with
                 | PlusPI | MinusPI -> is_base_of_dereference e1
@@ -885,7 +885,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                   match instr with
                   | Sil.Load {e; _} -> is_base_of_dereference e
                   | Sil.Store {e1; _} -> is_base_of_dereference e1
-                  (* FIX: Treat passing a null alias to a function as a 'dereference' candidate *)
+                  (* Treat passing a null alias to a function as a 'dereference' candidate *)
                   | Sil.Call (_, _, args, _, _) -> 
                       List.exists args ~f:(fun (e, _) -> is_base_of_dereference e)
                   | _ -> false
@@ -1105,7 +1105,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     match bug.diag_trace with
     | Trace.ViaCall {location= crash_loc; _} ->
         L.d_printfln "[transformation-log] Trace is ViaCall at %a." Location.pp crash_loc;
-        (* FIX-02: Scan instructions using the new helper *)
+        (* Scan instructions using the helper *)
         List.filter (Procdesc.get_nodes proc_desc) ~f:(fun node ->
             let instrs = Procdesc.Node.get_instrs node in
             Instrs.exists instrs ~f:(fun instr ->
@@ -1145,7 +1145,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d crash node(s)."
     (List.length unified_crash_slice);
 
-  (* === FIX-04/06 LOGIC: Dominator-Based Evade Trigger === *)
+  (* === Dominator-Based Evade Trigger === *)
   let candidate_plans =
     List.filter_map unified_crash_slice ~f:(fun crash_node ->
         let slice_for_this_node = [crash_node] in
@@ -1165,13 +1165,13 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
            or the return statement itself. *)
         let dominates_exit = is_dominated_by ~dominator:start_node ~node:exit_node idom in
 
-        (* 3. Check for "At Start" (Dead Evade fix) - Optional if dominator check covers it *)
+        (* 3. Check for "At Start" - Optional if dominator check covers it *)
         let is_at_start = 
            let succs = Procdesc.Node.get_succs start in
            List.exists succs ~f:(fun n -> Procdesc.Node.equal n start_node)
         in
 
-(* FIX: Check if the pointer is a Formal Parameter. 
+(* Check if the pointer is a Formal Parameter. 
            Evade at the start of the function is ONLY valid for parameters. 
            We cannot check a local variable before it is defined. *)
         let is_parameter = 
@@ -1190,12 +1190,12 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             | _ -> false
         in
 
-        (* FIX: Only allow Evade if it's a parameter. 
+        (* Only allow Evade if it's a parameter. 
            If it's a local (like malloc result) dominating the exit, we currently 
            don't have a strategy to inject a check mid-function cleanly, 
            so we fall back to Skip (fragmented) or NoPlan. *)
         let has_return = scope_contains_return proc_desc idom ipdom_fun start_node end_node in
-        
+
         if ((dominates_exit && not is_void) || is_at_start) && is_parameter then (
           (* Case 1: Valid Evade *)
           L.d_printfln "[transformation-safety] Valid Evade detected for parameter.";
@@ -1212,7 +1212,6 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
         )
         else (
           (* Case 3: Safe Skip *)
-          (* FIX-Struct: Refine pointers *)
           let refined_ptrs = refine_guard_exprs crash_node all_ptrs_to_guard in
           Some (ISkip { lca_node= start_node; join_node= end_node; pointer_exprs= refined_ptrs; slice_nodes= [crash_node] }) 
         )
@@ -1232,14 +1231,14 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       && is_post_dominated_by ~pdominator:end1 ~node:end2 ipdom_fun
   in
 
-  (** [NEW LOGIC]
+  (**
       A configurable threshold for the proximity heuristic. This is our first guardrail.
       We will not even consider merging two candidate plans if their closest boundaries
       are more than this many lines of code apart. This prevents "absurd" merges
       and dramatically prunes the search space for performance. *)
   let max_line_distance_for_merge = 50 in
 
-  (** [NEW LOGIC]
+  (**
       Checks if two plans are "proximate" enough to be worth considering for a merge.
       This is a fast, cheap check that runs before the more expensive semantic validation.
       @return true if the plans are overlapping, adjacent, or within the configured line distance. *)
@@ -1284,7 +1283,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             true
         
         (*************************************************************************)
-        (* [FIX] The or-pattern has been separated into three distinct cases    *)
+        (* The or-pattern has been separated into three distinct cases    *)
         (* to handle the different types of the base expression.                *)
         (*************************************************************************)
 
@@ -1311,7 +1310,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       if List.exists args ~f:(fun (arg_exp, _) -> not (Exp.is_const arg_exp)) then Some instr
       else None
     in
-  (** [NEW LOGIC]
+  (**
       Proposes a merge, validates its safety, and returns the merged plan if valid.
       This is our second, more powerful guardrail. It correctly handles `goto` and other
       complex control flow by validating the final "delta" region of the proposed merge.
@@ -1387,7 +1386,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 
   L.d_printfln "\n[transformation-log] STEP 3: Merging %d filtered plan(s) using a 'Greedy with Guardrails' fixed-point algorithm." (List.length filtered_plans);
   (* let final_intermediate_plans = *)
-    (** [NEW] A configurable threshold to switch between optimal and greedy strategies. *)
+    (** A configurable threshold to switch between optimal and greedy strategies. *)
   let optimal_merge_threshold = 4 in
 
   (** [FINAL VERSION]
@@ -1404,7 +1403,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 
       (* 1. Find ALL possible valid merges and their associated "Decision-Making Cost".
         
-        PHILOSOPHY: The goal is to optimize the full (Imprecision, Overhead) cost vector.
+        The goal is to optimize the full (Imprecision, Overhead) cost vector.
         A merge always reduces Overhead by 1. Therefore, when comparing two potential
         merges, the change in Overhead is identical. The ONLY differentiating factor
         is the change in Imprecision. The "best" merge is the one that introduces the
@@ -1486,7 +1485,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
     match iplan with
     | ISkip {lca_node; join_node; pointer_exprs; slice_nodes} ->
       let nodes_in_scope =
-        (* Change: Call the new node-counting function. *)
+        (* Call the new node-counting function. *)
         count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node:lca_node
           ~end_node:join_node
       in
@@ -1780,7 +1779,6 @@ let report_transformation_plan proc_desc plan =
   (* let (_:unit) = *)
   match plan with
 | Skip {lca_node; join_node; pointer_exprs; _} -> (
-    (* --- START OF FIX 1A --- *)
     match pointer_exprs with
     | [] ->
         (* This case should ideally not happen, but we handle it defensively. *)
@@ -1788,7 +1786,7 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
         L.d_printfln "[transformation-plan]STRATEGY: SKIP (malformed)"
     | guard_ptr_expr :: _ ->
-        (* FIX-01: Unwrap Lvar addresses for display *)
+        (* Unwrap Lvar addresses for display *)
         (* let pp_expr_value fmt e =
           match e with
           | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar (* Print 'x', not '&x' *)
@@ -1936,7 +1934,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
     find_syntactic_aliases proc_desc seed_pointers
   in
 
-  (* === FIX-03: SCOPE FILTERING === *)
+  (* === SCOPE FILTERING === *)
   let all_ptrs_to_guard =
     let locals = Procdesc.get_locals proc_desc in
     let formals = Procdesc.get_formals proc_desc in

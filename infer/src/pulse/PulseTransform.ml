@@ -712,6 +712,25 @@ let refine_guard_exprs node candidate_exprs =
   in
   List.dedup_and_sort ~compare:Exp.compare refined
 
+(** [FIX-04 Helper] Checks if a specific scope contains a return statement. *)
+let scope_contains_return proc_desc idom ipdom_fun start_node end_node =
+  let ipdom = Lazy.force ipdom_fun in
+  let is_inside_scope node =
+    is_dominated_by ~dominator:start_node ~node idom
+    && is_post_dominated_by ~pdominator:end_node ~node (lazy ipdom)
+  in
+  Procdesc.fold_nodes proc_desc ~init:false ~f:(fun found node ->
+    if found then true
+    else if is_inside_scope node then
+      let instrs = Procdesc.Node.get_instrs node in
+      Instrs.exists instrs ~f:(fun instr ->
+        match instr with
+        | Sil.Store {e1= Exp.Lvar p; _} when Pvar.is_return p -> true
+        | _ -> false
+      )
+    else false
+  )
+
 let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_ptrs_to_guard: transformation_plan list =
   let start = Procdesc.get_start_node proc_desc in
   let idom = GDoms.compute_idom proc_desc start in
@@ -1126,8 +1145,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d crash node(s)."
     (List.length unified_crash_slice);
 
-  (* === FIX-04/06 LOGIC: Updated Candidate Generation === *)
-    (* === FIX-04/06 LOGIC: Dominator-Based Evade Trigger === *)
+  (* === FIX-04/06 LOGIC: Dominator-Based Evade Trigger === *)
   let candidate_plans =
     List.filter_map unified_crash_slice ~f:(fun crash_node ->
         let slice_for_this_node = [crash_node] in
@@ -1153,24 +1171,50 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
            List.exists succs ~f:(fun n -> Procdesc.Node.equal n start_node)
         in
 
-        if (dominates_exit && not is_void) || is_at_start then (
-          L.d_printfln "[transformation-safety] Scope dominates exit (non-void) OR is at start. Forcing EVADE.";
+(* FIX: Check if the pointer is a Formal Parameter. 
+           Evade at the start of the function is ONLY valid for parameters. 
+           We cannot check a local variable before it is defined. *)
+        let is_parameter = 
+          let formals = Procdesc.get_formals proc_desc in
+          let locals = Procdesc.get_locals proc_desc in
+          match all_ptrs_to_guard with
+          | [] -> false
+          | ptr :: _ -> 
+            match ptr with
+            | Exp.Lvar pvar -> 
+                let name = Pvar.get_name pvar in
+                let in_formals = List.exists formals ~f:(fun (mangled, _, _) -> Mangled.equal mangled name) in
+                (* Crucial: If it is in locals, it is NOT a parameter we can check at start *)
+                let in_locals = List.exists locals ~f:(fun (data: ProcAttributes.var_data) -> Mangled.equal data.name name) in
+                in_formals && (not in_locals)
+            | _ -> false
+        in
+
+        (* FIX: Only allow Evade if it's a parameter. 
+           If it's a local (like malloc result) dominating the exit, we currently 
+           don't have a strategy to inject a check mid-function cleanly, 
+           so we fall back to Skip (fragmented) or NoPlan. *)
+        let has_return = scope_contains_return proc_desc idom ipdom_fun start_node end_node in
+        
+        if ((dominates_exit && not is_void) || is_at_start) && is_parameter then (
+          (* Case 1: Valid Evade *)
+          L.d_printfln "[transformation-safety] Valid Evade detected for parameter.";
           let ret_typ_str = Typ.to_string ret_type in
           let ptr = match all_ptrs_to_guard with [] -> bug.ptr_expr | h::_ -> h in
-          
-          Some (IEvade { proc_start_node = start;
-                        pointer_expr = ptr;
-                        return_typ_str = ret_typ_str })
-        ) else (
-          (* FIX-Struct: Refine the pointers based on usage in the crash node *)
+          Some (IEvade { proc_start_node = start; pointer_expr = ptr; return_typ_str = ret_typ_str })
+        ) 
+        else if (dominates_exit || has_return) && (not is_void) then (
+          (* Case 2: UNSAFE Skip. 
+             We cannot Evade (not a parameter), but we cannot Skip (non-void return). 
+             We must abort this specific candidate plan. *)
+          L.d_printfln "[transformation-safety] REJECTED: Scope contains return in non-void function, but pointer is local (cannot Evade).";
+          None
+        )
+        else (
+          (* Case 3: Safe Skip *)
+          (* FIX-Struct: Refine pointers *)
           let refined_ptrs = refine_guard_exprs crash_node all_ptrs_to_guard in
-          
-          Some
-            (ISkip
-                { lca_node= start_node
-                ; join_node= end_node
-                ; pointer_exprs= refined_ptrs (* CHANGED *)
-                ; slice_nodes= [crash_node] } ) 
+          Some (ISkip { lca_node= start_node; join_node= end_node; pointer_exprs= refined_ptrs; slice_nodes= [crash_node] }) 
         )
     )
   in
@@ -1430,10 +1474,15 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
       in
   let final_intermediate_plans = merge_fixed_point filtered_plans in
   L.d_printfln "\n[transformation-log] <<< Generated %d final plan(s)." (List.length final_intermediate_plans);
-
+  
+  let selected_plans =
+    let evades = List.filter final_intermediate_plans ~f:(function IEvade _ -> true | _ -> false) in
+    if not (List.is_empty evades) then evades else final_intermediate_plans
+  in
+  
   let final_guard_count = List.length final_intermediate_plans in
   (* Final step: Map over the generated plans to compute and attach metrics. *)
-  List.map final_intermediate_plans ~f:(fun iplan ->
+  List.map selected_plans ~f:(fun iplan ->
     match iplan with
     | ISkip {lca_node; join_node; pointer_exprs; slice_nodes} ->
       let nodes_in_scope =

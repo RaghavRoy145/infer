@@ -3,17 +3,6 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test10_switch_case_null.c",
-    "plan_type": "Evade",
-    "details": {
-      "start_node": 1,
-      "pointer_expr": "ptr",
-      "return_type": "int"
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 7,
@@ -23,10 +12,10 @@
       "guard_with_pointer": "ptr",
       "metrics": {
         "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 4,
+        "cost_g_overhead_final": 2,
         "nodes_in_scope": 1,
         "true_slice_size": 4,
-        "initial_candidate_plans": 4,
+        "initial_candidate_plans": 2,
         "total_aliases": 1
       }
     }
@@ -44,116 +33,10 @@
       "guard_with_pointer": "ptr",
       "metrics": {
         "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 4,
+        "cost_g_overhead_final": 2,
         "nodes_in_scope": 1,
         "true_slice_size": 4,
-        "initial_candidate_plans": 4,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
-    "plan_type": "Evade",
-    "details": {
-      "start_node": 1,
-      "pointer_expr": "ptr",
-      "return_type": "int"
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 7,
-      "end_node": 7,
-      "start_line": 17,
-      "end_line": 17,
-      "guard_with_pointer": "ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 4,
-        "nodes_in_scope": 1,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 9,
-      "end_node": 9,
-      "start_line": 13,
-      "end_line": 13,
-      "guard_with_pointer": "ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 4,
-        "nodes_in_scope": 1,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
-    "plan_type": "Evade",
-    "details": {
-      "start_node": 1,
-      "pointer_expr": "ptr",
-      "return_type": "int"
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 7,
-      "end_node": 7,
-      "start_line": 17,
-      "end_line": 17,
-      "guard_with_pointer": "ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 4,
-        "nodes_in_scope": 1,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test10_switch_case_null.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 9,
-      "end_node": 9,
-      "start_line": 13,
-      "end_line": 13,
-      "guard_with_pointer": "ptr",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 4,
-        "nodes_in_scope": 1,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
+        "initial_candidate_plans": 2,
         "total_aliases": 1
       }
     }

@@ -1,7 +1,7 @@
 // Test 18: Realloc failure not checked
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdint.h>
 int main() {
     int *data = malloc(10 * sizeof(int));
     

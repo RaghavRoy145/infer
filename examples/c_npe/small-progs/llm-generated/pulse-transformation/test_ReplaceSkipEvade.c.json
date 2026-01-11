@@ -38,7 +38,12 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test_ReplaceSkipEvade.c",
-    "plan_type": "Evade",
-    "details": { "start_node": 1, "pointer_expr": "t", "return_type": "int" }
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "test_ReplaceSkipEvade.c",
+      "npe_line": 50,
+      "original_pointer": "t"
+    }
   }
 ]

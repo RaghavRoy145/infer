@@ -3,17 +3,6 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test02_conditional_null.c",
-    "plan_type": "Evade",
-    "details": {
-      "start_node": 1,
-      "pointer_expr": "data",
-      "return_type": "int"
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test02_conditional_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 10,
@@ -23,42 +12,10 @@
       "guard_with_pointer": "data",
       "metrics": {
         "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 3,
+        "cost_g_overhead_final": 1,
         "nodes_in_scope": 1,
         "true_slice_size": 3,
-        "initial_candidate_plans": 3,
-        "total_aliases": 1
-      }
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test02_conditional_null.c",
-    "plan_type": "Evade",
-    "details": {
-      "start_node": 1,
-      "pointer_expr": "data",
-      "return_type": "int"
-    }
-  },
-  {
-    "procedure_name": "main",
-    "procedure_id": "main",
-    "source_file": "test02_conditional_null.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 10,
-      "end_node": 10,
-      "start_line": 10,
-      "end_line": 10,
-      "guard_with_pointer": "data",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 3,
-        "nodes_in_scope": 1,
-        "true_slice_size": 3,
-        "initial_candidate_plans": 3,
+        "initial_candidate_plans": 1,
         "total_aliases": 1
       }
     }

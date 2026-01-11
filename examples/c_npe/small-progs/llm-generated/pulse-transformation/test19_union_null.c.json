@@ -3,11 +3,12 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test19_union_null.c",
-    "plan_type": "Evade",
+    "plan_type": "NoPlanGenerated",
     "details": {
-      "start_node": 1,
-      "pointer_expr": "ptr",
-      "return_type": "int"
+      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "npe_file": "test19_union_null.c",
+      "npe_line": 12,
+      "original_pointer": "ptr"
     }
   }
 ]

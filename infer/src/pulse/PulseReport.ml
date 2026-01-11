@@ -463,6 +463,7 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
         (* === MONOBROW HOOK START === *)
         (* Runs regardless of is_suppressed to catch all Manifest bugs *)
         begin
+          if not is_suppressed then (
           match diagnostic with
           | AccessToInvalidAddress na ->
             (* 1. Try to get PVar from Decompiler *)
@@ -512,6 +513,7 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
             )
           | _ -> 
             () 
+          )
         end;
         (* === MONOBROW HOOK END === *)
 

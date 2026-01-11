@@ -1,7 +1,7 @@
 // Test 08: Failed malloc not checked
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdint.h>
 int main() {
     // Simulate malloc failure by requesting huge amount
     int *buffer = malloc(SIZE_MAX);

@@ -17,21 +17,11 @@
     "procedure_name": "simple_null_pointer_bad",
     "procedure_id": "simple_null_pointer_bad",
     "source_file": "small_npes.c",
-    "plan_type": "Skip",
+    "plan_type": "Evade",
     "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 163,
-      "end_line": 163,
-      "guard_with_pointer": "max",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
+      "start_node": 1,
+      "pointer_expr": "max",
+      "return_type": "int"
     }
   },
   {
@@ -220,73 +210,119 @@
     "procedure_name": "struct_value_by_ref_ptr_write_bad",
     "procedure_id": "struct_value_by_ref_ptr_write_bad",
     "source_file": "small_npes.c",
+    "plan_type": "Evade",
+    "details": { "start_node": 1, "pointer_expr": "x", "return_type": "int" }
+  },
+  {
+    "procedure_name": "bug_with_allocation_bad",
+    "procedure_id": "bug_with_allocation_bad",
+    "source_file": "small_npes.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 32,
+      "target_pvar": "y",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "bug_with_allocation_bad",
+    "procedure_id": "bug_with_allocation_bad",
+    "source_file": "small_npes.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 32,
+      "target_pvar": "y",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  },
+  {
+    "procedure_name": "FPuseafterfree_no_check_for_null_after_realloc_bad",
+    "procedure_id": "FPuseafterfree_no_check_for_null_after_realloc_bad",
+    "source_file": "small_npes.c",
     "plan_type": "Skip",
     "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 176,
-      "end_line": 176,
-      "guard_with_pointer": "x",
+      "start_node": 8,
+      "end_node": 8,
+      "start_line": 201,
+      "end_line": 201,
+      "guard_with_pointer": "p",
       "metrics": {
         "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
+        "cost_g_overhead_final": 2,
         "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
         "total_aliases": 1
       }
     }
   },
   {
-    "procedure_name": "bug_with_allocation_bad",
-    "procedure_id": "bug_with_allocation_bad",
+    "procedure_name": "FPuseafterfree_no_check_for_null_after_realloc_bad",
+    "procedure_id": "FPuseafterfree_no_check_for_null_after_realloc_bad",
     "source_file": "small_npes.c",
-    "plan_type": "Replace",
+    "plan_type": "Skip",
     "details": {
-      "def_site_node": 4,
-      "def_site_line": 32,
-      "target_pvar": "y",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
-    }
-  },
-  {
-    "procedure_name": "bug_with_allocation_bad",
-    "procedure_id": "bug_with_allocation_bad",
-    "source_file": "small_npes.c",
-    "plan_type": "Replace",
-    "details": {
-      "def_site_node": 4,
-      "def_site_line": 32,
-      "target_pvar": "y",
-      "pvar_type": "int*",
-      "reuse_candidate": null,
-      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+      "start_node": 9,
+      "end_node": 9,
+      "start_line": 199,
+      "end_line": 199,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
     }
   },
   {
     "procedure_name": "FPuseafterfree_no_check_for_null_after_realloc_bad",
     "procedure_id": "FPuseafterfree_no_check_for_null_after_realloc_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 198,
-      "original_pointer": "p"
+      "start_node": 8,
+      "end_node": 8,
+      "start_line": 201,
+      "end_line": 201,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
     }
   },
   {
     "procedure_name": "FPuseafterfree_no_check_for_null_after_realloc_bad",
     "procedure_id": "FPuseafterfree_no_check_for_null_after_realloc_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 198,
-      "original_pointer": "p"
+      "start_node": 9,
+      "end_node": 9,
+      "start_line": 199,
+      "end_line": 199,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -296,16 +332,16 @@
     "plan_type": "Skip",
     "details": {
       "start_node": 4,
-      "end_node": 4,
+      "end_node": 3,
       "start_line": 202,
-      "end_line": 202,
+      "end_line": 203,
       "guard_with_pointer": "q",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
+        "nodes_in_scope": 2,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
         "total_aliases": 1
       }
     }
@@ -349,12 +385,21 @@
     "procedure_name": "lib_memcpy_src_bad",
     "procedure_id": "lib_memcpy_src_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 496,
-      "original_pointer": "src"
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 497,
+      "end_line": 497,
+      "guard_with_pointer": "src",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -416,7 +461,7 @@
       "end_node": 3,
       "start_line": 429,
       "end_line": 429,
-      "guard_with_pointer": "c",
+      "guard_with_pointer": "c.inner",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -480,12 +525,21 @@
     "procedure_name": "ptr_arithmetic_bad",
     "procedure_id": "ptr_arithmetic_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 412,
-      "original_pointer": "p"
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 414,
+      "end_line": 414,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 2
+      }
     }
   },
   {
@@ -533,7 +587,7 @@
       "end_node": 3,
       "start_line": 213,
       "end_line": 213,
-      "guard_with_pointer": "l",
+      "guard_with_pointer": "l.next",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -554,7 +608,7 @@
       "end_node": 3,
       "start_line": 460,
       "end_line": 460,
-      "guard_with_pointer": "nodes",
+      "guard_with_pointer": "nodes[0]",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -644,12 +698,21 @@
     "procedure_name": "lib_strdup_bad",
     "procedure_id": "lib_strdup_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 488,
-      "original_pointer": "s"
+      "start_node": 8,
+      "end_node": 8,
+      "start_line": 489,
+      "end_line": 489,
+      "guard_with_pointer": "s",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -662,7 +725,7 @@
       "end_node": 3,
       "start_line": 81,
       "end_line": 81,
-      "guard_with_pointer": "vec",
+      "guard_with_pointer": "vec[64]",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -691,12 +754,21 @@
     "procedure_name": "lib_memcpy_dest_bad",
     "procedure_id": "lib_memcpy_dest_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 502,
-      "original_pointer": "dest"
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 503,
+      "end_line": 503,
+      "guard_with_pointer": "dest",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -717,12 +789,42 @@
     "procedure_name": "no_fopen_check_getc_bad",
     "procedure_id": "no_fopen_check_getc_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 95,
-      "original_pointer": "f"
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 98,
+      "end_line": 98,
+      "guard_with_pointer": "f",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "no_fopen_check_getc_bad",
+    "procedure_id": "no_fopen_check_getc_bad",
+    "source_file": "small_npes.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 5,
+      "end_node": 5,
+      "start_line": 96,
+      "end_line": 96,
+      "guard_with_pointer": "f",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -744,16 +846,16 @@
     "plan_type": "Skip",
     "details": {
       "start_node": 7,
-      "end_node": 4,
+      "end_node": 3,
       "start_line": 435,
-      "end_line": 441,
+      "end_line": 442,
       "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 4,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
+        "nodes_in_scope": 5,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 5,
         "total_aliases": 1
       }
     }
@@ -765,16 +867,16 @@
     "plan_type": "Skip",
     "details": {
       "start_node": 7,
-      "end_node": 4,
+      "end_node": 3,
       "start_line": 435,
-      "end_line": 441,
+      "end_line": 442,
       "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 4,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
+        "nodes_in_scope": 5,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 5,
         "total_aliases": 1
       }
     }
@@ -786,16 +888,16 @@
     "plan_type": "Skip",
     "details": {
       "start_node": 7,
-      "end_node": 4,
+      "end_node": 3,
       "start_line": 435,
-      "end_line": 441,
+      "end_line": 442,
       "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 4,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
+        "nodes_in_scope": 5,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 5,
         "total_aliases": 1
       }
     }
@@ -807,16 +909,16 @@
     "plan_type": "Skip",
     "details": {
       "start_node": 7,
-      "end_node": 4,
+      "end_node": 3,
       "start_line": 435,
-      "end_line": 441,
+      "end_line": 442,
       "guard_with_pointer": "c",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 4,
-        "true_slice_size": 4,
-        "initial_candidate_plans": 4,
+        "nodes_in_scope": 5,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 5,
         "total_aliases": 1
       }
     }
@@ -943,7 +1045,7 @@
       "end_node": 3,
       "start_line": 451,
       "end_line": 451,
-      "guard_with_pointer": "n",
+      "guard_with_pointer": "n.next",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
@@ -958,12 +1060,21 @@
     "procedure_name": "lib_strlen_bad",
     "procedure_id": "lib_strlen_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 470,
-      "original_pointer": "s"
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 471,
+      "end_line": 471,
+      "guard_with_pointer": "s",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -972,17 +1083,17 @@
     "source_file": "small_npes.c",
     "plan_type": "Skip",
     "details": {
-      "start_node": 3,
+      "start_node": 9,
       "end_node": 3,
-      "start_line": 69,
+      "start_line": 65,
       "end_line": 69,
       "guard_with_pointer": "x",
       "metrics": {
-        "cost_l_imprecision": 0,
+        "cost_l_imprecision": 5,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
+        "nodes_in_scope": 7,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
         "total_aliases": 2
       }
     }
@@ -991,24 +1102,42 @@
     "procedure_name": "lib_strcmp_1_bad",
     "procedure_id": "lib_strcmp_1_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 476,
-      "original_pointer": "s"
+      "start_node": 5,
+      "end_node": 5,
+      "start_line": 477,
+      "end_line": 477,
+      "guard_with_pointer": "s",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
     "procedure_name": "lib_strcmp_2_bad",
     "procedure_id": "lib_strcmp_2_bad",
     "source_file": "small_npes.c",
-    "plan_type": "NoPlanGenerated",
+    "plan_type": "Skip",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
-      "npe_file": "small_npes.c",
-      "npe_line": 482,
-      "original_pointer": "s"
+      "start_node": 5,
+      "end_node": 5,
+      "start_line": 483,
+      "end_line": 483,
+      "guard_with_pointer": "s",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
     }
   },
   {
@@ -1043,21 +1172,11 @@
     "procedure_name": "null_pointer_interproc_bad",
     "procedure_id": "null_pointer_interproc_bad",
     "source_file": "small_npes.c",
-    "plan_type": "Skip",
+    "plan_type": "Evade",
     "details": {
-      "start_node": 3,
-      "end_node": 3,
-      "start_line": 111,
-      "end_line": 111,
-      "guard_with_pointer": "joe",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
+      "start_node": 1,
+      "pointer_expr": "joe",
+      "return_type": "int"
     }
   }
 ]

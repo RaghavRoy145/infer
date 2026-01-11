@@ -5,19 +5,30 @@
     "source_file": "test09_linked_list_null.c",
     "plan_type": "Skip",
     "details": {
-      "start_node": 11,
-      "end_node": 4,
-      "start_line": 14,
-      "end_line": 18,
+      "start_node": 9,
+      "end_node": 8,
+      "start_line": 19,
+      "end_line": 20,
       "guard_with_pointer": "current",
       "metrics": {
-        "cost_l_imprecision": 3,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 6,
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 2,
         "true_slice_size": 3,
         "initial_candidate_plans": 3,
         "total_aliases": 2
       }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test09_linked_list_null.c",
+    "plan_type": "Evade",
+    "details": {
+      "start_node": 1,
+      "pointer_expr": "current",
+      "return_type": "int"
     }
   }
 ]

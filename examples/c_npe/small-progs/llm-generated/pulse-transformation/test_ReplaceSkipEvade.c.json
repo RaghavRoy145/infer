@@ -5,17 +5,17 @@
     "source_file": "test_ReplaceSkipEvade.c",
     "plan_type": "Skip",
     "details": {
-      "start_node": 3,
+      "start_node": 4,
       "end_node": 3,
-      "start_line": 31,
+      "start_line": 28,
       "end_line": 31,
       "guard_with_pointer": "escaping_ptr",
       "metrics": {
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
+        "nodes_in_scope": 2,
+        "true_slice_size": 2,
+        "initial_candidate_plans": 2,
         "total_aliases": 1
       }
     }
@@ -38,21 +38,7 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test_ReplaceSkipEvade.c",
-    "plan_type": "Skip",
-    "details": {
-      "start_node": 4,
-      "end_node": 4,
-      "start_line": 51,
-      "end_line": 51,
-      "guard_with_pointer": "t",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 1,
-        "nodes_in_scope": 1,
-        "true_slice_size": 1,
-        "initial_candidate_plans": 1,
-        "total_aliases": 1
-      }
-    }
+    "plan_type": "Evade",
+    "details": { "start_node": 1, "pointer_expr": "t", "return_type": "int" }
   }
 ]

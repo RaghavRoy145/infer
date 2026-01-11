@@ -3,21 +3,11 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test02_conditional_null.c",
-    "plan_type": "Skip",
+    "plan_type": "Evade",
     "details": {
-      "start_node": 5,
-      "end_node": 5,
-      "start_line": 14,
-      "end_line": 14,
-      "guard_with_pointer": "data",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 2,
-        "nodes_in_scope": 1,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
-        "total_aliases": 1
-      }
+      "start_node": 1,
+      "pointer_expr": "data",
+      "return_type": "int"
     }
   },
   {
@@ -33,10 +23,10 @@
       "guard_with_pointer": "data",
       "metrics": {
         "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 2,
+        "cost_g_overhead_final": 3,
         "nodes_in_scope": 1,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
         "total_aliases": 1
       }
     }
@@ -45,21 +35,11 @@
     "procedure_name": "main",
     "procedure_id": "main",
     "source_file": "test02_conditional_null.c",
-    "plan_type": "Skip",
+    "plan_type": "Evade",
     "details": {
-      "start_node": 5,
-      "end_node": 5,
-      "start_line": 14,
-      "end_line": 14,
-      "guard_with_pointer": "data",
-      "metrics": {
-        "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 2,
-        "nodes_in_scope": 1,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
-        "total_aliases": 1
-      }
+      "start_node": 1,
+      "pointer_expr": "data",
+      "return_type": "int"
     }
   },
   {
@@ -75,10 +55,10 @@
       "guard_with_pointer": "data",
       "metrics": {
         "cost_l_imprecision": 0,
-        "cost_g_overhead_final": 2,
+        "cost_g_overhead_final": 3,
         "nodes_in_scope": 1,
-        "true_slice_size": 2,
-        "initial_candidate_plans": 2,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 3,
         "total_aliases": 1
       }
     }

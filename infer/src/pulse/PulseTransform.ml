@@ -682,6 +682,36 @@ match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
     This is a fixed-point algorithm that continues until no more merges are possible, reducing the
     total number of guards. The decision to merge is a heuristic that balances minimizing
     guard count against avoiding wrapping unrelated code with side-effects. *)
+
+(** [FIX-Struct] Scans the crash node for field/index accesses rooted in the candidate pointers. 
+    If found, returns the more specific expression (e.g., x.f instead of x). *)
+let refine_guard_exprs node candidate_exprs =
+  let instrs = Procdesc.Node.get_instrs node in
+  let refined = List.map candidate_exprs ~f:(fun root ->
+     (* Helper to check if an expression is a field/index access rooted in 'root' *)
+     let rec find_rooted_access e = 
+       match e with
+       (* FIX: Unpack the record for Lfield to get the actual base expression *)
+       | Exp.Lfield ({exp=base}, _, _) ->
+           if Exp.equal base root then Some e
+           else find_rooted_access base
+       | Exp.Lindex (base, _) ->
+           if Exp.equal base root then Some e
+           else find_rooted_access base
+       | _ -> None
+     in
+     
+     let best_match = Instrs.find_map instrs ~f:(fun instr ->
+        match instr with
+        | Load {e} | Store {e1=e} -> find_rooted_access e
+        | _ -> None
+     )
+     in
+     Option.value best_match ~default:root
+  )
+  in
+  List.dedup_and_sort ~compare:Exp.compare refined
+
 let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_ptrs_to_guard: transformation_plan list =
   let start = Procdesc.get_start_node proc_desc in
   let idom = GDoms.compute_idom proc_desc start in
@@ -750,14 +780,13 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                     is_source_tainted base_exp
                 | Cast (_, base_exp) ->
                     is_source_tainted base_exp
-                (* NEW: Handle pointer arithmetic expressions *)
-                | BinOp (bop, e1, e2) -> (
-                  match bop with
-                  (* Taint propagates through pointer arithmetic. *)
-                  | Binop.PlusPI | Binop.MinusPI ->
-                      is_source_tainted e1 || is_source_tainted e2
-                  | _ ->
-                      false )
+                (* FIX: Propagate taint through pointer arithmetic *)
+                | BinOp (op, e1, _e2) -> (
+                    match op with
+                    (* Pointer arithmetic preserves the null-ness of the base pointer *)
+                    | PlusPI | MinusPI -> is_source_tainted e1
+                    | _ -> false 
+                  )
                 | _ ->
                     false
               in
@@ -822,23 +851,28 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                 Ident.Set.mem id null_carrying_idents
             | Lfield ({exp= base_exp}, _, _) | Lindex (base_exp, _) | Cast (_, base_exp) ->
                 is_base_of_dereference base_exp
+            (* FIX: Handle pointer arithmetic (p+1) in the usage check *)
+            | BinOp (op, e1, _) -> (
+                match op with
+                | PlusPI | MinusPI -> is_base_of_dereference e1
+                | _ -> false
+              )
             | _ ->
                 false
           in
           let has_dereference =
             Instrs.exists instrs ~f:(fun instr ->
-                let is_deref, addr_exp_opt =
+                let is_deref =
                   match instr with
-                  | Sil.Load {e; _} ->
-                      (is_base_of_dereference e, Some e)
-                  | Sil.Store {e1; _} ->
-                      (is_base_of_dereference e1, Some e1)
-                  | _ ->
-                      (false, None)
+                  | Sil.Load {e; _} -> is_base_of_dereference e
+                  | Sil.Store {e1; _} -> is_base_of_dereference e1
+                  (* FIX: Treat passing a null alias to a function as a 'dereference' candidate *)
+                  | Sil.Call (_, _, args, _, _) -> 
+                      List.exists args ~f:(fun (e, _) -> is_base_of_dereference e)
+                  | _ -> false
                 in
                 if is_deref then
-                  L.d_printfln "[transformation-log]      !!! Found DEREFERENCE via expression: %a" Exp.pp
-                    (Option.value_exn addr_exp_opt) ;
+                  L.d_printfln "[transformation-log]      !!! Found DEREFERENCE/USAGE in instruction." ;
                 is_deref )
           in
           if has_dereference then (
@@ -1092,38 +1126,53 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   L.d_printfln "\n[transformation-log] STAGE 1.1: Found a unified slice of %d crash node(s)."
     (List.length unified_crash_slice);
 
+  (* === FIX-04/06 LOGIC: Updated Candidate Generation === *)
+    (* === FIX-04/06 LOGIC: Dominator-Based Evade Trigger === *)
   let candidate_plans =
     List.filter_map unified_crash_slice ~f:(fun crash_node ->
         let slice_for_this_node = [crash_node] in
         let start_node, end_node = find_minimal_scope slice_for_this_node ipdom_fun proc_desc lca idom in
         
-        L.d_printfln "\n[transformation-log] STAGE 1.2: Generating candidate plan for single crash node at line %d..."
+        L.d_printfln "\n[transformation-log] STAGE 1.2: Candidate for node at line %d..."
           (Procdesc.Node.get_loc crash_node).line;
-        L.d_printfln "[transformation-log]   - Calculated minimal scope: start node %a (line %d), end node %a (line %d)"
-            Procdesc.Node.pp start_node (Procdesc.Node.get_loc start_node).line
-            Procdesc.Node.pp end_node (Procdesc.Node.get_loc end_node).line;
 
-        (* Check if Evade is the chosen strategy for this slice *)
-        if Procdesc.Node.equal start_node start then (
-          (* This is a candidate for an Evade plan. It is always applicable. *)
-          
-          (* 1. Get the return type from the procedure description. *)
-          let ret_type = Procdesc.get_ret_type proc_desc in
-          
-          (* 2. Convert the type to a human-readable string. *)
+        (* 1. Check Return Type *)
+        let ret_type = Procdesc.get_ret_type proc_desc in
+        let is_void = Typ.equal ret_type StdTyp.void in
+        let exit_node = Procdesc.get_exit_node proc_desc in
+
+        (* 2. Check if the guard location dominates the exit. 
+           If it does, it means this code block is on the critical path to the exit. 
+           Skipping it in a non-void function implies skipping the return value calculation 
+           or the return statement itself. *)
+        let dominates_exit = is_dominated_by ~dominator:start_node ~node:exit_node idom in
+
+        (* 3. Check for "At Start" (Dead Evade fix) - Optional if dominator check covers it *)
+        let is_at_start = 
+           let succs = Procdesc.Node.get_succs start in
+           List.exists succs ~f:(fun n -> Procdesc.Node.equal n start_node)
+        in
+
+        if (dominates_exit && not is_void) || is_at_start then (
+          L.d_printfln "[transformation-safety] Scope dominates exit (non-void) OR is at start. Forcing EVADE.";
           let ret_typ_str = Typ.to_string ret_type in
+          let ptr = match all_ptrs_to_guard with [] -> bug.ptr_expr | h::_ -> h in
           
-          (* 3. Generate the Evade plan with the new type information. *)
           Some (IEvade { proc_start_node = start;
-                        pointer_expr = List.hd_exn all_ptrs_to_guard;
+                        pointer_expr = ptr;
                         return_typ_str = ret_typ_str })
-        )else
+        ) else (
+          (* FIX-Struct: Refine the pointers based on usage in the crash node *)
+          let refined_ptrs = refine_guard_exprs crash_node all_ptrs_to_guard in
+          
           Some
             (ISkip
                 { lca_node= start_node
                 ; join_node= end_node
-                ; pointer_exprs= all_ptrs_to_guard
-                ; slice_nodes= [crash_node] } ) )
+                ; pointer_exprs= refined_ptrs (* CHANGED *)
+                ; slice_nodes= [crash_node] } ) 
+        )
+    )
   in
   let initial_candidate_plans = List.length candidate_plans in
   
@@ -1436,10 +1485,26 @@ let save_all_plans proc_desc plans =
     IUnix.mkdir_p transformation_dir;
 
     let plan_to_json plan =
+      (* Recursive helper to print expressions cleanly (no &) *)
+      let rec pp_expr_value fmt e =
+        match e with
+        | Exp.Lvar pvar -> 
+            (* Use to_string to ensure we get "ptr" not "&ptr" *)
+            Format.pp_print_string fmt (Pvar.to_string pvar)
+        | Exp.Lfield ({exp=base}, f, _) ->
+            (* Recursively unwrap base and add field: "base.field" *)
+            Format.fprintf fmt "%a.%a" pp_expr_value base Fieldname.pp f
+        | Exp.Lindex (base, idx) ->
+            (* Recursively unwrap base and add index: "base[idx]" *)
+            Format.fprintf fmt "%a[%a]" pp_expr_value base Exp.pp idx
+        | _ -> 
+            Exp.pp fmt e
+      in
+
       `Assoc
         [ ("procedure_name", `String (Procname.to_string proc_name))
         ; ("procedure_id", `String (Procname.to_unique_id proc_name))
-        ; ("source_file", `String source_file_str) (* Also save the original source file path *)
+        ; ("source_file", `String source_file_str)
         ; ( "plan_type"
           , match plan with
             | Skip _ -> `String "Skip"
@@ -1459,12 +1524,7 @@ let save_all_plans proc_desc plans =
                   | [] ->
                       `String "unknown_pointer_due_to_empty_list"
                   | hd :: _ ->
-                      let ptr_str = 
-                        match hd with
-                        | Exp.Lvar pvar -> Pvar.to_string pvar (* Clean string "ptr" *)
-                        | _ -> Format.asprintf "%a" Exp.pp hd    (* Fallback "((int*)p)" *)
-                      in
-                      `String ptr_str )
+                      `String (Format.asprintf "%a" pp_expr_value hd) )
               ; ( "metrics"
                 , `Assoc
                     [ ("cost_l_imprecision", `Int metrics.imprecision_cost)
@@ -1476,7 +1536,7 @@ let save_all_plans proc_desc plans =
           | Evade {proc_start_node; pointer_expr; return_typ_str} ->
             `Assoc
               [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
-              ; ("pointer_expr", `String (Format.asprintf "%a" Exp.pp pointer_expr))
+              ; ("pointer_expr", `String (Format.asprintf "%a" pp_expr_value pointer_expr))
               ; ("return_type", `String return_typ_str) ]
           | Replace {def_site_node; pvar; pvar_typ; reuse_info; metrics; _} ->
             `Assoc
@@ -1495,16 +1555,11 @@ let save_all_plans proc_desc plans =
                     [ ("cost_rep_modification", `Int metrics.cost)
                     ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
           | NoPlanGenerated {reason; npe_location; pointer_expr} ->
-              let ptr_str = 
-                match pointer_expr with 
-                | Exp.Lvar pvar -> Pvar.to_string pvar 
-                | _ -> Format.asprintf "%a" Exp.pp pointer_expr 
-              in
               `Assoc
                 [ ("reason", `String reason)
                 ; ("npe_file", `String (SourceFile.to_string npe_location.file))
                 ; ("npe_line", `Int npe_location.line)
-                ; ("original_pointer", `String ptr_str) ] ) ]
+                ; ("original_pointer", `String (Format.asprintf "%a" pp_expr_value pointer_expr)) ] ) ]
     in
     let new_plans_json = List.map plans ~f:plan_to_json in
     (* let all_plans_json = `List (List.map plans ~f:plan_to_json) in *)
@@ -1550,11 +1605,24 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]STRATEGY: SKIP (malformed)"
     | guard_ptr_expr :: _ ->
         (* FIX-01: Unwrap Lvar addresses for display *)
-        let pp_expr_value fmt e =
+        (* let pp_expr_value fmt e =
           match e with
           | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar (* Print 'x', not '&x' *)
           | _ -> Exp.pp fmt e
-        in
+        in *)
+        let rec pp_expr_value fmt e =
+            match e with
+            | Exp.Lvar pvar -> 
+                Pvar.pp Pp.text fmt pvar (* Unwrap Lvar: prints "x" instead of "&x" *)
+            | Exp.Lfield ({exp=base}, f, _) ->
+                (* Recursively unwrap the base and append the field name: "base.f" *)
+                Format.fprintf fmt "%a.%a" pp_expr_value base Fieldname.pp f
+            | Exp.Lindex (base, idx) ->
+                (* Recursively unwrap the base and append index: "base[idx]" *)
+                Format.fprintf fmt "%a[%a]" pp_expr_value base Exp.pp idx
+            | _ -> 
+                Exp.pp fmt e (* Fallback for other expression types *)
+          in
         let line1 = (Procdesc.Node.get_loc lca_node).line in
         let line2 = (Procdesc.Node.get_loc join_node).line in
         let start_line = min line1 line2 in
@@ -1571,13 +1639,26 @@ let report_transformation_plan proc_desc plan =
           (Pp.seq ~sep:", " Exp.pp) pointer_exprs ;
         L.d_printfln "[transformation-plan]--------------------------" )
 
-| Evade {proc_start_node; pointer_expr} ->
-    L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
-    L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
-    L.d_printfln "[transformation-plan]STRATEGY: EVADE" ;
-    L.d_printfln "[transformation-plan]ACTION: At the start of the function (node %d), insert an early return." (Procdesc.Node.get_id proc_start_node :> int);
-    L.d_printfln "[transformation-plan]        Insert logic: if (%a == NULL) return;" Exp.pp pointer_expr;
-    L.d_printfln "[transformation-plan]--------------------------"
+| Evade {proc_start_node; pointer_expr; return_typ_str} ->
+      let rec pp_expr_value fmt e =
+            match e with
+            | Exp.Lvar pvar -> 
+                Pvar.pp Pp.text fmt pvar (* Unwrap Lvar: prints "x" instead of "&x" *)
+            | Exp.Lfield ({exp=base}, f, _) ->
+                (* Recursively unwrap the base and append the field name: "base.f" *)
+                Format.fprintf fmt "%a.%a" pp_expr_value base Fieldname.pp f
+            | Exp.Lindex (base, idx) ->
+                (* Recursively unwrap the base and append index: "base[idx]" *)
+                Format.fprintf fmt "%a[%a]" pp_expr_value base Exp.pp idx
+            | _ -> 
+                Exp.pp fmt e (* Fallback for other expression types *)
+          in
+      L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
+      L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;
+      L.d_printfln "[transformation-plan]STRATEGY: EVADE" ;
+      L.d_printfln "[transformation-plan]ACTION: At the start of the function (node %d), insert an early return." (Procdesc.Node.get_id proc_start_node :> int);
+      L.d_printfln "[transformation-plan]        Insert logic: if (%a == NULL) return <default_%s>;" pp_expr_value pointer_expr return_typ_str;
+      L.d_printfln "[transformation-plan]--------------------------"
 | Replace {def_site_node; pvar; pvar_typ; reuse_info} ->
     let def_line = (Procdesc.Node.get_loc def_site_node).line in
     L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
@@ -1605,10 +1686,18 @@ let report_transformation_plan proc_desc plan =
         L.d_printfln "[transformation-plan]          (Reusing non-null local variable '%a')" (Pvar.pp Pp.text) reused_pvar;
     ) 
 | NoPlanGenerated {reason; npe_location; pointer_expr} ->
-  let pp_expr_value fmt e =
-    match e with
-    | Exp.Lvar pvar -> Pvar.pp Pp.text fmt pvar
-    | _ -> Exp.pp fmt e
+  let rec pp_expr_value fmt e =
+            match e with
+            | Exp.Lvar pvar -> 
+                Pvar.pp Pp.text fmt pvar (* Unwrap Lvar: prints "x" instead of "&x" *)
+            | Exp.Lfield ({exp=base}, f, _) ->
+                (* Recursively unwrap the base and append the field name: "base.f" *)
+                Format.fprintf fmt "%a.%a" pp_expr_value base Fieldname.pp f
+            | Exp.Lindex (base, idx) ->
+                (* Recursively unwrap the base and append index: "base[idx]" *)
+                Format.fprintf fmt "%a[%a]" pp_expr_value base Exp.pp idx
+            | _ -> 
+                Exp.pp fmt e (* Fallback for other expression types *)
   in
   L.d_printfln "[transformation-plan]--- PULSE TRANSFORMATION PLAN ---" ;
   L.d_printfln "[transformation-plan]PROCEDURE: %a" Procname.pp proc_name ;

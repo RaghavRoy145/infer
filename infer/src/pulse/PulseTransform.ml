@@ -1463,7 +1463,7 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
 
 (** Helper to save a single transformation plan to a file. *)
 
-let save_all_plans proc_desc plans =
+(* let save_all_plans proc_desc plans =
   let proc_name = Procdesc.get_proc_name proc_desc in
   try
     L.d_printfln "[transformation-plan] Attempting to save plan.";
@@ -1588,7 +1588,142 @@ let save_all_plans proc_desc plans =
       (List.length plans) Procname.pp proc_name filepath
   with exn ->
     L.d_printfln "[transformation-plan] ERROR: Failed to save repair plans for %a. Exception: %s"
-      Procname.pp proc_name (Exn.to_string exn)
+      Procname.pp proc_name (Exn.to_string exn) *)
+
+let save_all_plans proc_desc new_plans =
+  if List.is_empty new_plans then () else
+  let proc_name = Procdesc.get_proc_name proc_desc in
+  try
+    let loc = Procdesc.get_loc proc_desc in
+    let source_file_str = SourceFile.to_string loc.Location.file in
+    let sanitized_source_file = String.tr ~target:'/' ~replacement:'_' source_file_str in
+    let filename = Format.asprintf "%s.json" sanitized_source_file in
+    let lock_filename = Format.asprintf "%s.lock" sanitized_source_file in
+    
+    let transformation_dir = Filename.concat Config.project_root "pulse-transformation" in
+    let filepath = Filename.concat transformation_dir filename in
+    let lock_filepath = Filename.concat transformation_dir lock_filename in
+
+    IUnix.mkdir_p transformation_dir;
+
+    (* 1. Acquire Lock on a separate lockfile *)
+    let lock_fd = Unix.openfile lock_filepath ~mode:[O_RDWR; O_CREAT] ~perm:0o666 in
+    Unix.lockf lock_fd ~mode:Unix.F_LOCK ~len:0;
+
+    (* BEGIN CRITICAL SECTION *)
+    (* Now we have exclusive access to 'filepath' because everyone agrees to grab lock_fd first *)
+
+    (* 2. Read existing content *)
+    let existing_json_list = 
+      if ISys.file_exists filepath then
+        try
+          let ic = In_channel.create filepath in
+          let json = 
+            try Yojson.Safe.from_channel ic 
+            with _ -> `List [] 
+          in
+          In_channel.close ic;
+          match json with
+          | `List l -> l
+          | _ -> []
+        with _ -> []
+      else []
+    in
+
+    let plan_to_json plan =
+      let rec pp_expr_value fmt e =
+        match e with
+        | Exp.Lvar pvar -> 
+            Format.pp_print_string fmt (Pvar.to_string pvar)
+        | Exp.Lfield ({exp=base}, f, _) ->
+            Format.fprintf fmt "%a.%a" pp_expr_value base Fieldname.pp f
+        | Exp.Lindex (base, idx) ->
+            Format.fprintf fmt "%a[%a]" pp_expr_value base Exp.pp idx
+        | _ -> 
+            Exp.pp fmt e
+      in
+
+      `Assoc
+        [ ("procedure_name", `String (Procname.to_string proc_name))
+        ; ("procedure_id", `String (Procname.to_unique_id proc_name))
+        ; ("source_file", `String source_file_str)
+        ; ( "plan_type"
+          , match plan with
+            | Skip _ -> `String "Skip"
+            | Evade _ -> `String "Evade"
+            | Replace _ -> `String "Replace"
+            | NoPlanGenerated _ -> `String "NoPlanGenerated" )
+        ; ( "details"
+          , match plan with
+          | Skip {lca_node; join_node; pointer_exprs; metrics; _} ->
+            `Assoc
+              [ ("start_node", `Int (Procdesc.Node.get_id lca_node :> int))
+              ; ("end_node", `Int (Procdesc.Node.get_id join_node :> int))
+              ; ("start_line", `Int (Procdesc.Node.get_loc lca_node).line)
+              ; ("end_line", `Int (Procdesc.Node.get_loc join_node).line)
+              ; ( "guard_with_pointer"
+                , match pointer_exprs with
+                  | [] -> `String "unknown_pointer_due_to_empty_list"
+                  | hd :: _ -> `String (Format.asprintf "%a" pp_expr_value hd) )
+              ; ( "metrics"
+                , `Assoc
+                    [ ("cost_l_imprecision", `Int metrics.imprecision_cost)
+                    ; ("cost_g_overhead_final", `Int metrics.final_guard_count)
+                    ; ("nodes_in_scope", `Int metrics.nodes_in_scope)
+                    ; ("true_slice_size", `Int metrics.true_slice_size)
+                    ; ("initial_candidate_plans", `Int metrics.initial_candidate_plans)
+                    ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
+          | Evade {proc_start_node; pointer_expr; return_typ_str} ->
+            `Assoc
+              [ ("start_node", `Int (Procdesc.Node.get_id proc_start_node :> int))
+              ; ("pointer_expr", `String (Format.asprintf "%a" pp_expr_value pointer_expr))
+              ; ("return_type", `String return_typ_str) ]
+          | Replace {def_site_node; pvar; pvar_typ; reuse_info; metrics; _} ->
+            `Assoc
+              [ ("def_site_node", `Int (Procdesc.Node.get_id def_site_node :> int))
+              ; ("def_site_line", `Int (Procdesc.Node.get_loc def_site_node).line)
+              ; ("target_pvar", `String (Pvar.to_string pvar))
+              ; ("pvar_type", `String (Typ.to_string pvar_typ))
+              ; ( "reuse_candidate"
+                , match reuse_info with
+                  | None -> `Null
+                  | Some {reused_pvar} -> `String (Pvar.to_string reused_pvar) )
+              ; ( "metrics"
+                , `Assoc
+                    [ ("cost_rep_modification", `Int metrics.cost)
+                    ; ("total_aliases", `Int metrics.total_aliases) ] ) ]
+          | NoPlanGenerated {reason; npe_location; pointer_expr} ->
+              `Assoc
+                [ ("reason", `String reason)
+                ; ("npe_file", `String (SourceFile.to_string npe_location.file))
+                ; ("npe_line", `Int npe_location.line)
+                ; ("original_pointer", `String (Format.asprintf "%a" pp_expr_value pointer_expr)) ] ) ]
+    in
+
+    let new_json_items = List.map new_plans ~f:plan_to_json in
+
+    (* Deduplication *)
+    let unique_new_items = 
+      List.filter new_json_items ~f:(fun new_item ->
+        not (List.exists existing_json_list ~f:(fun existing -> Yojson.Safe.equal new_item existing))
+      )
+    in
+
+    (* 3. Write Updated Content *)
+    if not (List.is_empty unique_new_items) then (
+      let final_list = existing_json_list @ unique_new_items in
+      let oc = Out_channel.create filepath in
+      Yojson.Safe.pretty_to_channel oc (`List final_list);
+      Out_channel.close oc;
+      L.d_printfln "[transformation] Appended %d plans to %s" (List.length unique_new_items) filepath
+    );
+
+    (* 4. Release Lock *)
+    Unix.lockf lock_fd ~mode:Unix.F_ULOCK ~len:0;
+    Unix.close lock_fd
+
+  with exn ->
+    L.d_printfln "[transformation] ERROR saving plans: %s" (Exn.to_string exn)
 
 (** A pure function that translates a `transformation_plan` record into a human-readable format for logging, and calls the save-plan helper *)
 let report_transformation_plan proc_desc plan =
@@ -1728,7 +1863,7 @@ let equal_transformation_plan p1 p2 =
   | _, _ -> false
 
 let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
-  clear_cache_if_new_proc (Procdesc.get_proc_name proc_desc);
+  (* clear_cache_if_new_proc (Procdesc.get_proc_name proc_desc); *)
 
   (* Step 1a. Get the initial abstract value for the bug *)
   let av_opt =
@@ -1819,10 +1954,14 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
   in 
     
   (* Step 3: Iterate through the generated list and log them. *)
-  List.iter final_plans ~f:(fun plan ->
+  (* List.iter final_plans ~f:(fun plan ->
     if not (List.mem !logged_transformations_cache plan ~equal:equal_transformation_plan) then (
       L.d_printfln "[transformation] Found new unique plan.";
       report_transformation_plan proc_desc plan;
       logged_transformations_cache := plan :: !logged_transformations_cache
     )
-  )
+  ) *)
+  List.iter final_plans ~f:(fun plan -> report_transformation_plan proc_desc plan);
+
+  (* Save directly to file (The save function now handles locking and deduplication) *)
+  save_all_plans proc_desc final_plans

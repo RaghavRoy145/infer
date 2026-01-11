@@ -340,7 +340,7 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
       Some (LatentInvalidAccess {astate= summary; address; must_be_valid; calling_context= []})
   | PotentialInvalidSpecializedCall {specialized_type; trace} ->
       Some (LatentSpecializedTypeIssue {astate= summary; specialized_type; trace})
-  | ReportableError {diagnostic} -> (
+  (* | ReportableError {diagnostic} -> (
       let is_nullptr_dereference =
         match diagnostic with AccessToInvalidAddress _ -> true | _ -> false
       in
@@ -425,6 +425,97 @@ let report_summary_error ({InterproceduralAnalysis.tenv; proc_desc} as analysis_
               () (* Catch-all for non-NPE diagnostics *)
           end
         );
+        if is_suppressed then L.d_printfln "ReportNow suppressed error";
+        report analysis_data ~latent:false ~is_suppressed diagnostic;
+        if Diagnostic.aborts_execution path diagnostic then
+          let trace_to_issue =
+            Trace.Immediate {location= Procdesc.get_loc proc_desc; history= ValueHistory.epoch}
+          in
+          Some (AbortProgram {astate= summary; diagnostic; trace_to_issue})
+        else 
+          None
+      
+      | `DelayReport latent_issue ->
+          if is_suppressed then L.d_printfln "DelayReport suppressed error" ;
+          if Config.pulse_report_latent_issues then
+            report_latent_issue analysis_data ~is_suppressed latent_issue ;
+          Some (LatentAbortProgram {astate= summary; latent_issue}) ) *)
+  | ReportableError {diagnostic} -> (
+      let is_nullptr_dereference =
+        match diagnostic with AccessToInvalidAddress _ -> true | _ -> false
+      in
+      let is_constant_deref_without_invalidation =
+        is_constant_deref_without_invalidation_diagnostic diagnostic
+      in
+      let is_optional_empty = is_optional_empty diagnostic in
+      let is_suppressed =
+        is_suppressed tenv proc_desc ~is_nullptr_dereference ~is_constant_deref_without_invalidation
+          ~is_optional_empty
+      in
+      match LatentIssue.should_report summary diagnostic with
+      | `ReportNow ->
+        let astate =
+          match access_error with
+          | AccessResult.ReportableError {astate; _} -> astate
+          | _ -> assert false
+        in
+        
+        (* === MONOBROW HOOK START === *)
+        (* Runs regardless of is_suppressed to catch all Manifest bugs *)
+        begin
+          match diagnostic with
+          | AccessToInvalidAddress na ->
+            (* 1. Try to get PVar from Decompiler *)
+            let ptr_exp_opt, ptr_var =
+              match na.invalid_address with
+              | PulseDecompilerExpr.SourceExpr ((PVar pvar, _), _) -> (Some (Exp.Lvar pvar), Some (Var.of_pvar pvar))
+              | _ -> (None, None)
+            in
+
+            (* 2. Fallback: Scan instructions if Decompiler failed *)
+            let err_node =
+              List.find (Procdesc.get_nodes proc_desc) ~f:(fun n -> 
+                Location.equal (Procdesc.Node.get_loc n) (Trace.get_start_location na.access_trace))
+              |> Option.value ~default:(Procdesc.get_start_node proc_desc)
+            in
+
+            let final_ptr_exp = 
+              match ptr_exp_opt with
+              | Some e -> e
+              | None -> 
+                  let crash_loc = Trace.get_start_location na.access_trace in
+                  let found_exp = 
+                    Instrs.find_map (Procdesc.Node.get_instrs err_node) ~f:(fun instr ->
+                      match instr with
+                      | Sil.Load {e; loc; _} when Location.equal loc crash_loc -> Some e
+                      | Sil.Store {e1; loc; _} when Location.equal loc crash_loc -> Some e1
+                      | _ -> None
+                    )
+                  in
+                  Option.value found_exp ~default:Exp.null
+            in
+
+            let av_opt = PulseDecompilerExpr.abstract_value_of_expr na.invalid_address in
+            
+            (* Only proceed if we have a valid pointer expression *)
+            if not (Exp.is_null_literal final_ptr_exp) then (
+              let bug : _ PulseTransform.bug_info = {
+                  PulseTransform.ptr_expr = final_ptr_exp;
+                  ptr_var;
+                  diag_trace = na.access_trace;
+                  err_node; astate; av_opt;
+                  analysis = analysis_data;
+              } in
+              
+              (* FIX: Call the stateless planner. It handles generation, logging, and saving (with locks). *)
+              PulseTransform.plan_and_log_if_unique ~proc_desc ~bug;
+            )
+          | _ -> 
+            () 
+        end;
+        (* === MONOBROW HOOK END === *)
+
+        (* Standard Pulse Reporting *)
         if is_suppressed then L.d_printfln "ReportNow suppressed error";
         report analysis_data ~latent:false ~is_suppressed diagnostic;
         if Diagnostic.aborts_execution path diagnostic then

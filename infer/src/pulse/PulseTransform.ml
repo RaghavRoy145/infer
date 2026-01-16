@@ -685,6 +685,94 @@ match AbductiveDomain.Stack.find_opt ~pre_or_post:`Post v astate with
 
 (** Scans the crash node for field/index accesses rooted in the candidate pointers. 
     If found, returns the more specific expression (e.g., x.f instead of x). *)
+
+(** {6. Liveness Analysis (Safety Check for NG-009)} *)
+
+(** Collects all Pvars that are defined (written to) within the given scope. *)
+let get_vars_defined_in_scope proc_desc start_node end_node idom ipdom_fun =
+  let all_nodes = Procdesc.get_nodes proc_desc in
+  let ipdom = Lazy.force ipdom_fun in
+  
+  List.fold all_nodes ~init:Pvar.Set.empty ~f:(fun acc node ->
+    (* Check if node is strictly inside the scope *)
+    let in_scope = 
+      is_dominated_by ~dominator:start_node ~node idom &&
+      is_post_dominated_by ~pdominator:end_node ~node (lazy ipdom)
+    in
+    if in_scope then
+      let instrs = Procdesc.Node.get_instrs node in
+      Instrs.fold instrs ~init:acc ~f:(fun acc_inner instr ->
+        match instr with
+        | Sil.Store {e1= Exp.Lvar pvar; _} -> Pvar.Set.add pvar acc_inner
+        | _ -> acc_inner
+      )
+    else acc
+  )
+
+(** Checks if a specific variable is "Live-Out" at the join node. 
+    It performs a BFS starting from the SUCCESSORS of [start_node]. 
+    - If it finds a USE (Load) -> Returns True (Unsafe).
+    - If it finds a DEF (Store) -> Returns False (Safe along this path).
+    - If it hits Exit -> Returns False. *)
+let is_var_live_after_node start_node pvar =
+  let rec bfs visited worklist =
+    match worklist with
+    | [] -> false (* No uses found on any path *)
+    | node :: rest ->
+        if Procdesc.NodeSet.mem node visited then bfs visited rest
+        else
+          let visited' = Procdesc.NodeSet.add node visited in
+          let instrs = Procdesc.Node.get_instrs node in
+          
+          (* Check instructions in this node sequentially *)
+          let status = 
+            Instrs.fold instrs ~init:`Continue ~f:(fun state instr ->
+              match state with
+              | `FoundUse | `FoundDef -> state
+              | `Continue ->
+                  match instr with
+                  | Sil.Load {e= Exp.Lvar p; _} when Pvar.equal p pvar -> `FoundUse
+                  | Sil.Store {e1= Exp.Lvar p; _} when Pvar.equal p pvar -> `FoundDef
+                  (* Also check Call arguments for usage *)
+                  | Sil.Call (_, _, args, _, _) ->
+                      if List.exists args ~f:(fun (exp, _) -> 
+                        match exp with Exp.Lvar p when Pvar.equal p pvar -> true | _ -> false
+                      ) then `FoundUse else `Continue
+                  | _ -> `Continue
+            )
+          in
+          
+          match status with
+          | `FoundUse -> true (* Found a read before a write! Unsafe. *)
+          | `FoundDef -> bfs visited' rest (* Re-defined. Safe along this path. *)
+          | `Continue -> 
+              (* Continue searching successors *)
+              let succs = Procdesc.Node.get_succs node in
+              bfs visited' (succs @ rest)
+  in
+  (* Start BFS from the SUCCESSORS of the join node, not the node itself. 
+     We care about what happens *after* the block. *)
+  let initial_worklist = Procdesc.Node.get_succs start_node in
+  bfs Procdesc.NodeSet.empty initial_worklist
+
+(** Validates if a proposed Skip plan is safe regarding uninitialized variables. *)
+let is_safe_skip_for_uninit_vars proc_desc start_node end_node idom ipdom_fun =
+  (* 1. Find all variables written inside the slice *)
+  let defined_vars = get_vars_defined_in_scope proc_desc start_node end_node idom ipdom_fun in
+  
+  if Pvar.Set.is_empty defined_vars then true
+  else
+    (* 2. Check if any of them are used after the join node (end_node) *)
+    let unsafe_var = Pvar.Set.find_first_opt (fun pvar -> 
+      is_var_live_after_node end_node pvar
+    ) defined_vars
+    in
+    match unsafe_var with
+    | Some v -> 
+        L.d_printfln "[transformation-safety] Plan Rejected: Variable '%a' is defined in Skip scope but used uninitialized later." (Pvar.pp Pp.text) v;
+        false
+    | None -> true
+
 let refine_guard_exprs node candidate_exprs =
   let instrs = Procdesc.Node.get_instrs node in
   let refined = List.map candidate_exprs ~f:(fun root ->
@@ -771,7 +859,34 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   (Procdesc.get_proc_name proc_desc) ;
   L.d_printfln "[transformation-log] Initial `all_ptrs_to_guard` list: [%a]" (Pp.seq ~sep:", " Exp.pp)
     all_ptrs_to_guard ;
-
+  
+    (** [FIX NG-011] Helper to determine if an expression is statically known to be Non-Null.
+    Used to implement Strong Updates in taint analysis. *)
+  let is_guaranteed_non_null exp =
+    match exp with
+    | Exp.Const (Const.Cstr _) -> true (* String literals are addresses *)
+    | Exp.Const (Const.Cint i) -> not (IntLit.iszero i) (* Non-zero constant *)
+    | Exp.Lvar _ -> true (* Address of a program variable (&x) is never NULL *)
+    | Exp.Sizeof _ -> true
+    (* Crucial: Exp.Var (temporaries/return values) are NOT guaranteed safe. 
+      This prevents us from filtering out 'ptr = malloc()' or 'ptr = get_globals()'. *)
+    | _ -> false
+  in
+  (** Finds nodes where the pointer is assigned a strictly safe value. *)
+  let find_sanitizing_definitions proc_desc ptr_exp =
+    Procdesc.fold_nodes proc_desc ~init:[] ~f:(fun acc node ->
+      let instrs = Procdesc.Node.get_instrs node in
+      let is_sanitizer = 
+        Instrs.exists instrs ~f:(fun instr ->
+          match instr with
+          | Sil.Store {e1; e2; _} when Exp.equal e1 ptr_exp ->
+              is_guaranteed_non_null e2
+          | _ -> false
+        )
+      in
+      if is_sanitizer then node :: acc else acc
+    )
+    in  
   (* This is the version of the implementation that understands SIL's two-step dereference. *)
   let get_crash_nodes ptr_exp =
     L.d_printfln "\n[transformation-log] >> Running get_crash_nodes for pointer: %a" Exp.pp ptr_exp ;
@@ -865,19 +980,21 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
           let instrs = Procdesc.Node.get_instrs node in
           let node_loc = Procdesc.Node.get_loc node in
           let rec is_base_of_dereference e =
-            match (e : Exp.t) with
-            | Var id ->
-                Ident.Set.mem id null_carrying_idents
-            | Lfield ({exp= base_exp}, _, _) | Lindex (base_exp, _) | Cast (_, base_exp) ->
-                is_base_of_dereference base_exp
-            (* Handle pointer arithmetic (p+1) in the usage check *)
-            | BinOp (op, e1, _) -> (
-                match op with
-                | PlusPI | MinusPI -> is_base_of_dereference e1
-                | _ -> false
-              )
-            | _ ->
-                false
+            (* FIX NG-002: Check if the expression IS the pointer we are tracking *)
+            if Exp.equal e ptr_exp then true 
+            else
+              match (e : Exp.t) with
+              | Var id ->
+                  Ident.Set.mem id null_carrying_idents
+              | Lfield ({exp= base_exp}, _, _) | Lindex (base_exp, _) | Cast (_, base_exp) ->
+                  is_base_of_dereference base_exp
+              | BinOp (op, e1, _) -> (
+                  match op with
+                  | PlusPI | MinusPI -> is_base_of_dereference e1
+                  | _ -> false
+                )
+              | _ ->
+                  false
           in
           let has_dereference =
             Instrs.exists instrs ~f:(fun instr ->
@@ -900,11 +1017,30 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
             node :: acc )
           else acc )
     in
-    L.d_printfln "[transformation-log] << Finished get_crash_nodes for %a. Found %d crash nodes."
-      Exp.pp ptr_exp (List.length result_nodes) ;
-    result_nodes
+    (* Strong Update Filtering
+       If a crash node is dominated by a 'Sanitizer' (assignment to known non-null),
+       then the pointer cannot be null at that point. Discard the node. *)
+    let sanitizers = find_sanitizing_definitions proc_desc ptr_exp in
+    
+    let filtered_nodes = 
+      List.filter result_nodes ~f:(fun crash_node ->
+        let is_sanitized = 
+          List.exists sanitizers ~f:(fun sanitizer ->
+            is_dominated_by ~dominator:sanitizer ~node:crash_node idom
+          )
+        in
+        if is_sanitized then (
+          L.d_printfln "[transformation-taint] Dropping node %a: Dominated by Strong Update (Safe Assignment)." 
+            Procdesc.Node.pp crash_node;
+          false
+        ) else true
+      )
     in
 
+    L.d_printfln "[transformation-log] << Finished get_crash_nodes for %a. Found %d nodes (filtered from %d)."
+      Exp.pp ptr_exp (List.length filtered_nodes) (List.length result_nodes);
+    filtered_nodes
+  in
   (*********************************************************************************)
   (* Stage 0: Cluster by Control-Flow Proximity                                  *)
   (*********************************************************************************)
@@ -1154,66 +1290,77 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
         L.d_printfln "\n[transformation-log] STAGE 1.2: Candidate for node at line %d..."
           (Procdesc.Node.get_loc crash_node).line;
 
+        (* --- Definitions moved UP so they are visible --- *)
         (* 1. Check Return Type *)
         let ret_type = Procdesc.get_ret_type proc_desc in
         let is_void = Typ.equal ret_type StdTyp.void in
         let exit_node = Procdesc.get_exit_node proc_desc in
 
-        (* 2. Check if the guard location dominates the exit. 
-           If it does, it means this code block is on the critical path to the exit. 
-           Skipping it in a non-void function implies skipping the return value calculation 
-           or the return statement itself. *)
+        (* 2. Check dominance *)
         let dominates_exit = is_dominated_by ~dominator:start_node ~node:exit_node idom in
 
-        (* 3. Check for "At Start" - Optional if dominator check covers it *)
+        (* 3. Check At Start *)
         let is_at_start = 
            let succs = Procdesc.Node.get_succs start in
            List.exists succs ~f:(fun n -> Procdesc.Node.equal n start_node)
         in
+        (* ------------------------------------------------ *)
 
-(* Check if the pointer is a Formal Parameter. 
-           Evade at the start of the function is ONLY valid for parameters. 
-           We cannot check a local variable before it is defined. *)
-        let is_parameter = 
-          let formals = Procdesc.get_formals proc_desc in
-          let locals = Procdesc.get_locals proc_desc in
-          match all_ptrs_to_guard with
-          | [] -> false
-          | ptr :: _ -> 
-            match ptr with
-            | Exp.Lvar pvar -> 
-                let name = Pvar.get_name pvar in
-                let in_formals = List.exists formals ~f:(fun (mangled, _, _) -> Mangled.equal mangled name) in
-                (* Crucial: If it is in locals, it is NOT a parameter we can check at start *)
-                let in_locals = List.exists locals ~f:(fun (data: ProcAttributes.var_data) -> Mangled.equal data.name name) in
-                in_formals && (not in_locals)
-            | _ -> false
+        (* [FIX NG-010] Syntax Validity Check *)
+        let is_expression_scope =
+          match Procdesc.Node.get_kind start_node with
+          | Prune_node _ -> true
+          | _ -> 
+              (* Heuristic: If succ is Prune, and we are guarding a small slice, it's likely an expression *)
+              let succs = Procdesc.Node.get_succs start_node in
+              List.exists succs ~f:(fun n -> 
+                match Procdesc.Node.get_kind n with Prune_node _ -> true | _ -> false
+              )
         in
 
-        (* Only allow Evade if it's a parameter. 
-           If it's a local (like malloc result) dominating the exit, we currently 
-           don't have a strategy to inject a check mid-function cleanly, 
-           so we fall back to Skip (fragmented) or NoPlan. *)
-        let has_return = scope_contains_return proc_desc idom ipdom_fun start_node end_node in
+        if is_expression_scope then (
+           L.d_printfln "[transformation-validity] REJECTED: Scope at node %a appears to be inside a Condition/Expression." 
+             Procdesc.Node.pp start_node;
+           None
+        ) else (
+            (* Check if the pointer is a Formal Parameter. *)
+            let is_parameter = 
+              let formals = Procdesc.get_formals proc_desc in
+              match all_ptrs_to_guard with
+              | [] -> false
+              | ptr :: _ -> 
+                match ptr with
+                | Exp.Lvar pvar -> 
+                    let name = Pvar.get_name pvar in
+                    List.exists formals ~f:(fun (mangled, _, _) -> Mangled.equal mangled name)
+                | _ -> false
+            in
 
-        if ((dominates_exit && not is_void) || is_at_start) && is_parameter then (
-          (* Case 1: Valid Evade *)
-          L.d_printfln "[transformation-safety] Valid Evade detected for parameter.";
-          let ret_typ_str = Typ.to_string ret_type in
-          let ptr = match all_ptrs_to_guard with [] -> bug.ptr_expr | h::_ -> h in
-          Some (IEvade { proc_start_node = start; pointer_expr = ptr; return_typ_str = ret_typ_str })
-        ) 
-        else if (dominates_exit || has_return) && (not is_void) then (
-          (* Case 2: UNSAFE Skip. 
-             We cannot Evade (not a parameter), but we cannot Skip (non-void return). 
-             We must abort this specific candidate plan. *)
-          L.d_printfln "[transformation-safety] REJECTED: Scope contains return in non-void function, but pointer is local (cannot Evade).";
-          None
-        )
-        else (
-          (* Case 3: Safe Skip *)
-          let refined_ptrs = refine_guard_exprs crash_node all_ptrs_to_guard in
-          Some (ISkip { lca_node= start_node; join_node= end_node; pointer_exprs= refined_ptrs; slice_nodes= [crash_node] }) 
+            let has_return = scope_contains_return proc_desc idom ipdom_fun start_node end_node in
+
+            if ((dominates_exit || has_return) && not is_void && is_parameter) || (is_at_start && is_parameter) then (
+              L.d_printfln "[transformation-safety] Valid Evade detected for parameter.";
+              let ret_typ_str = Typ.to_string ret_type in
+              let ptr = match all_ptrs_to_guard with [] -> bug.ptr_expr | h::_ -> h in
+              Some (IEvade { proc_start_node = start; pointer_expr = ptr; return_typ_str = ret_typ_str })
+            ) 
+            else if (dominates_exit || has_return) && (not is_void) then (
+              L.d_printfln "[transformation-safety] REJECTED: Scope contains return in non-void function, but pointer is local (cannot Evade).";
+              None
+            )
+            else (
+              (* Case 3: Safe Skip *)
+              (* [FIX NG-009] Liveness Check *)
+              let is_safe_liveness = is_safe_skip_for_uninit_vars proc_desc start_node end_node idom ipdom_fun in
+              
+              if is_safe_liveness then
+                let refined_ptrs = refine_guard_exprs crash_node all_ptrs_to_guard in
+                Some (ISkip { lca_node= start_node; join_node= end_node; pointer_exprs= refined_ptrs; slice_nodes= [crash_node] }) 
+              else (
+                 L.d_printfln "[transformation-safety] REJECTED: Skip would leave variables uninitialized.";
+                 None
+              )
+            )
         )
     )
   in
@@ -1342,22 +1489,23 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
                     Option.is_some (has_external_side_effects all_aliases instr) ) ) )
         in
         if is_delta_benign then
-        (* 4. If safe, calculate the imprecision cost and create the new merged plan. *)
-        let nodes_in_merged_scope =
-          count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node:new_lca ~end_node:new_join
-        in
-        let imprecision_cost = nodes_in_merged_scope - List.length merged_slice in
-        let merged_plan =
-          ISkip
-            { lca_node= new_lca
-            ; join_node= new_join
-            ; pointer_exprs= List.dedup_and_sort ~compare:Exp.compare (ptrs1 @ ptrs2)
-            ; slice_nodes= merged_slice }
-        in
+          (* 4. If safe, calculate the imprecision cost and create the new merged plan. *)
+          if is_safe_skip_for_uninit_vars proc_desc new_lca new_join idom ipdom_fun then (
+            let nodes_in_merged_scope =
+              count_nodes_in_scope ~proc_desc ~idom ~ipdom_fun ~start_node:new_lca ~end_node:new_join
+            in
+            let imprecision_cost = nodes_in_merged_scope - List.length merged_slice in
+            let merged_plan =
+              ISkip
+                { lca_node= new_lca
+                ; join_node= new_join
+                ; pointer_exprs= List.dedup_and_sort ~compare:Exp.compare (ptrs1 @ ptrs2)
+                ; slice_nodes= merged_slice }
+            in
 
-        Some (imprecision_cost, merged_plan)
-      else 
-        None )
+            Some (imprecision_cost, merged_plan)
+          ) else None
+        else None )
   | _ ->
       None
 
@@ -1992,7 +2140,7 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
           "[transformation-warning] Planners generated ZERO plans for procedure %a. Logging as NoPlanGenerated."
           Procname.pp (Procdesc.get_proc_name proc_desc) ;
         [ NoPlanGenerated
-            { reason= "All potential crash sites were found to be already syntactically guarded."
+            { reason= "No valid plans remained after filtering"
             ; npe_location= Trace.get_start_location bug.diag_trace
             ; pointer_expr= bug.ptr_expr } ] )
       else (* Success! *)

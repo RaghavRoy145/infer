@@ -1,5 +1,5 @@
 
-In /home/openssl-openssl-3.1.2/apps/lib/opt.c:
+In /home/openssl-openssl-3.0.0/apps/lib/opt.c:
 
 ~~~~~~~~~ In function: opt_ulong ~~~~~~~~~
 Future-condition checking for 'strtoul @656': Failed!
@@ -12,17 +12,17 @@ Future-condition checking for 'strtoul @656': Failed!
  @ line 657 can be inserted with code: if (!(((endptr==value \/ __errno_location__==34) \/ l==0)) /\ endptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/asn1/asn1_gen.c:
+In /home/openssl-openssl-3.0.0/crypto/asn1/asn1_gen.c:
 
 ~~~~~~~~~ In function: parse_tagging ~~~~~~~~~
-Future-condition checking for 'strtoul @353': Failed!
+Future-condition checking for 'strtoul @354': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-!(tag_num<0) /\ .ret=1 /\ eptr=0 /\ deref(eptr)@355 ~~~> (!_(eptr))^*;
+!(tag_num<0) /\ .ret=1 /\ eptr=0 /\ deref(eptr)@356 ~~~> (!_(eptr))^*;
 [Patches]
- @ line 355 can be inserted with code: if (!(tag_num<0) /\ eptr==0){ return; }
+ @ line 356 can be inserted with code: if (!(tag_num<0) /\ eptr==0){ return; }
 
 
 ~~~~~~~~~ In function: bitstr_cb ~~~~~~~~~
@@ -36,7 +36,7 @@ Future-condition checking for 'strtoul @748': Failed!
  @ line 749 can be inserted with code: if (!(bitnum<0) /\ eptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/asn1/asn_mstbl.c:
+In /home/openssl-openssl-3.0.0/crypto/asn1/asn_mstbl.c:
 
 ~~~~~~~~~ In function: do_tcreate ~~~~~~~~~
 Future-condition checking for 'strtoul @76': Failed!
@@ -60,31 +60,31 @@ Future-condition checking for 'strtoul @80': Failed!
  @ line 81 can be inserted with code: if (eptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/http/http_client.c:
+In /home/openssl-openssl-3.0.0/crypto/http/http_client.c:
 
 ~~~~~~~~~ In function: parse_http_line1 ~~~~~~~~~
-Future-condition checking for 'strtoul @437': Failed!
+Future-condition checking for 'strtoul @408': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-!(retcode<400) /\ .ret=retcode /\ end=0 /\ deref(end)@438 ~~~> (!_(end))^*;
+!(retcode<400) /\ .ret=0 /\ end=0 /\ deref(end)@409 ~~~> (!_(end))^*;
 [Patches]
- @ line 438 can be inserted with code: if (!(retcode<400) /\ end==0){ return; }
+ @ line 409 can be inserted with code: if (!(retcode<400) /\ end==0){ return; }
 
 
 ~~~~~~~~~ In function: OSSL_HTTP_REQ_CTX_nbio ~~~~~~~~~
-Future-condition checking for 'strtoul @738': Failed!
+Future-condition checking for 'strtoul @667': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-true /\ line_end=0 /\ deref(line_end)@739 ~~~> (!_(line_end))^*;
+true /\ line_end=0 /\ deref(line_end)@668 ~~~> (!_(line_end))^*;
 [Patches]
- @ line 739 can be inserted with code: if (line_end==0){ return; }
+ @ line 668 can be inserted with code: if (line_end==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/rand/randfile.c:
+In /home/openssl-openssl-3.0.0/crypto/rand/randfile.c:
 
 ~~~~~~~~~ In function: RAND_write_file ~~~~~~~~~
 Future-condition checking for 'open @210': Failed!
@@ -108,20 +108,20 @@ Future-condition checking for 'open @210': Failed!
  @ line 242 can be inserted with code: if ((fd!=-1) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
 
 
-In /home/openssl-openssl-3.1.2/crypto/x509/v3_addr.c:
+In /home/openssl-openssl-3.0.0/crypto/x509/v3_addr.c:
 
 ~~~~~~~~~ In function: v2i_IPAddrBlocks ~~~~~~~~~
-Future-condition checking for 'strtoul @975': Failed!
+Future-condition checking for 'strtoul @942': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-!((safi>255 \/ (t!=char))) /\ !(((t=s_plus_i2 \/ (t!=char)) \/ prefixlen<0)) /\ .ret=addr /\ t=0 /\ deref(t)@977 · deref(s)@1009 · deref(s)@1010 · deref(t)@1022 ~~~> (!_(t))^*;
+!((safi>255 \/ (t!=char))) /\ .ret=addr /\ t=0 /\ deref(t)@944 · deref(s)@976 · deref(s)@977 · deref(t)@988 ~~~> (!_(t))^*;
 [Patches]
- @ line 977 can be inserted with code: if (!((safi>255 \/ (t!=char))) /\ !(((t==s_plus_i2 \/ (t!=char)) \/ prefixlen<0)) /\ t==0){ return; }
+ @ line 944 can be inserted with code: if (!((safi>255 \/ (t!=char))) /\ t==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/apps/lib/opt.c:
+In /home/openssl-openssl-3.0.0/apps/lib/opt.c:
 
 ~~~~~~~~~ In function: opt_ulong ~~~~~~~~~
 Future-condition checking for 'strtoul @656': Failed!
@@ -134,17 +134,17 @@ Future-condition checking for 'strtoul @656': Failed!
  @ line 657 can be inserted with code: if (!(((endptr==value \/ __errno_location__==34) \/ l==0)) /\ endptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/asn1/asn1_gen.c:
+In /home/openssl-openssl-3.0.0/crypto/asn1/asn1_gen.c:
 
 ~~~~~~~~~ In function: parse_tagging ~~~~~~~~~
-Future-condition checking for 'strtoul @353': Failed!
+Future-condition checking for 'strtoul @354': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-!(tag_num<0) /\ .ret=1 /\ eptr=0 /\ deref(eptr)@355 ~~~> (!_(eptr))^*;
+!(tag_num<0) /\ .ret=1 /\ eptr=0 /\ deref(eptr)@356 ~~~> (!_(eptr))^*;
 [Patches]
- @ line 355 can be inserted with code: if (!(tag_num<0) /\ eptr==0){ return; }
+ @ line 356 can be inserted with code: if (!(tag_num<0) /\ eptr==0){ return; }
 
 
 ~~~~~~~~~ In function: bitstr_cb ~~~~~~~~~
@@ -158,7 +158,7 @@ Future-condition checking for 'strtoul @748': Failed!
  @ line 749 can be inserted with code: if (!(bitnum<0) /\ eptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/asn1/asn_mstbl.c:
+In /home/openssl-openssl-3.0.0/crypto/asn1/asn_mstbl.c:
 
 ~~~~~~~~~ In function: do_tcreate ~~~~~~~~~
 Future-condition checking for 'strtoul @76': Failed!
@@ -182,31 +182,31 @@ Future-condition checking for 'strtoul @80': Failed!
  @ line 81 can be inserted with code: if (eptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/http/http_client.c:
+In /home/openssl-openssl-3.0.0/crypto/http/http_client.c:
 
 ~~~~~~~~~ In function: parse_http_line1 ~~~~~~~~~
-Future-condition checking for 'strtoul @437': Failed!
+Future-condition checking for 'strtoul @408': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-!(retcode<400) /\ .ret=retcode /\ end=0 /\ deref(end)@438 ~~~> (!_(end))^*;
+!(retcode<400) /\ .ret=0 /\ end=0 /\ deref(end)@409 ~~~> (!_(end))^*;
 [Patches]
- @ line 438 can be inserted with code: if (!(retcode<400) /\ end==0){ return; }
+ @ line 409 can be inserted with code: if (!(retcode<400) /\ end==0){ return; }
 
 
 ~~~~~~~~~ In function: OSSL_HTTP_REQ_CTX_nbio ~~~~~~~~~
-Future-condition checking for 'strtoul @738': Failed!
+Future-condition checking for 'strtoul @667': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-true /\ line_end=0 /\ deref(line_end)@739 ~~~> (!_(line_end))^*;
+true /\ line_end=0 /\ deref(line_end)@668 ~~~> (!_(line_end))^*;
 [Patches]
- @ line 739 can be inserted with code: if (line_end==0){ return; }
+ @ line 668 can be inserted with code: if (line_end==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/crypto/rand/randfile.c:
+In /home/openssl-openssl-3.0.0/crypto/rand/randfile.c:
 
 ~~~~~~~~~ In function: RAND_write_file ~~~~~~~~~
 Future-condition checking for 'open @210': Failed!
@@ -230,20 +230,20 @@ Future-condition checking for 'open @210': Failed!
  @ line 242 can be inserted with code: if ((fd!=-1) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
 
 
-In /home/openssl-openssl-3.1.2/crypto/x509/v3_addr.c:
+In /home/openssl-openssl-3.0.0/crypto/x509/v3_addr.c:
 
 ~~~~~~~~~ In function: v2i_IPAddrBlocks ~~~~~~~~~
-Future-condition checking for 'strtoul @975': Failed!
+Future-condition checking for 'strtoul @942': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-!((safi>255 \/ (t!=char))) /\ !(((t=s_plus_i2 \/ (t!=char)) \/ prefixlen<0)) /\ .ret=addr /\ t=0 /\ deref(t)@977 · deref(s)@1009 · deref(s)@1010 · deref(t)@1022 ~~~> (!_(t))^*;
+!((safi>255 \/ (t!=char))) /\ .ret=addr /\ t=0 /\ deref(t)@944 · deref(s)@976 · deref(s)@977 · deref(t)@988 ~~~> (!_(t))^*;
 [Patches]
- @ line 977 can be inserted with code: if (!((safi>255 \/ (t!=char))) /\ !(((t==s_plus_i2 \/ (t!=char)) \/ prefixlen<0)) /\ t==0){ return; }
+ @ line 944 can be inserted with code: if (!((safi>255 \/ (t!=char))) /\ t==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/apps/passwd.c:
+In /home/openssl-openssl-3.0.0/apps/passwd.c:
 
 ~~~~~~~~~ In function: shacrypt ~~~~~~~~~
 Future-condition checking for 'strtoul @550': Failed!
@@ -256,20 +256,20 @@ true /\ endp=0 /\ deref(endp)@551 · RET(NULL)@561 ~~~> (!_(endp))^*;
  @ line 551 can be inserted with code: if (endp==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/apps/rehash.c:
+In /home/openssl-openssl-3.0.0/apps/rehash.c:
 
 ~~~~~~~~~ In function: handle_symlink ~~~~~~~~~
-Future-condition checking for 'strtoul @222': Failed!
+Future-condition checking for 'strtoul @216': Failed!
 
 <======[Bidirectional Bug Localization & Possible Proof Repairs]======>
 
 [Repair Options]
-.ret=r2 /\ endptr=0 /\ deref(endptr)@223 ~~~> (!_(endptr))^*;
+.ret=r2 /\ endptr=0 /\ deref(endptr)@217 ~~~> (!_(endptr))^*;
 [Patches]
- @ line 223 can be inserted with code: if (endptr==0){ return; }
+ @ line 217 can be inserted with code: if (endptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -282,7 +282,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -295,7 +295,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -308,7 +308,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -321,7 +321,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -334,7 +334,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -347,7 +347,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -360,7 +360,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -373,7 +373,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -386,7 +386,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -399,7 +399,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -412,7 +412,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
+In /home/openssl-openssl-3.0.0/fuzz/test-corpus.c:
 
 ~~~~~~~~~ In function: main ~~~~~~~~~
 Future-condition checking for 'malloc @79': Failed!
@@ -425,20 +425,7 @@ pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
  @ line 98 can be inserted with code: if (pathname==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/fuzz/test-corpus.c:
-
-~~~~~~~~~ In function: main ~~~~~~~~~
-Future-condition checking for 'malloc @79': Failed!
-
-<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
-
-[Repair Options]
-pathname=0 /\ free(pathname)@98 · RET()@103 ~~~> (!_(pathname))^*;
-[Patches]
- @ line 98 can be inserted with code: if (pathname==0){ return; }
-
-
-In /home/openssl-openssl-3.1.2/test/bio_prefix_text.c:
+In /home/openssl-openssl-3.0.0/test/bio_prefix_text.c:
 
 ~~~~~~~~~ In function: setup ~~~~~~~~~
 Future-condition checking for 'strtoul @202': Failed!
@@ -473,20 +460,7 @@ Future-condition checking for 'strtoul @229': Failed!
  @ line 230 can be inserted with code: if (!(idx>=amount) /\ endptr==0){ return; }
 
 
-In /home/openssl-openssl-3.1.2/test/evp_test.c:
-
-~~~~~~~~~ In function: pderive_test_parse ~~~~~~~~~
-Future-condition checking for 'strtoul @1968': Failed!
-
-<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
-
-[Repair Options]
-.ret=1 /\ endptr=0 /\ deref(endptr)@1970 ~~~> (!_(endptr))^*;
-[Patches]
- @ line 1970 can be inserted with code: if (endptr==0){ return; }
-
-
-In /home/openssl-openssl-3.1.2/test/p_test.c:
+In /home/openssl-openssl-3.0.0/test/p_test.c:
 
 ~~~~~~~~~ In function: p_test_init ~~~~~~~~~
 Future-condition checking for 'malloc @269': Failed!
@@ -510,7 +484,7 @@ Future-condition checking for 'malloc @269': Failed!
  @ line 283 can be inserted with code: if ((ctx!=0)){free(ctx); }
 
 
-In /home/openssl-openssl-3.1.2/test/p_test.c:
+In /home/openssl-openssl-3.0.0/test/p_test.c:
 
 ~~~~~~~~~ In function: p_test_init ~~~~~~~~~
 Future-condition checking for 'malloc @269': Failed!
@@ -532,17 +506,4 @@ Future-condition checking for 'malloc @269': Failed!
 (ctx!=0) /\ RET()@283 ~~~> (!free(ctx))^* · free(ctx) · (_)^*;
 [Patches]
  @ line 283 can be inserted with code: if ((ctx!=0)){free(ctx); }
-
-
-In /home/openssl-openssl-3.1.2/test/timing_load_creds.c:
-
-~~~~~~~~~ In function: main ~~~~~~~~~
-Future-condition checking for 'fopen @151': Failed!
-
-<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
-
-[Repair Options]
-true /\ fp>0 /\ (fp!=stdout) /\ (fp!=stdin) /\ RET()@154 ~~~> (!fclose(fp))^* · fclose(fp) · (_)^*;
-[Patches]
- @ line 154 can be inserted with code: if (fp>0 /\ (fp!=stdout) /\ (fp!=stdin)){fclose(fp); }
 

@@ -7,10 +7,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 OUTPUT_DIR="${SCRIPT_DIR}/openssl1.0-analysis-results/${TIMESTAMP}"
 
-OPENSSL_VERSION="OpenSSL_1_0_2u"
+OPENSSL_VERSION="OpenSSL_1_0_1h"
 OPENSSL_DIR="openssl-${OPENSSL_VERSION}"
 
-echo "=== ProveNFix OpenSSL 1.0 Analysis ==="
+echo "=== ProveNFix OpenSSL 1.0.1h Analysis ==="
 echo "Using existing spec_openssl.c on main branch"
 echo ""
 echo "OpenSSL version: ${OPENSSL_VERSION}"
@@ -59,7 +59,7 @@ docker exec "$CONTAINER_NAME" bash -c '
 
 # Download OpenSSL 1.0
 echo ""
-echo "[5/6] Downloading and configuring OpenSSL 1.0.2u..."
+echo "[5/6] Downloading and configuring OpenSSL 1.0.1h..."
 docker exec "$CONTAINER_NAME" bash -c "
     cd /home
     if [ ! -d \"${OPENSSL_DIR}\" ]; then

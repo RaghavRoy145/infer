@@ -628,6 +628,45 @@ void comma_op_bad() {
     int x = (p = NULL, *p); // Crash
 }
 
+/* 
+======================================================================= 
+   GROUP 8: EVADE STRATEGY TRIGGERS (Parameters & Return Safety)
+   Note: We force manifest errors inside the function by checking for NULL
+   and then dereferencing it. This makes the bug local to the function
+   while keeping the variable as a parameter.
+======================================================================= 
+*/
+
+// VARIATION 1: Bad Error Handling (Dereference in error path)
+// Expectation: EVADE. 
+// Logic: "If p is null, crash". This is a manifest bug in this function.
+// Since 'p' is a parameter, Evade (Early Return) is the valid fix.
+int test_evade_simple(int* p) {
+    if (p == NULL) {
+        return *p; // Crash
+    }
+    return 0;
+}
+
+// VARIATION 2: Arithmetic on Parameter with Bad Check
+// Expectation: EVADE.
+int test_evade_arith(int* arr) {
+    if (arr == NULL) {
+        return arr[5]; // Crash
+    }
+    return 0;
+}
+
+// VARIATION 3: Void Function Bad Logic
+// Expectation: EVADE.
+void test_evade_void(int* p) {
+    if (p == NULL) {
+        *p = 10; // Crash
+        return;
+    }
+    *p = 20;
+}
+
 int main() {
     return 0;
 }

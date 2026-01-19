@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "str_copy",
+    "procedure_id": "str_copy{5fae1e16a66fac1fe4d42c089f9596df}",
+    "source_file": "crypto/conf/conf_def.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 18,
+      "end_node": 18,
+      "start_line": 639,
+      "end_line": 639,
+      "guard_with_pointer": "to",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 7,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

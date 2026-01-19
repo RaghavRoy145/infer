@@ -1,0 +1,119 @@
+[
+  {
+    "procedure_name": "do_multi",
+    "procedure_id": "do_multi{a55e992c6c1997f74359583d864eee80}",
+    "source_file": "apps/speed.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 147,
+      "end_node": 142,
+      "start_line": 2670,
+      "end_line": 2687,
+      "guard_with_pointer": "n",
+      "metrics": {
+        "cost_l_imprecision": 1,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 3,
+        "true_slice_size": 30,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "do_multi",
+    "procedure_id": "do_multi{a55e992c6c1997f74359583d864eee80}",
+    "source_file": "apps/speed.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 129,
+      "end_node": 129,
+      "start_line": 2705,
+      "end_line": 2705,
+      "guard_with_pointer": "n",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 30,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "do_multi",
+    "procedure_id": "do_multi{a55e992c6c1997f74359583d864eee80}",
+    "source_file": "apps/speed.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 124,
+      "end_node": 124,
+      "start_line": 2709,
+      "end_line": 2709,
+      "guard_with_pointer": "n",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 30,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "do_multi",
+    "procedure_id": "do_multi{a55e992c6c1997f74359583d864eee80}",
+    "source_file": "apps/speed.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 123,
+      "end_node": 123,
+      "start_line": 2833,
+      "end_line": 2833,
+      "guard_with_pointer": "n",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 30,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "do_multi",
+    "procedure_id": "do_multi{a55e992c6c1997f74359583d864eee80}",
+    "source_file": "apps/speed.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "apps/speed.c",
+      "npe_line": 2675,
+      "original_pointer": "null"
+    }
+  },
+  {
+    "procedure_name": "do_multi",
+    "procedure_id": "do_multi{a55e992c6c1997f74359583d864eee80}",
+    "source_file": "apps/speed.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 11,
+      "end_node": 11,
+      "start_line": 2836,
+      "end_line": 2836,
+      "guard_with_pointer": "f",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

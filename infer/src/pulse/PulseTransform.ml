@@ -89,7 +89,6 @@ type 'payload bug_info = {
   av_opt: AbstractValue.t option;
 }
 
-
 (** {2. Low-Level & CFG Utilities} *)
 
 (** A collection of modules to compute dominators and post-dominators on the Infer CFG.
@@ -1624,7 +1623,21 @@ let plan_skip_or_evade_transformation proc_desc (bug : 'payload bug_info) all_pt
   
   let selected_plans =
     let evades = List.filter final_intermediate_plans ~f:(function IEvade _ -> true | _ -> false) in
-    if not (List.is_empty evades) then evades else final_intermediate_plans
+    
+    (* New Deduplication Logic *)
+    let unique_evades = 
+      List.dedup_and_sort evades ~compare:(fun p1 p2 ->
+        match (p1, p2) with
+        | (IEvade {proc_start_node=n1}, IEvade {proc_start_node=n2}) -> 
+            Procdesc.Node.compare n1 n2
+        | _ -> 0
+      )
+    in
+
+    let skips = List.filter final_intermediate_plans ~f:(function ISkip _ -> true | _ -> false) in
+    
+    (* Combine unique evades with skips *)
+    if not (List.is_empty unique_evades) then unique_evades @ skips else skips
   in
   
   let final_guard_count = List.length final_intermediate_plans in

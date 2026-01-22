@@ -2070,6 +2070,35 @@ let equal_transformation_plan p1 p2 =
   | Replace r1, Replace r2 -> Procdesc.Node.equal r1.def_site_node r2.def_site_node
   | _, _ -> false
 
+(** Checks if the given Pvar has a pointer type (Tptr) in the procedure's locals or formals. 
+    This prevents the tool from generating guards for integer loop iterators 
+    (which Pulse reports as NULLPTR when they equal 0). *)
+let is_pointer_variable proc_desc pvar =
+  let name = Pvar.get_name pvar in
+  let locals = Procdesc.get_locals proc_desc in
+  let formals = Procdesc.get_formals proc_desc in
+  
+  (* Check Locals *)
+  let local_typ = 
+    List.find_map locals ~f:(fun (data: ProcAttributes.var_data) -> 
+      if Mangled.equal data.name name then Some data.typ else None)
+  in
+  
+  match local_typ with
+  | Some t -> Typ.is_pointer t
+  | None ->
+      (* Check Formals *)
+      let formal_typ = 
+        List.find_map formals ~f:(fun (m, t, _) -> 
+          if Mangled.equal m name then Some t else None)
+      in
+      match formal_typ with
+      | Some t -> Typ.is_pointer t
+      | None -> 
+          (* Variable not found in standard scope (globals? ghosts?). 
+             Default to FALSE to be safe and avoid patching non-pointers. *)
+          false
+
 let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
   (* clear_cache_if_new_proc (Procdesc.get_proc_name proc_desc); *)
 
@@ -2109,10 +2138,12 @@ let plan_and_log_if_unique ~proc_desc ~(bug : 'payload bug_info) =
        in_locals || in_formals
     in
 
+    let is_ptr pvar = is_pointer_variable proc_desc pvar in
+
     List.filter all_ptrs_to_guard_raw ~f:(fun ptr ->
       match ptr with
       | Exp.Lvar pvar ->
-          if is_visible pvar then true
+          if is_visible pvar && is_ptr pvar then true
           else (
             L.d_printfln "[transformation-scope] Dropping invisible pointer %a (not found in locals or formals of %a)" 
               (Pvar.pp Pp.text) pvar Procname.pp (Procdesc.get_proc_name proc_desc);

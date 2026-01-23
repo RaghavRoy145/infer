@@ -1,0 +1,61 @@
+libgnu_a-ioctl.o: ioctl.c \
+  /home/ragroy01/repos/infer/infer/bin/../lib/clang_wrappers/global_defines.h \
+  ../config.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/stdbool.h \
+  assert.h /usr/include/assert.h /usr/include/features.h \
+  /usr/include/features-time64.h \
+  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+  /usr/include/x86_64-linux-gnu/bits/timesize.h \
+  /usr/include/stdc-predef.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+  /usr/include/x86_64-linux-gnu/bits/long-double.h \
+  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h ../confpaths.h \
+  /usr/include/paths.h sys/ioctl.h \
+  /usr/include/x86_64-linux-gnu/sys/ioctl.h \
+  /usr/include/x86_64-linux-gnu/bits/ioctls.h \
+  /usr/include/x86_64-linux-gnu/asm/ioctls.h \
+  /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
+  /usr/include/x86_64-linux-gnu/asm/ioctl.h \
+  /usr/include/asm-generic/ioctl.h \
+  /usr/include/x86_64-linux-gnu/bits/ioctl-types.h \
+  /usr/include/x86_64-linux-gnu/sys/ttydefaults.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/stdarg.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_header_macro.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg___gnuc_va_list.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_va_list.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_va_arg.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg___va_copy.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_va_copy.h
+/home/ragroy01/repos/infer/infer/bin/../lib/clang_wrappers/global_defines.h:
+../config.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/stdbool.h:
+assert.h:
+/usr/include/assert.h:
+/usr/include/features.h:
+/usr/include/features-time64.h:
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
+/usr/include/stdc-predef.h:
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+../confpaths.h:
+/usr/include/paths.h:
+sys/ioctl.h:
+/usr/include/x86_64-linux-gnu/sys/ioctl.h:
+/usr/include/x86_64-linux-gnu/bits/ioctls.h:
+/usr/include/x86_64-linux-gnu/asm/ioctls.h:
+/usr/include/asm-generic/ioctls.h:
+/usr/include/linux/ioctl.h:
+/usr/include/x86_64-linux-gnu/asm/ioctl.h:
+/usr/include/asm-generic/ioctl.h:
+/usr/include/x86_64-linux-gnu/bits/ioctl-types.h:
+/usr/include/x86_64-linux-gnu/sys/ttydefaults.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/stdarg.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_header_macro.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg___gnuc_va_list.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_va_list.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_va_arg.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg___va_copy.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/__stdarg_va_copy.h:

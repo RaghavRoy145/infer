@@ -1,0 +1,26 @@
+[
+  {
+    "procedure_name": "do_query",
+    "procedure_id": "do_query",
+    "source_file": "whois/whois.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "whois/whois.c",
+      "npe_line": 484,
+      "original_pointer": "fi"
+    }
+  },
+  {
+    "procedure_name": "query_crsnic",
+    "procedure_id": "query_crsnic",
+    "source_file": "whois/whois.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "whois/whois.c",
+      "npe_line": 554,
+      "original_pointer": "fi"
+    }
+  }
+]

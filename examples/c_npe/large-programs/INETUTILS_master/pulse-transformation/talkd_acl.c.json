@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "open_users_acl",
+    "procedure_id": "open_users_acl{fd97100f7b40121daf845a3f62c2db1f}",
+    "source_file": "talkd/acl.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "talkd/acl.c",
+      "npe_line": 334,
+      "original_pointer": "n$3"
+    }
+  }
+]

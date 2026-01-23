@@ -1,0 +1,21 @@
+Description:
+isfinite macro: test for finite value (zero, subnormal, or normal, and not infinite or NaN).
+
+Files:
+
+Depends-on:
+isfinite-no-c++
+
+configure.ac:
+gl_MATH_MODULE_INDICATOR([isfinite])
+
+Makefile.am:
+
+Include:
+<math.h>
+
+License:
+LGPL
+
+Maintainer:
+Ben Pfaff

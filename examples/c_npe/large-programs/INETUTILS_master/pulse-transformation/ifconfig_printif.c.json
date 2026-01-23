@@ -1,0 +1,163 @@
+[
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 72,
+      "end_node": 71,
+      "start_line": 1104,
+      "end_line": 1105,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 2,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 37,
+      "end_node": 37,
+      "start_line": 1154,
+      "end_line": 1154,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 36,
+      "end_node": 36,
+      "start_line": 1113,
+      "end_line": 1113,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 19,
+      "end_node": 19,
+      "start_line": 1096,
+      "end_line": 1096,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 1159,
+      "end_line": 1159,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 66,
+      "end_node": 66,
+      "start_line": 1133,
+      "end_line": 1133,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "print_interfaceX",
+    "procedure_id": "print_interfaceX",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 62,
+      "end_node": 60,
+      "start_line": 1137,
+      "end_line": 1139,
+      "guard_with_pointer": "p",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 3,
+        "true_slice_size": 37,
+        "initial_candidate_plans": 10,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "put_addr",
+    "procedure_id": "put_addr",
+    "source_file": "ifconfig/printif.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 22,
+      "def_site_line": 286,
+      "target_pvar": "p",
+      "pvar_type": "char*",
+      "reuse_candidate": "addr",
+      "metrics": { "cost_rep_modification": 1, "total_aliases": 1 }
+    }
+  }
+]

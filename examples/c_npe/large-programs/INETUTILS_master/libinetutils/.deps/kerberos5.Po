@@ -1,0 +1,29 @@
+kerberos5.o: kerberos5.c \
+  /home/ragroy01/repos/infer/infer/bin/../lib/clang_wrappers/global_defines.h \
+  ../config.h \
+  /home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/stdbool.h \
+  ../lib/assert.h /usr/include/assert.h /usr/include/features.h \
+  /usr/include/features-time64.h \
+  /usr/include/x86_64-linux-gnu/bits/wordsize.h \
+  /usr/include/x86_64-linux-gnu/bits/timesize.h \
+  /usr/include/stdc-predef.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
+  /usr/include/x86_64-linux-gnu/bits/long-double.h \
+  /usr/include/x86_64-linux-gnu/gnu/stubs.h \
+  /usr/include/x86_64-linux-gnu/gnu/stubs-64.h ../confpaths.h \
+  /usr/include/paths.h
+/home/ragroy01/repos/infer/infer/bin/../lib/clang_wrappers/global_defines.h:
+../config.h:
+/home/ragroy01/repos/infer/facebook-clang-plugins/clang/install/lib/clang/20/include/stdbool.h:
+../lib/assert.h:
+/usr/include/assert.h:
+/usr/include/features.h:
+/usr/include/features-time64.h:
+/usr/include/x86_64-linux-gnu/bits/wordsize.h:
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
+/usr/include/stdc-predef.h:
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
+/usr/include/x86_64-linux-gnu/gnu/stubs.h:
+/usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
+../confpaths.h:
+/usr/include/paths.h:

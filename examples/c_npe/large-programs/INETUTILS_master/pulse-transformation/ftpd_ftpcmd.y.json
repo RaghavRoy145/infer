@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "copy",
+    "procedure_id": "copy{d3e2651894f0ae6b04eec0af6f87dcf1}",
+    "source_file": "ftpd/ftpcmd.y",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "ftpd/ftpcmd.y",
+      "npe_line": 1874,
+      "original_pointer": "p"
+    }
+  }
+]

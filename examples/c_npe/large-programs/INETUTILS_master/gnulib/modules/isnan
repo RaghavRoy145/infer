@@ -1,0 +1,21 @@
+Description:
+isnan macro: test for NaN value.
+
+Files:
+
+Depends-on:
+isnan-no-c++
+
+configure.ac:
+gl_MATH_MODULE_INDICATOR([isnan])
+
+Makefile.am:
+
+Include:
+<math.h>
+
+License:
+LGPL
+
+Maintainer:
+Ben Pfaff

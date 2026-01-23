@@ -1,0 +1,191 @@
+[
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 4,
+      "start_line": 2039,
+      "end_line": 2039,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 12,
+      "end_node": 12,
+      "start_line": 2032,
+      "end_line": 2032,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 14,
+      "end_node": 14,
+      "start_line": 2024,
+      "end_line": 2024,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 21,
+      "end_node": 21,
+      "start_line": 2018,
+      "end_line": 2018,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 32,
+      "end_node": 32,
+      "start_line": 2009,
+      "end_line": 2009,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 98,
+      "end_node": 98,
+      "start_line": 1943,
+      "end_line": 1943,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 109,
+      "end_node": 109,
+      "start_line": 1928,
+      "end_line": 1928,
+      "guard_with_pointer": "cline",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 7,
+        "nodes_in_scope": 1,
+        "true_slice_size": 45,
+        "initial_candidate_plans": 7,
+        "total_aliases": 5
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 145,
+      "end_node": 142,
+      "start_line": 1878,
+      "end_line": 1884,
+      "guard_with_pointer": "f",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 4,
+        "true_slice_size": 9,
+        "initial_candidate_plans": 7,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "load_conffile",
+    "procedure_id": "load_conffile{81e7dda7874c22c56514d4a9f44a2cde}",
+    "source_file": "src/syslogd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 12,
+      "end_node": 10,
+      "start_line": 2032,
+      "end_line": 2034,
+      "guard_with_pointer": "f",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 3,
+        "true_slice_size": 9,
+        "initial_candidate_plans": 7,
+        "total_aliases": 1
+      }
+    }
+  }
+]

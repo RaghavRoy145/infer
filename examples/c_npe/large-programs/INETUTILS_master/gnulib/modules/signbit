@@ -1,0 +1,21 @@
+Description:
+signbit() macro: Determine the sign bit of a floating-point number.
+
+Files:
+
+Depends-on:
+signbit-no-c++
+
+configure.ac:
+gl_MATH_MODULE_INDICATOR([signbit])
+
+Makefile.am:
+
+Include:
+<math.h>
+
+License:
+LGPLv2+
+
+Maintainer:
+all

@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "suboption",
+    "procedure_id": "suboption",
+    "source_file": "telnetd/state.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "telnetd/state.c",
+      "npe_line": 1200,
+      "original_pointer": "h"
+    }
+  }
+]

@@ -1,0 +1,23 @@
+[
+  {
+    "procedure_name": "getstr",
+    "procedure_id": "getstr",
+    "source_file": "src/rexecd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 721,
+      "end_line": 721,
+      "guard_with_pointer": "buf",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 16,
+        "initial_candidate_plans": 1,
+        "total_aliases": 2
+      }
+    }
+  }
+]

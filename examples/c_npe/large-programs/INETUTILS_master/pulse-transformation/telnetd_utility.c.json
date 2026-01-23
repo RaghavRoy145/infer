@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "expand_line",
+    "procedure_id": "expand_line",
+    "source_file": "telnetd/utility.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "telnetd/utility.c",
+      "npe_line": 1914,
+      "original_pointer": "h"
+    }
+  }
+]

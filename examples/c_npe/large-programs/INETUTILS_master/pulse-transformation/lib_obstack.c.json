@@ -1,0 +1,56 @@
+[
+  {
+    "procedure_name": "rpl_obstack_newchunk",
+    "procedure_id": "rpl_obstack_newchunk",
+    "source_file": "lib/obstack.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 18,
+      "end_node": 16,
+      "start_line": 217,
+      "end_line": 219,
+      "guard_with_pointer": "new_chunk",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 3,
+        "true_slice_size": 9,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "rpl_obstack_newchunk",
+    "procedure_id": "rpl_obstack_newchunk",
+    "source_file": "lib/obstack.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 13,
+      "end_node": 13,
+      "start_line": 239,
+      "end_line": 239,
+      "guard_with_pointer": "new_chunk",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 9,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "_obstack_begin_worker",
+    "procedure_id": "_obstack_begin_worker{aa30d9ea3a30b7fbcb2beb597693ac5e}",
+    "source_file": "lib/obstack.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "lib/obstack.c",
+      "npe_line": 145,
+      "original_pointer": "chunk"
+    }
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "procedure_name": "_help",
+    "procedure_id": "_help{d994c7001d4327edf23b7c629d1bffe1}",
+    "source_file": "lib/argp-help.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 99,
+      "end_node": 97,
+      "start_line": 1743,
+      "end_line": 1746,
+      "guard_with_pointer": "hol",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 3,
+        "nodes_in_scope": 3,
+        "true_slice_size": 11,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "_help",
+    "procedure_id": "_help{d994c7001d4327edf23b7c629d1bffe1}",
+    "source_file": "lib/argp-help.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 77,
+      "end_node": 77,
+      "start_line": 1788,
+      "end_line": 1788,
+      "guard_with_pointer": "hol",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 3,
+        "nodes_in_scope": 1,
+        "true_slice_size": 11,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "_help",
+    "procedure_id": "_help{d994c7001d4327edf23b7c629d1bffe1}",
+    "source_file": "lib/argp-help.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 36,
+      "end_node": 36,
+      "start_line": 1824,
+      "end_line": 1824,
+      "guard_with_pointer": "hol",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 3,
+        "nodes_in_scope": 1,
+        "true_slice_size": 11,
+        "initial_candidate_plans": 5,
+        "total_aliases": 1
+      }
+    }
+  }
+]

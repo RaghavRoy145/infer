@@ -1,0 +1,65 @@
+[
+  {
+    "procedure_name": "env_init",
+    "procedure_id": "env_init",
+    "source_file": "telnet/commands.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 24,
+      "end_node": 24,
+      "start_line": 1916,
+      "end_line": 1916,
+      "guard_with_pointer": "hostname",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "env_init",
+    "procedure_id": "env_init",
+    "source_file": "telnet/commands.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 27,
+      "end_node": 27,
+      "start_line": 1911,
+      "end_line": 1911,
+      "guard_with_pointer": "hostname",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "env_init",
+    "procedure_id": "env_init",
+    "source_file": "telnet/commands.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 27,
+      "end_node": 27,
+      "start_line": 1911,
+      "end_line": 1911,
+      "guard_with_pointer": "cp2",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  }
+]

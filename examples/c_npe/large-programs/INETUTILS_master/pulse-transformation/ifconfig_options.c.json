@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "parse_opt_set_default_format_from_file",
+    "procedure_id": "parse_opt_set_default_format_from_file",
+    "source_file": "ifconfig/options.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "ifconfig/options.c",
+      "npe_line": 458,
+      "original_pointer": "h"
+    }
+  }
+]

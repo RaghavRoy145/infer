@@ -1,0 +1,86 @@
+[
+  {
+    "procedure_name": "printtime",
+    "procedure_id": "printtime{7b13ea2c74f3522409d5293111e37268}",
+    "source_file": "libls/print.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 13,
+      "end_node": 13,
+      "start_line": 281,
+      "end_line": 281,
+      "guard_with_pointer": "longstring",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "printtime",
+    "procedure_id": "printtime{7b13ea2c74f3522409d5293111e37268}",
+    "source_file": "libls/print.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 24,
+      "end_node": 24,
+      "start_line": 284,
+      "end_line": 284,
+      "guard_with_pointer": "longstring",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "printtime",
+    "procedure_id": "printtime{7b13ea2c74f3522409d5293111e37268}",
+    "source_file": "libls/print.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 31,
+      "end_node": 31,
+      "start_line": 289,
+      "end_line": 289,
+      "guard_with_pointer": "longstring",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "printtime",
+    "procedure_id": "printtime{7b13ea2c74f3522409d5293111e37268}",
+    "source_file": "libls/print.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 39,
+      "end_node": 39,
+      "start_line": 276,
+      "end_line": 276,
+      "guard_with_pointer": "longstring",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  }
+]

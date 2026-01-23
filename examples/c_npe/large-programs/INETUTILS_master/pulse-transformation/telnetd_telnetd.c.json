@@ -1,0 +1,44 @@
+[
+  {
+    "procedure_name": "print_hostinfo",
+    "procedure_id": "print_hostinfo",
+    "source_file": "telnetd/telnetd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 3,
+      "start_line": 786,
+      "end_line": 787,
+      "guard_with_pointer": "str",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 2,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 3,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "print_hostinfo",
+    "procedure_id": "print_hostinfo",
+    "source_file": "telnetd/telnetd.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 9,
+      "end_node": 9,
+      "start_line": 785,
+      "end_line": 785,
+      "guard_with_pointer": "str",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 4,
+        "initial_candidate_plans": 3,
+        "total_aliases": 1
+      }
+    }
+  }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "procedure_name": "mbsnlen",
+    "procedure_id": "mbsnlen",
+    "source_file": "lib/mbsnlen.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "lib/mbsnlen.c",
+      "npe_line": 48,
+      "original_pointer": "state"
+    }
+  },
+  {
+    "procedure_name": "mbsnlen",
+    "procedure_id": "mbsnlen",
+    "source_file": "lib/mbsnlen.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 21,
+      "end_node": 21,
+      "start_line": 50,
+      "end_line": 50,
+      "guard_with_pointer": "string",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 1,
+        "initial_candidate_plans": 1,
+        "total_aliases": 2
+      }
+    }
+  }
+]

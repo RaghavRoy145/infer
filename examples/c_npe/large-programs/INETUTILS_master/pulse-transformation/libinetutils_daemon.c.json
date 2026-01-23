@@ -1,0 +1,14 @@
+[
+  {
+    "procedure_name": "waitdaemon",
+    "procedure_id": "waitdaemon",
+    "source_file": "libinetutils/daemon.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "libinetutils/daemon.c",
+      "npe_line": 184,
+      "original_pointer": "i"
+    }
+  }
+]

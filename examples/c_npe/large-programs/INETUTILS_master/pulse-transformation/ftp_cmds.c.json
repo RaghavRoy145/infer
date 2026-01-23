@@ -1,0 +1,98 @@
+[
+  {
+    "procedure_name": "shell",
+    "procedure_id": "shell",
+    "source_file": "ftp/cmds.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "ftp/cmds.c",
+      "npe_line": 1667,
+      "original_pointer": "pid"
+    }
+  },
+  {
+    "procedure_name": "put",
+    "procedure_id": "put",
+    "source_file": "ftp/cmds.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 3,
+      "end_node": 3,
+      "start_line": 601,
+      "end_line": 601,
+      "guard_with_pointer": "new",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 12,
+        "initial_candidate_plans": 4,
+        "total_aliases": 3
+      }
+    }
+  },
+  {
+    "procedure_name": "put",
+    "procedure_id": "put",
+    "source_file": "ftp/cmds.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 14,
+      "end_node": 14,
+      "start_line": 598,
+      "end_line": 598,
+      "guard_with_pointer": "new",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 12,
+        "initial_candidate_plans": 4,
+        "total_aliases": 3
+      }
+    }
+  },
+  {
+    "procedure_name": "put",
+    "procedure_id": "put",
+    "source_file": "ftp/cmds.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 25,
+      "end_node": 25,
+      "start_line": 594,
+      "end_line": 594,
+      "guard_with_pointer": "new",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 12,
+        "initial_candidate_plans": 4,
+        "total_aliases": 3
+      }
+    }
+  },
+  {
+    "procedure_name": "put",
+    "procedure_id": "put",
+    "source_file": "ftp/cmds.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 33,
+      "end_node": 33,
+      "start_line": 586,
+      "end_line": 586,
+      "guard_with_pointer": "new",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 12,
+        "initial_candidate_plans": 4,
+        "total_aliases": 3
+      }
+    }
+  }
+]

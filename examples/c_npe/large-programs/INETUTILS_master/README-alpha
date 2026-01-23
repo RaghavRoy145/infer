@@ -1,0 +1,113 @@
+This is the GNU Inetutils package.
+Copyright (C) 1999-2026 Free Software Foundation, Inc.
+See end of file for copying conditions.
+
+This document describes the actions needed to build GNU inetutils from
+a pre-release tarball or sources checked out from the version control.
+
+* Introduction
+
+This is a *pre-release* version, and not ready for production use yet.
+If you are taking source from version control, you will need to have
+several special tools to help contribute.  See the section `Building',
+below, for the detailed instructions on how to build the package.
+
+Please, note that the accompanying documentation may be inaccurate or
+incomplete.  See ChangeLog for the list of recent changes.
+
+Report bugs to <bug-inetutils@gnu.org>
+
+If you see a problem that you've already reported, feel free to
+re-report it -- it won't bother us to get a reminder.  Besides, the
+more messages we get regarding a particular problem the sooner it'll
+be fixed -- usually.  If you sent a complete patch and nobody applied
+it or got back to you, please let us know!
+
+The source `tests/identify.c' should compile in all interesting build
+environments, even without configuration.  The resulting executables
+display some features known to have produced malfunctions in
+portability.  Conveying some selected part of that output could help
+us in locating the cause of compiling errors, or of missing
+functionality in the built programs.
+
+* Checking Out the Sources
+
+The following instructions apply if you wish to obtain sources from
+the version control repository.
+
+To download the source tree from the repository, issue the following
+command:
+
+  git clone https://git.savannah.gnu.org/git/inetutils.git
+
+This will give you read-only access.  If you think you need write
+access, contact the mailing list.
+
+* Prerequisites
+
+You need the following packages, we don't make any extra effort to
+accommodate older versions of these packages, so please make sure that
+you have the latest stable version.
+
+- Shell <https://www.gnu.org/software/bash/>
+- Git <https://git-scm.com/>
+- Make <https://www.gnu.org/software/make/>
+- C compiler <https://www.gnu.org/software/gcc/>
+- Autoconf <https://www.gnu.org/software/autoconf/>
+- Automake <https://www.gnu.org/software/automake/>
+- Bison <https://www.gnu.org/software/bison/>
+- Gnulib <https://www.gnu.org/software/gnulib/>
+- M4 <https://www.gnu.org/software/m4/>
+- Texinfo <https://www.gnu.org/software/texinfo>
+- help2man <https://www.gnu.org/software/help2man>
+- ncurses <https://www.gnu.org/software/ncurses/> (optional, for talk)
+- Texlive & epsf <http://www.tug.org/texlive/> (for 'make dist')
+
+* Building
+
+1. Change to the source tree directory
+
+   cd inetutils
+
+2. Run
+
+   ./bootstrap
+
+For more information about `bootstrap', run `bootstrap --help', or see
+the gnulib documentation.
+
+3. Configure
+
+   ./configure
+   make
+
+See the file INSTALL for standard instructions.
+
+Before running "make dist" in a freshly bootstrapped directory, you
+need to have run "make" at least once to create the binaries which are
+needed by help2man when generating man pages.
+
+See INSTALL and README for the detailed instructions.
+
+* Development
+
+If you are looking for something to hack on, please take a look at the
+TODO file in the repository, or in our bug tracker
+<https://savannah.gnu.org/bugs/?group=inetutils>.
+
+You can track the development process through the
+<commit-inetutils@gnu.org> mailing list.  This is a medium volume
+moderated list.
+
+* Copyright information
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+
+Local Variables:
+mode: outline
+paragraph-separate: "[	 ]*$"
+version-control: never
+End:

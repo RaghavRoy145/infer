@@ -1,0 +1,86 @@
+[
+  {
+    "procedure_name": "hookup",
+    "procedure_id": "hookup",
+    "source_file": "ftp/ftp.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 309,
+      "end_node": 309,
+      "start_line": 177,
+      "end_line": 177,
+      "guard_with_pointer": "rhost",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 7,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "hookup",
+    "procedure_id": "hookup",
+    "source_file": "ftp/ftp.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 316,
+      "end_node": 316,
+      "start_line": 173,
+      "end_line": 173,
+      "guard_with_pointer": "rhost",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 7,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "hookup",
+    "procedure_id": "hookup",
+    "source_file": "ftp/ftp.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 321,
+      "end_node": 321,
+      "start_line": 166,
+      "end_line": 166,
+      "guard_with_pointer": "rhost",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 7,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "hookup",
+    "procedure_id": "hookup",
+    "source_file": "ftp/ftp.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 341,
+      "end_node": 341,
+      "start_line": 164,
+      "end_line": 164,
+      "guard_with_pointer": "rhost",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 4,
+        "nodes_in_scope": 1,
+        "true_slice_size": 7,
+        "initial_candidate_plans": 4,
+        "total_aliases": 1
+      }
+    }
+  }
+]

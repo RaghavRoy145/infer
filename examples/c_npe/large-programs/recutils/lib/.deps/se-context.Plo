@@ -1,0 +1,6 @@
+se-context.lo: se-context.c \
+  /home/ragroy01/repos/infer/infer/bin/../lib/clang_wrappers/global_defines.h \
+  ../src/config.h /usr/include/selinux/context.h
+/home/ragroy01/repos/infer/infer/bin/../lib/clang_wrappers/global_defines.h:
+../src/config.h:
+/usr/include/selinux/context.h:

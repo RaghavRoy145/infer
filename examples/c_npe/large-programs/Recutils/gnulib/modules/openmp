@@ -1,0 +1,22 @@
+Description:
+Detection of OpenMP support.
+
+Files:
+
+Depends-on:
+
+configure.ac:
+AC_OPENMP
+
+Makefile.am:
+
+Include:
+
+Link:
+$(OPENMP_CFLAGS)
+
+License:
+LGPL
+
+Maintainer:
+all

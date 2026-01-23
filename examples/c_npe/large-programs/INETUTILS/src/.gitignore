@@ -1,0 +1,16 @@
+dnsdomainname
+hostname
+inetd
+logger
+rcp
+rexec
+rexecd
+rlogin
+rlogind
+rsh
+rshd
+syslogd
+tftp
+tftpd
+traceroute
+uucpd

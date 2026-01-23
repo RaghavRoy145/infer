@@ -55,14 +55,14 @@ docker exec "$CONTAINER_NAME" bash -c '
 '
 
 echo ""
-echo "[5/7] Downloading and configuring OpenSSL 3.1.2..."
+echo "[5/7] Downloading and configuring OpenSSL 3.0.0..."
 docker exec "$CONTAINER_NAME" bash -c '
     cd /home
-    if [ ! -d "openssl-openssl-3.1.2" ]; then
-        curl -L https://github.com/openssl/openssl/archive/refs/tags/openssl-3.1.2.tar.gz -o openssl-3.1.2.tar.gz
-        tar -xzf openssl-3.1.2.tar.gz
+    if [ ! -d "openssl-openssl-3.0.0" ]; then
+        curl -L https://github.com/openssl/openssl/archive/refs/tags/openssl-3.0.0.tar.gz -o openssl-3.0.0.tar.gz
+        tar -xzf openssl-3.0.0.tar.gz
     fi
-    cd openssl-openssl-3.1.2
+    cd openssl-openssl-3.0.0
     ./Configure --prefix=/usr/local/ssl --openssldir=/usr/local/ssl \
         "-Wl,-rpath,\$(LIBRPATH)"
 '
@@ -70,7 +70,7 @@ docker exec "$CONTAINER_NAME" bash -c '
 echo ""
 echo "[6/7] Copying spec_openssl.c and running TempFix..."
 docker exec "$CONTAINER_NAME" bash -c '
-    cd /home/openssl-openssl-3.1.2
+    cd /home/openssl-openssl-3.0.0
     cp /home/infer_TempFix/spec_openssl.c spec.c
     /home/infer_TempFix/infer/bin/tempFix
 '
@@ -79,8 +79,8 @@ echo ""
 echo "[7/7] Copying results to host..."
 docker cp "${CONTAINER_NAME}:/home/infer_TempFix/TempFix-out/detail.txt" "${OUTPUT_DIR}/detail.txt" 2>/dev/null || echo "Warning: detail.txt not found"
 docker cp "${CONTAINER_NAME}:/home/infer_TempFix/TempFix-out/report.csv" "${OUTPUT_DIR}/report.csv" 2>/dev/null || echo "Warning: report.csv not found"
-docker cp "${CONTAINER_NAME}:/home/openssl-openssl-3.1.2/spec.c" "${OUTPUT_DIR}/spec.c" 2>/dev/null || echo "Warning: spec.c not found"
-docker cp "${CONTAINER_NAME}:/home/openssl-openssl-3.1.2/infer-out/logs" "${OUTPUT_DIR}/infer-logs.txt" 2>/dev/null || true
+docker cp "${CONTAINER_NAME}:/home/openssl-openssl-3.0.0/spec.c" "${OUTPUT_DIR}/spec.c" 2>/dev/null || echo "Warning: spec.c not found"
+docker cp "${CONTAINER_NAME}:/home/openssl-openssl-3.0.0/infer-out/logs" "${OUTPUT_DIR}/infer-logs.txt" 2>/dev/null || true
 
 echo ""
 echo "=== Analysis Complete ==="
@@ -128,5 +128,5 @@ echo ""
 read -p "Attach to container now? (y/n): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    docker exec -it "$CONTAINER_NAME" bash -c 'cd /home/openssl-openssl-3.1.2 && bash'
+    docker exec -it "$CONTAINER_NAME" bash -c 'cd /home/openssl-openssl-3.0.0 && bash'
 fi

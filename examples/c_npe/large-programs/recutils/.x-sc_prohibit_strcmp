@@ -1,6 +1,0 @@
-lib/*
-src/*
-utils/*
-m4/*
-torture/*
-bash/testrec.c

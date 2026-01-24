@@ -63,19 +63,33 @@ docker exec "$CONTAINER_NAME" bash -c '
 
 # Download and configure inetutils
 echo ""
-echo "[6/7] Downloading and configuring inetutils (version 1.9.4)..."
+echo "[6/7] Downloading and configuring inetutils (tag inetutils-1_9_4)..."
 docker exec "$CONTAINER_NAME" bash -c '
     cd /home
     if [ ! -d "inetutils" ]; then
         git clone https://git.savannah.gnu.org/git/inetutils.git
     fi
     cd inetutils
-    git checkout v1.9.4
+    if ! git checkout inetutils-1_9_4; then
+        echo "ERROR: Failed to checkout tag inetutils-1_9_4"
+        echo "Available tags:"
+        git tag -l | head -20
+        exit 1
+    fi
     echo "Checked out version: $(git describe --tags 2>/dev/null || git rev-parse --short HEAD)"
+
+    # Pre-clone gnulib at a version compatible with inetutils 1.9.4 (Dec 2014)
+    if [ ! -d "gnulib" ]; then
+        git clone https://git.savannah.gnu.org/git/gnulib.git gnulib
+    fi
+    cd gnulib
+    git checkout $(git rev-list -n 1 --before="2015-01-01" master)
+    echo "Using gnulib at: $(git rev-parse --short HEAD) ($(git log -1 --format=%ci))"
+    cd ..
 
     # inetutils uses gnulib and requires bootstrap
     if [ -f bootstrap ]; then
-        ./bootstrap
+        ./bootstrap --gnulib-srcdir=gnulib
     else
         autoreconf -fi
     fi
@@ -100,8 +114,18 @@ docker exec "$CONTAINER_NAME" bash -c '
     # Clear old results
     rm -f /home/infer_TempFix/TempFix-out/detail.txt
     rm -f /home/infer_TempFix/TempFix-out/report.csv
+'
+START_TIME=$(date +%s)
+docker exec "$CONTAINER_NAME" bash -c '
+    cd /home/inetutils
     /home/infer_TempFix/infer/bin/tempFix
 '
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
+echo "start_time=$(date -d @${START_TIME} '+%Y-%m-%d %H:%M:%S')" > "${OUTPUT_DIR}/metadata.txt"
+echo "end_time=$(date -d @${END_TIME} '+%Y-%m-%d %H:%M:%S')" >> "${OUTPUT_DIR}/metadata.txt"
+echo "analysis_seconds=${ELAPSED}" >> "${OUTPUT_DIR}/metadata.txt"
+echo ">>> ProveNFix analysis took ${ELAPSED} seconds"
 
 # Save results
 docker cp "${CONTAINER_NAME}:/home/infer_TempFix/TempFix-out/detail.txt" "${OUTPUT_DIR}/detail.txt" 2>/dev/null || true

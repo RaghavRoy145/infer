@@ -1,0 +1,840 @@
+
+In /home/inetutils/lib/argp-help.c:
+
+~~~~~~~~~ In function: make_hol ~~~~~~~~~
+Future-condition checking for 'malloc @440': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=hol /\ hol=0 /\ deref(hol)@444 · deref(hol)@445 ~~~> (!_(hol))^*;
+[Patches]
+ @ line 444 can be inserted with code: if (hol==0){ return; }
+
+
+In /home/inetutils/lib/localcharset.c:
+
+~~~~~~~~~ In function: get_charset_aliases ~~~~~~~~~
+Future-condition checking for 'malloc @225': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(res_ptr!=0) /\ RET(cp)@350 ~~~> (!free(res_ptr))^* · free(res_ptr) · (_)^*;
+[Patches]
+ @ line 350 can be inserted with code: if ((res_ptr!=0)){free(res_ptr); }
+
+
+In /home/inetutils/lib/tempname.c:
+
+~~~~~~~~~ In function: gen_tempname ~~~~~~~~~
+Future-condition checking for 'open @262': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin) /\ emp ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 192 can be inserted with code: if (fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
+
+
+In /home/inetutils/lib/glob.c:
+
+~~~~~~~~~ In function: glob_in_dir ~~~~~~~~~
+Future-condition checking for 'malloc @1464': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(names.name.cur!=0) /\ RET(result)@1550 ~~~> (!free(names.name.cur))^* · free(names.name.cur) · (_)^*;
+[Patches]
+ @ line 1550 can be inserted with code: if ((names.name.cur!=0)){free(names.name.cur); }
+
+
+~~~~~~~~~ In function: glob_in_dir ~~~~~~~~~
+Future-condition checking for 'malloc @1448': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(names.name.cur!=0) /\ RET(result)@1550 ~~~> (!free(names.name.cur))^* · free(names.name.cur) · (_)^*;
+[Patches]
+ @ line 1550 can be inserted with code: if ((names.name.cur!=0)){free(names.name.cur); }
+
+
+In /home/inetutils/libinetutils/argcv.c:
+
+~~~~~~~~~ In function: argcv_string ~~~~~~~~~
+Future-condition checking for 'malloc @149': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buffer!=0) /\ RET()@175 ~~~> (!free(buffer))^* · free(buffer) · (_)^*;
+[Patches]
+ @ line 175 can be inserted with code: if ((buffer!=0)){free(buffer); }
+
+
+In /home/inetutils/libinetutils/daemon.c:
+
+~~~~~~~~~ In function: waitdaemon ~~~~~~~~~
+Future-condition checking for 'open @189': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fd!=-1) /\ !(fd>2) /\ .ret=ppid /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin) /\ RET(ppid)@199 ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 199 can be inserted with code: if ((fd!=-1) /\ !(fd>2) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
+
+
+In /home/inetutils/libinetutils/ttymsg.c:
+
+~~~~~~~~~ In function: ttymsg ~~~~~~~~~
+Future-condition checking for 'malloc @87': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(device!=0) /\ RET()@197 ~~~> (!free(device))^* · free(device) · (_)^*;
+[Patches]
+ @ line 197 can be inserted with code: if ((device!=0)){free(device); }
+
+
+~~~~~~~~~ In function: ttymsg ~~~~~~~~~
+Future-condition checking for 'malloc @87': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(device!=0) /\ RET()@155 ~~~> (!free(device))^* · free(device) · (_)^*;
+[Patches]
+ @ line 155 can be inserted with code: if ((device!=0)){free(device); }
+
+
+~~~~~~~~~ In function: ttymsg ~~~~~~~~~
+Future-condition checking for 'malloc @87': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(device!=0) /\ RET(errbuf)@102 ~~~> (!free(device))^* · free(device) · (_)^*;
+[Patches]
+ @ line 102 can be inserted with code: if ((device!=0)){free(device); }
+
+
+In /home/inetutils/src/logger.c:
+
+~~~~~~~~~ In function: decode ~~~~~~~~~
+Future-condition checking for 'strtoul @83': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(n>1016) /\ .ret=n /\ p=0 /\ deref(p)@93 ~~~> (!_(p))^*;
+[Patches]
+ @ line 93 can be inserted with code: if (!(n>1016) /\ p==0){ return; }
+
+
+In /home/inetutils/src/rcp.c:
+
+~~~~~~~~~ In function: rsource ~~~~~~~~~
+Future-condition checking for 'malloc @850': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+buf=0 /\ free(buf)@862 ~~~> (!_(buf))^*;
+[Patches]
+ @ line 858 can be inserted with code: if (buf==0){ return; }
+
+
+~~~~~~~~~ In function: sink ~~~~~~~~~
+Future-condition checking for 'open @1058': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ofd<0) /\ ofd>0 /\ (ofd!=stdout) /\ (ofd!=stdin) /\ RET()@1086 ~~~> (!close(ofd))^* · close(ofd) · (_)^*;
+[Patches]
+ @ line 1086 can be inserted with code: if (!(ofd<0) /\ ofd>0 /\ (ofd!=stdout) /\ (ofd!=stdin)){close(ofd); }
+
+
+In /home/inetutils/src/tftp.c:
+
+~~~~~~~~~ In function: put ~~~~~~~~~
+Future-condition checking for 'open @627': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(fd<0) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin) /\ emp ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 633 can be inserted with code: if (!(fd<0) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
+
+
+~~~~~~~~~ In function: put ~~~~~~~~~
+Future-condition checking for 'open @607': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(fd<0) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin) /\ RET()@618 ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 618 can be inserted with code: if (!(fd<0) /\ fd>0 /\ (fd!=stdout) /\ (fd!=stdin)){close(fd); }
+
+
+In /home/inetutils/src/inetd.c:
+
+~~~~~~~~~ In function: getconfigent ~~~~~~~~~
+Future-condition checking for 'strtoul @1160': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=r27 /\ q=0 /\ deref(q)@1161 ~~~> (!_(q))^*;
+[Patches]
+ @ line 1161 can be inserted with code: if (q==0){ return; }
+
+
+In /home/inetutils/src/rlogind.c:
+
+~~~~~~~~~ In function: getstr ~~~~~~~~~
+Future-condition checking for 'malloc @1797': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buf!=0) /\ RET()@1816 ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 1816 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+In /home/inetutils/src/syslogd.c:
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 849 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 847 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 845 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 810 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 835 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 815 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 820 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 802 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @601': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fdarray!=0) /\ emp ~~~> (!free(fdarray))^* · free(fdarray) · (_)^*;
+[Patches]
+ @ line 766 can be inserted with code: if ((fdarray!=0)){free(fdarray); }
+
+
+~~~~~~~~~ In function: add_funix ~~~~~~~~~
+Future-condition checking for 'realloc @861': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+funix=0 /\ deref(funix)@865 · deref(funix)@866 ~~~> (!_(funix))^*;
+[Patches]
+ @ line 865 can be inserted with code: if (funix==0){ return; }
+
+
+~~~~~~~~~ In function: create_inet_socket ~~~~~~~~~
+Future-condition checking for 'socket @936': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(fd<0) /\ fd>0 /\ RET()@969 ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 969 can be inserted with code: if (!(fd<0) /\ fd>0){close(fd); }
+
+
+~~~~~~~~~ In function: create_inet_socket ~~~~~~~~~
+Future-condition checking for 'socket @936': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(fd<0) /\ fd>0 /\ RET()@967 ~~~> (!close(fd))^* · close(fd) · (_)^*;
+[Patches]
+ @ line 967 can be inserted with code: if (!(fd<0) /\ fd>0){close(fd); }
+
+
+~~~~~~~~~ In function: crunch_list ~~~~~~~~~
+Future-condition checking for 'malloc @1018': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+oldlist.count=0 /\ deref(oldlist.count)@1023 · deref(oldlist)@1027 · deref(oldlist)@1028 · strcpy(oldlist.count)@1031 ~~~> (!_(oldlist.count))^*;
+[Patches]
+ @ line 1019 can be inserted with code: if (oldlist.count==0){ return; }
+
+
+~~~~~~~~~ In function: crunch_list ~~~~~~~~~
+Future-condition checking for 'realloc @1005': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+oldlist=0 /\ deref(oldlist)@1018 · deref(oldlist)@1019 · deref(oldlist.count)@1023 · deref(oldlist)@1027 · deref(oldlist)@1028 · strcpy(oldlist.count)@1031 · deref(oldlist)@1033 ~~~> (!_(oldlist))^*;
+[Patches]
+ @ line 1018 can be inserted with code: if (oldlist==0){ return; }
+
+
+~~~~~~~~~ In function: fprintlog ~~~~~~~~~
+Future-condition checking for 'socket @1480': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(temp_finet<0) /\ temp_finet>0 /\ emp ~~~> (!close(temp_finet))^* · close(temp_finet) · (_)^*;
+[Patches]
+ @ line 1593 can be inserted with code: if (!(temp_finet<0) /\ temp_finet>0){close(temp_finet); }
+
+
+~~~~~~~~~ In function: fprintlog ~~~~~~~~~
+Future-condition checking for 'socket @1480': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(temp_finet<0) /\ temp_finet>0 /\ emp ~~~> (!close(temp_finet))^* · close(temp_finet) · (_)^*;
+[Patches]
+ @ line 1594 can be inserted with code: if (!(temp_finet<0) /\ temp_finet>0){close(temp_finet); }
+
+
+~~~~~~~~~ In function: load_confdir ~~~~~~~~~
+Future-condition checking for 'opendir @2037': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(dir!=0) /\ .ret=0 /\ dir>0 /\ RET()@2052 ~~~> (!closedir(dir))^* · closedir(dir) · (_)^*;
+[Patches]
+ @ line 2052 can be inserted with code: if ((dir!=0) /\ dir>0){closedir(dir); }
+
+
+~~~~~~~~~ In function: cfline ~~~~~~~~~
+Future-condition checking for 'malloc @2436': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ f.f_un.f_user.f_unames.i=0 /\ deref(f.f_un.f_user.f_unames.i)@2440 ~~~> (!_(f.f_un.f_user.f_unames.i))^*;
+[Patches]
+ @ line 2437 can be inserted with code: if (f.f_un.f_user.f_unames.i==0){ return; }
+
+
+~~~~~~~~~ In function: cfline ~~~~~~~~~
+Future-condition checking for 'malloc @2431': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ f.f_un.f_user.f_unames=0 /\ deref(f.f_un.f_user.f_unames)@2436 · deref(f.f_un.f_user.f_unames)@2437 ~~~> (!_(f.f_un.f_user.f_unames))^*;
+[Patches]
+ @ line 2434 can be inserted with code: if (f.f_un.f_user.f_unames==0){ return; }
+
+
+In /home/inetutils/src/tftpd.c:
+
+~~~~~~~~~ In function: validate_access ~~~~~~~~~
+Future-condition checking for 'malloc @605': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(pathname!=0) /\ RET(err)@620 ~~~> (!free(pathname))^* · free(pathname) · (_)^*;
+[Patches]
+ @ line 620 can be inserted with code: if ((pathname!=0)){free(pathname); }
+
+
+In /home/inetutils/telnet/telnet.c:
+
+~~~~~~~~~ In function: mklist ~~~~~~~~~
+Future-condition checking for 'malloc @656': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(argv!=0) /\ RET(unknown)@751 ~~~> (!free(argv))^* · free(argv) · (_)^*;
+[Patches]
+ @ line 751 can be inserted with code: if ((argv!=0)){free(argv); }
+
+
+In /home/inetutils/telnetd/telnetd.c:
+
+~~~~~~~~~ In function: print_hostinfo ~~~~~~~~~
+Future-condition checking for 'malloc @758': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+im=0 /\ free(im)@770 ~~~> (!_(im))^*;
+[Patches]
+ @ line 770 can be inserted with code: if (im==0){ return; }
+
+
+In /home/inetutils/ftp/cmds.c:
+
+~~~~~~~~~ In function: remglob ~~~~~~~~~
+Future-condition checking for 'malloc @1088': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buf!=0) /\ emp ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 1107 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+~~~~~~~~~ In function: remglob ~~~~~~~~~
+Future-condition checking for 'fopen @1078': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(ftemp!=0) /\ (buf!=0) /\ ftemp>0 /\ (ftemp!=stdout) /\ (ftemp!=stdin) /\ emp ~~~> (!fclose(ftemp))^* · fclose(ftemp) · (_)^*;
+[Patches]
+ @ line 1107 can be inserted with code: if ((ftemp!=0) /\ (buf!=0) /\ ftemp>0 /\ (ftemp!=stdout) /\ (ftemp!=stdin)){fclose(ftemp); }
+
+
+~~~~~~~~~ In function: remglob ~~~~~~~~~
+Future-condition checking for 'fopen @1078': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(ftemp!=0) /\ (buf!=0) /\ .ret=buf /\ ftemp>0 /\ (ftemp!=stdout) /\ (ftemp!=stdin) /\ RET(buf)@1110 ~~~> (!fclose(ftemp))^* · fclose(ftemp) · (_)^*;
+[Patches]
+ @ line 1110 can be inserted with code: if ((ftemp!=0) /\ (buf!=0) /\ ftemp>0 /\ (ftemp!=stdout) /\ (ftemp!=stdin)){fclose(ftemp); }
+
+
+~~~~~~~~~ In function: remglob ~~~~~~~~~
+Future-condition checking for 'fopen @1078': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(ftemp!=0) /\ buf=0 /\ .ret=0 /\ ftemp>0 /\ (ftemp!=stdout) /\ (ftemp!=stdin) /\ RET()@1096 ~~~> (!fclose(ftemp))^* · fclose(ftemp) · (_)^*;
+[Patches]
+ @ line 1096 can be inserted with code: if ((ftemp!=0) /\ buf==0 /\ ftemp>0 /\ (ftemp!=stdout) /\ (ftemp!=stdin)){fclose(ftemp); }
+
+
+~~~~~~~~~ In function: cp_subst ~~~~~~~~~
+Future-condition checking for 'realloc @2337': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+.ret=1 /\ buf_p=0 /\ deref(buf_p)@2338 ~~~> (!_(buf_p))^*;
+[Patches]
+ @ line 2338 can be inserted with code: if (buf_p==0){ return; }
+
+
+In /home/inetutils/ftp/ftp.c:
+
+~~~~~~~~~ In function: sendrequest ~~~~~~~~~
+Future-condition checking for 'malloc @754': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buf!=0) /\ RET()@855 ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 855 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+~~~~~~~~~ In function: sendrequest ~~~~~~~~~
+Future-condition checking for 'fopen @659': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fin!=0) /\ fin>0 /\ (fin!=stdout) /\ (fin!=stdin) /\ RET()@855 ~~~> (!fclose(fin))^* · fclose(fin) · (_)^*;
+[Patches]
+ @ line 855 can be inserted with code: if ((fin!=0) /\ fin>0 /\ (fin!=stdout) /\ (fin!=stdin)){fclose(fin); }
+
+
+~~~~~~~~~ In function: recvrequest ~~~~~~~~~
+Future-condition checking for 'malloc @1018': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buf!=0) /\ RET()@1182 ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 1182 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+~~~~~~~~~ In function: recvrequest ~~~~~~~~~
+Future-condition checking for 'malloc @1018': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buf!=0) /\ RET()@1039 ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 1039 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+~~~~~~~~~ In function: recvrequest ~~~~~~~~~
+Future-condition checking for 'malloc @1018': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(buf!=0) /\ RET()@1114 ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 1114 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+~~~~~~~~~ In function: recvrequest ~~~~~~~~~
+Future-condition checking for 'fopen @1005': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((fout=0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin) /\ RET()@1182 ~~~> (!fclose(fout))^* · fclose(fout) · (_)^*;
+[Patches]
+ @ line 1182 can be inserted with code: if (!((fout==0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin)){fclose(fout); }
+
+
+~~~~~~~~~ In function: recvrequest ~~~~~~~~~
+Future-condition checking for 'fopen @1005': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((fout=0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin) /\ RET()@1039 ~~~> (!fclose(fout))^* · fclose(fout) · (_)^*;
+[Patches]
+ @ line 1039 can be inserted with code: if (!((fout==0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin)){fclose(fout); }
+
+
+~~~~~~~~~ In function: recvrequest ~~~~~~~~~
+Future-condition checking for 'fopen @1005': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((fout=0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin) /\ RET()@1114 ~~~> (!fclose(fout))^* · fclose(fout) · (_)^*;
+[Patches]
+ @ line 1114 can be inserted with code: if (!((fout==0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin)){fclose(fout); }
+
+
+~~~~~~~~~ In function: gunique ~~~~~~~~~
+Future-condition checking for 'malloc @1916': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(new!=0) /\ emp ~~~> (!free(new))^* · free(new) · (_)^*;
+[Patches]
+ @ line 1936 can be inserted with code: if ((new!=0)){free(new); }
+
+
+~~~~~~~~~ In function: gunique ~~~~~~~~~
+Future-condition checking for 'malloc @1916': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(new!=0) /\ RET()@1947 ~~~> (!free(new))^* · free(new) · (_)^*;
+[Patches]
+ @ line 1947 can be inserted with code: if ((new!=0)){free(new); }
+
+
+~~~~~~~~~ In function: gunique ~~~~~~~~~
+Future-condition checking for 'malloc @1916': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(new!=0) /\ RET(NULL)@1933 ~~~> (!free(new))^* · free(new) · (_)^*;
+[Patches]
+ @ line 1933 can be inserted with code: if ((new!=0)){free(new); }
+
+
+In /home/inetutils/ftpd/ftpd.c:
+
+~~~~~~~~~ In function: sgetsave ~~~~~~~~~
+Future-condition checking for 'malloc @652': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+string=0 /\ memcpy(string)@659 ~~~> (!_(string))^*;
+[Patches]
+ @ line 659 can be inserted with code: if (string==0){ return; }
+
+
+~~~~~~~~~ In function: store ~~~~~~~~~
+Future-condition checking for 'fopen @1078': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!((fout=0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin) /\ emp ~~~> (!fclose(fout))^* · fclose(fout) · (_)^*;
+[Patches]
+ @ line 1139 can be inserted with code: if (!((fout==0 \/ fstat_CallExpr fileno (fout) _st_<0)) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin)){fclose(fout); }
+
+
+~~~~~~~~~ In function: store ~~~~~~~~~
+Future-condition checking for 'fopen @1078': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fout=0 \/ fstat_CallExpr fileno (fout) _st_<0) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin) /\ RET()@1084 ~~~> (!fclose(fout))^* · fclose(fout) · (_)^*;
+[Patches]
+ @ line 1084 can be inserted with code: if ((fout==0 \/ fstat_CallExpr fileno (fout) _st_<0) /\ fout>0 /\ (fout!=stdout) /\ (fout!=stdin)){fclose(fout); }
+
+
+~~~~~~~~~ In function: getdatasock ~~~~~~~~~
+Future-condition checking for 'socket @1155': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(s<0) /\ s>0 /\ RET()@1193 ~~~> (!close(s))^* · close(s) · (_)^*;
+[Patches]
+ @ line 1193 can be inserted with code: if (!(s<0) /\ s>0){close(s); }
+
+
+~~~~~~~~~ In function: getdatasock ~~~~~~~~~
+Future-condition checking for 'socket @1155': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(s<0) /\ s>0 /\ RET()@1209 ~~~> (!close(s))^* · close(s) · (_)^*;
+[Patches]
+ @ line 1209 can be inserted with code: if (!(s<0) /\ s>0){close(s); }
+
+
+~~~~~~~~~ In function: receive_data ~~~~~~~~~
+Future-condition checking for 'malloc @1500': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ (buf!=0) /\ emp ~~~> (!free(buf))^* · free(buf) · (_)^*;
+[Patches]
+ @ line 1483 can be inserted with code: if ((buf!=0)){free(buf); }
+
+
+~~~~~~~~~ In function: gunique ~~~~~~~~~
+Future-condition checking for 'malloc @2087': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(string!=0) /\ RET(NULL)@2102 ~~~> (!free(string))^* · free(string) · (_)^*;
+[Patches]
+ @ line 2102 can be inserted with code: if ((string!=0)){free(string); }
+
+
+In /home/inetutils/ftpd/server_mode.c:
+
+~~~~~~~~~ In function: server_mode ~~~~~~~~~
+Future-condition checking for 'socket @156': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ctl_sock<0) /\ (pid_fp!=0) /\ .ret=fd /\ ctl_sock>0 /\ RET(fd)@245 ~~~> (!close(ctl_sock))^* · close(ctl_sock) · (_)^*;
+[Patches]
+ @ line 245 can be inserted with code: if (!(ctl_sock<0) /\ (pid_fp!=0) /\ ctl_sock>0){close(ctl_sock); }
+
+
+~~~~~~~~~ In function: server_mode ~~~~~~~~~
+Future-condition checking for 'socket @156': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+!(ctl_sock<0) /\ .ret=-1 /\ ctl_sock>0 /\ RET()@201 ~~~> (!close(ctl_sock))^* · close(ctl_sock) · (_)^*;
+[Patches]
+ @ line 201 can be inserted with code: if (!(ctl_sock<0) /\ ctl_sock>0){close(ctl_sock); }
+
+
+In /home/inetutils/talkd/acl.c:
+
+~~~~~~~~~ In function: read_acl ~~~~~~~~~
+Future-condition checking for 'malloc @169': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(acl!=0) /\ RET()@185 ~~~> (!free(acl))^* · free(acl) · (_)^*;
+[Patches]
+ @ line 185 can be inserted with code: if ((acl!=0)){free(acl); }
+
+
+~~~~~~~~~ In function: read_acl ~~~~~~~~~
+Future-condition checking for 'malloc @169': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(acl!=0) /\ RET()@179 ~~~> (!free(acl))^* · free(acl) · (_)^*;
+[Patches]
+ @ line 179 can be inserted with code: if ((acl!=0)){free(acl); }
+
+
+~~~~~~~~~ In function: read_acl ~~~~~~~~~
+Future-condition checking for 'fopen @142': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(fp!=0) /\ acl=0 /\ fp>0 /\ (fp!=stdout) /\ (fp!=stdin) /\ RET()@273 ~~~> (!fclose(fp))^* · fclose(fp) · (_)^*;
+[Patches]
+ @ line 273 can be inserted with code: if ((fp!=0) /\ acl==0 /\ fp>0 /\ (fp!=stdout) /\ (fp!=stdin)){fclose(fp); }
+
+
+~~~~~~~~~ In function: open_users_acl ~~~~~~~~~
+Future-condition checking for 'malloc @306': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(filename!=0) /\ RET(NULL)@323 ~~~> (!free(filename))^* · free(filename) · (_)^*;
+[Patches]
+ @ line 323 can be inserted with code: if ((filename!=0)){free(filename); }
+
+
+In /home/inetutils/ping/ping_common.c:
+
+~~~~~~~~~ In function: ping_cvt_number ~~~~~~~~~
+Future-condition checking for 'strtoul @49': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+(n!=0) /\ .ret=n /\ p=0 /\ deref(p)@50 ~~~> (!_(p))^*;
+[Patches]
+ @ line 50 can be inserted with code: if ((n!=0) /\ p==0){ return; }
+
+
+In /home/inetutils/ifconfig/options.c:
+
+~~~~~~~~~ In function: parse_opt_new_ifs ~~~~~~~~~
+Future-condition checking for 'realloc @299': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+ifs=0 /\ deref(ifs)@303 ~~~> (!_(ifs))^*;
+[Patches]
+ @ line 303 can be inserted with code: if (ifs==0){ return; }
+
+
+~~~~~~~~~ In function: parse_cmdline ~~~~~~~~~
+Future-condition checking for 'realloc @651': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+ifs=0 /\ deref(ifs)@655 ~~~> (!_(ifs))^*;
+[Patches]
+ @ line 655 can be inserted with code: if (ifs==0){ return; }
+
+
+In /home/inetutils/ifconfig/printif.c:
+
+~~~~~~~~~ In function: fh_rep ~~~~~~~~~
+Future-condition checking for 'strtoul @462': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+true /\ p=0 /\ deref(p)@463 ~~~> (!_(p))^*;
+[Patches]
+ @ line 463 can be inserted with code: if (p==0){ return; }
+

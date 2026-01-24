@@ -2,6 +2,7 @@
 
 int main() {
     int *x = (int*) malloc(sizeof(int));
-    *x = 42;
+    if (x != NULL) *x = 42;
+    free(x);
     return 0;
 }

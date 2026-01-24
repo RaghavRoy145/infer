@@ -1,1 +1,0 @@
-/home/small-programs/malloc_deref.c,8,80,40,0.156261920929,0.0446000099182,2,2

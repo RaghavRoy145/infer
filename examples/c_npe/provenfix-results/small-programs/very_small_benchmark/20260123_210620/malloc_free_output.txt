@@ -1,1 +1,0 @@
-/home/small-programs/malloc_free.c,8,80,40,0.103835105896,0.0217249393463,1,1

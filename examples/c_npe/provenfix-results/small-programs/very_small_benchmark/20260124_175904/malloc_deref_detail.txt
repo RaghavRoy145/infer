@@ -1,0 +1,13 @@
+
+In /home/small-programs/malloc_deref.c:
+
+~~~~~~~~~ In function: main ~~~~~~~~~
+Future-condition checking for 'malloc @4': Failed!
+
+<======[Bidirectional Bug Localization & Possible Proof Repairs]======>
+
+[Repair Options]
+x=0 /\ free(x)@6 · RET()@7 ~~~> (!_(x))^*;
+[Patches]
+ @ line 6 can be inserted with code: if (x==0){ return; }
+

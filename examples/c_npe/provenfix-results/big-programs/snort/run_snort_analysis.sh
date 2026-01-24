@@ -110,8 +110,20 @@ docker exec "$CONTAINER_NAME" bash -c "
     cd /home/${SNORT_DIR}
     cp /home/infer_TempFix/spec_snort-2.9.13.c spec.c
     echo \"Using spec.c with \$(wc -l < spec.c) lines\"
+    rm -f /home/infer_TempFix/TempFix-out/detail.txt
+    rm -f /home/infer_TempFix/TempFix-out/report.csv
+"
+START_TIME=$(date +%s)
+docker exec "$CONTAINER_NAME" bash -c "
+    cd /home/${SNORT_DIR}
     /home/infer_TempFix/infer/bin/tempFix
 "
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
+echo "start_time=$(date -d @${START_TIME} '+%Y-%m-%d %H:%M:%S')" > "${OUTPUT_DIR}/metadata.txt"
+echo "end_time=$(date -d @${END_TIME} '+%Y-%m-%d %H:%M:%S')" >> "${OUTPUT_DIR}/metadata.txt"
+echo "analysis_seconds=${ELAPSED}" >> "${OUTPUT_DIR}/metadata.txt"
+echo ">>> ProveNFix analysis took ${ELAPSED} seconds"
 
 # Disable set -e so script continues to prompt even if errors occurred
 set +e

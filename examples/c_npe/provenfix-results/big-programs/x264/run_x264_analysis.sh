@@ -85,13 +85,21 @@ docker exec "$CONTAINER_NAME" bash -c '
     cd /home/x264
     cp /home/infer_TempFix/spec-x264.c spec.c
     echo "Using spec.c with $(wc -l < spec.c) lines"
-
     # Clear old results
     rm -f /home/infer_TempFix/TempFix-out/detail.txt
     rm -f /home/infer_TempFix/TempFix-out/report.csv
-
+'
+START_TIME=$(date +%s)
+docker exec "$CONTAINER_NAME" bash -c '
+    cd /home/x264
     /home/infer_TempFix/infer/bin/tempFix
 '
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
+echo "start_time=$(date -d @${START_TIME} '+%Y-%m-%d %H:%M:%S')" > "${OUTPUT_DIR}/metadata.txt"
+echo "end_time=$(date -d @${END_TIME} '+%Y-%m-%d %H:%M:%S')" >> "${OUTPUT_DIR}/metadata.txt"
+echo "analysis_seconds=${ELAPSED}" >> "${OUTPUT_DIR}/metadata.txt"
+echo ">>> ProveNFix analysis took ${ELAPSED} seconds"
 
 # Save results
 docker cp "${CONTAINER_NAME}:/home/infer_TempFix/TempFix-out/detail.txt" "${OUTPUT_DIR}/detail.txt" 2>/dev/null || true

@@ -38,6 +38,7 @@ lib/gl_array_list.c:483: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   484. }
   485. 
 
+FALSE_POSITIVE
 #4
 lib/obstack.c:204: error: Null Dereference(NULLPTR_DEREFERENCE)
   `new_chunk` could be null (null value originating from line 185) and is dereferenced. 
@@ -268,6 +269,7 @@ src/rec-db.c:1454: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   1455. 
   1456.   return true;
 
+FALSE_POSITIVE
 #27
 src/rec-fex.c:186: error: Null Dereference(NULLPTR_DEREFERENCE)
   `copy->elems[copy->elems[i]]` could be null (null value originating from line 178) and is dereferenced in the call to `rec_fex_destroy()`. 
@@ -278,6 +280,7 @@ src/rec-fex.c:186: error: Null Dereference(NULLPTR_DEREFERENCE)
   187.               return NULL;
   188.             }
 
+FALSE_POSITIVE
 #28
 src/rec-fex.c:212: error: Null Dereference(NULLPTR_DEREFERENCE)
   `copy->elems[copy->elems[i]->str]` could be null (null value originating from line 178) and is dereferenced in the call to `rec_fex_destroy()`. 
@@ -298,6 +301,7 @@ src/rec-fex.c:212: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   213.           REC_COPY_STR_MAYBE_RETURN (field_name);
   214.           REC_COPY_STR_MAYBE_RETURN (rewrite_to);
 
+FALSE_POSITIVE
 #30
 src/rec-fex.c:213: error: Null Dereference(NULLPTR_DEREFERENCE)
   `copy->elems[copy->elems[i]->field_name]` could be null (null value originating from line 178) and is dereferenced in the call to `rec_fex_destroy()`. 
@@ -318,6 +322,7 @@ src/rec-fex.c:213: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   214.           REC_COPY_STR_MAYBE_RETURN (rewrite_to);
   215.           REC_COPY_STR_MAYBE_RETURN (function_name);
 
+FALSE_POSITIVE
 #32
 src/rec-fex.c:412: error: Null Dereference(NULLPTR_DEREFERENCE)
   `buf` could be null (from the call to `rec_buf_new()` on line 353) and is dereferenced in the call to `rec_buf_close()`. 
@@ -2728,6 +2733,7 @@ utils/recins.c:179: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   180.         case FORCE_ARG:
   181.           {
 
+FALSE_POSITIVE
 #273
 utils/recins.c:202: error: Null Dereference(NULLPTR_DEREFERENCE)
   `recins_record` could be null (from the call to `rec_record_new()` on line 201) and is dereferenced in the call to `rec_record_set_source()`. 
@@ -2738,6 +2744,7 @@ utils/recins.c:202: error: Null Dereference(NULLPTR_DEREFERENCE)
   203.                 rec_record_set_location (recins_record, 0);
   204.               }
 
+FALSE_POSITIVE
 #274
 utils/recins.c:222: error: Null Dereference(NULLPTR_DEREFERENCE)
   `field` could be null (null value originating from line 163) and is dereferenced in the call to `rec_field_set_value()`. 
@@ -2748,6 +2755,7 @@ utils/recins.c:222: error: Null Dereference(NULLPTR_DEREFERENCE)
   223.             rec_mset_append (rec_record_mset (recins_record), MSET_FIELD, (void *) field, MSET_ANY);
   224. 
 
+FALSE_POSITIVE
 #275
 utils/recins.c:266: error: Null Dereference(NULLPTR_DEREFERENCE)
   `provided_record` could be null (from the call to `rec_parse_record_str()` on line 255) and is dereferenced in the call to `rec_record_mset()`. 
@@ -2778,6 +2786,7 @@ utils/recsel.c:333: error: Null Dereference(NULLPTR_DEREFERENCE)
   334.                 {
   335.                   rec_fex_elem_t elem = rec_fex_get (recsel_fex, i);
 
+FALSE_POSITIVE
 #278
 utils/recsel.c:484: error: Null Dereference(NULLPTR_DEREFERENCE)
   `rset` could be null (from the call to `rec_db_query()` on line 464) and is dereferenced in the call to `rec_rset_num_records()`. 
@@ -2788,6 +2797,7 @@ utils/recsel.c:484: error: Null Dereference(NULLPTR_DEREFERENCE)
   485.     }
   486.   else
 
+FALSE_POSITIVE
 #279
 utils/recsel.c:491: error: Null Dereference(NULLPTR_DEREFERENCE)
   `writer` could be null (from the call to `rec_writer_new()` on line 490) and is dereferenced in the call to `rec_writer_set_collapse()`. 
@@ -2798,6 +2808,7 @@ utils/recsel.c:491: error: Null Dereference(NULLPTR_DEREFERENCE)
   492.       rec_writer_set_skip_comments (writer, true);
   493.       rec_writer_set_mode (writer, recsel_write_mode);
 
+FALSE_POSITIVE
 #280
 utils/recsel.c:494: error: Null Dereference(NULLPTR_DEREFERENCE)
   `rset` could be null (from the call to `rec_db_query()` on line 464) and is dereferenced in the call to `rec_write_rset()`. 

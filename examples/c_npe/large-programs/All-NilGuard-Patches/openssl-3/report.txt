@@ -288,6 +288,7 @@ crypto/bio/bio_lib.c:317: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   318. 
   319.     if (ret > 0) {
 
+FALSE_POSITIVE
 #29
 crypto/bio/bss_core.c:49: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 47) and is dereferenced. 
@@ -298,6 +299,7 @@ crypto/bio/bss_core.c:49: error: Null Dereference(NULLPTR_DEREFERENCE)
   50.         return 0;
   51.     return bcgbl->c_bio_read_ex(BIO_get_data(bio), data, data_len, bytes_read);
 
+FALSE_POSITIVE
 #30
 crypto/bio/bss_core.c:59: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 57) and is dereferenced. 
@@ -308,6 +310,7 @@ crypto/bio/bss_core.c:59: error: Null Dereference(NULLPTR_DEREFERENCE)
   60.         return 0;
   61.     return bcgbl->c_bio_write_ex(BIO_get_data(bio), data, data_len, written);
 
+FALSE_POSITIVE
 #31
 crypto/bio/bss_core.c:68: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 66) and is dereferenced. 
@@ -318,6 +321,7 @@ crypto/bio/bss_core.c:68: error: Null Dereference(NULLPTR_DEREFERENCE)
   69.         return -1;
   70.     return bcgbl->c_bio_ctrl(BIO_get_data(bio), cmd, num, ptr);
 
+FALSE_POSITIVE
 #32
 crypto/bio/bss_core.c:77: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 75) and is dereferenced. 
@@ -328,6 +332,7 @@ crypto/bio/bss_core.c:77: error: Null Dereference(NULLPTR_DEREFERENCE)
   78.         return -1;
   79.     return bcgbl->c_bio_gets(BIO_get_data(bio), buf, size);
 
+FALSE_POSITIVE
 #33
 crypto/bio/bss_core.c:86: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 84) and is dereferenced. 
@@ -338,6 +343,7 @@ crypto/bio/bss_core.c:86: error: Null Dereference(NULLPTR_DEREFERENCE)
   87.         return -1;
   88.     return bcgbl->c_bio_puts(BIO_get_data(bio), str);
 
+FALSE_POSITIVE
 #34
 crypto/bio/bss_core.c:131: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 128) and is dereferenced. 
@@ -348,6 +354,7 @@ crypto/bio/bss_core.c:131: error: Null Dereference(NULLPTR_DEREFERENCE)
   132.         return NULL;
   133. 
 
+FALSE_POSITIVE
 #35
 crypto/bio/bss_core.c:148: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 143) and is dereferenced. 
@@ -358,6 +365,7 @@ crypto/bio/bss_core.c:148: error: Null Dereference(NULLPTR_DEREFERENCE)
   149.                 bcgbl->c_bio_read_ex = OSSL_FUNC_BIO_read_ex(fns);
   150.             break;
 
+FALSE_POSITIVE
 #36
 crypto/bio/bss_core.c:152: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 143) and is dereferenced. 
@@ -368,6 +376,7 @@ crypto/bio/bss_core.c:152: error: Null Dereference(NULLPTR_DEREFERENCE)
   153.                 bcgbl->c_bio_write_ex = OSSL_FUNC_BIO_write_ex(fns);
   154.             break;
 
+FALSE_POSITIVE
 #37
 crypto/bio/bss_core.c:156: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 143) and is dereferenced. 
@@ -378,6 +387,7 @@ crypto/bio/bss_core.c:156: error: Null Dereference(NULLPTR_DEREFERENCE)
   157.                 bcgbl->c_bio_gets = OSSL_FUNC_BIO_gets(fns);
   158.             break;
 
+FALSE_POSITIVE
 #38
 crypto/bio/bss_core.c:160: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 143) and is dereferenced. 
@@ -388,6 +398,7 @@ crypto/bio/bss_core.c:160: error: Null Dereference(NULLPTR_DEREFERENCE)
   161.                 bcgbl->c_bio_puts = OSSL_FUNC_BIO_puts(fns);
   162.             break;
 
+FALSE_POSITIVE
 #39
 crypto/bio/bss_core.c:164: error: Null Dereference(NULLPTR_DEREFERENCE)
   `bcgbl` could be null (from the call to `get_globals()` on line 143) and is dereferenced. 
@@ -768,6 +779,7 @@ crypto/property/property.c:617: error: Memory Leak(MEMORY_LEAK_C)
   618.             if (++store->nelem >= IMPL_CACHE_FLUSH_THRESHOLD)
   619.                 store->need_flush = 1;
 
+FALSE_POSITIVE
 #77
 crypto/provider_core.c:667: error: Null Dereference(NULLPTR_DEREFERENCE)
   `provider_dispatch` could be null (null value originating from line 561) and is dereferenced. 
@@ -778,6 +790,7 @@ crypto/provider_core.c:667: error: Null Dereference(NULLPTR_DEREFERENCE)
   668.         switch (provider_dispatch->function_id) {
   669.         case OSSL_FUNC_PROVIDER_TEARDOWN:
 
+FALSE_POSITIVE
 #78
 crypto/rand/rand_lib.c:532: error: Null Dereference(NULLPTR_DEREFERENCE)
   `dgbl` could be null (from the call to `rand_get_global()` on line 528) and is dereferenced. 
@@ -788,6 +801,7 @@ crypto/rand/rand_lib.c:532: error: Null Dereference(NULLPTR_DEREFERENCE)
   533.     rand = EVP_RAND_fetch(libctx, name, dgbl->seed_propq);
   534.     if (rand == NULL) {
 
+FALSE_POSITIVE
 #79
 crypto/rand/rand_lib.c:563: error: Null Dereference(NULLPTR_DEREFERENCE)
   `dgbl` could be null (from the call to `rand_get_global()` on line 558) and is dereferenced. 
@@ -1108,6 +1122,7 @@ engines/e_afalg.c:215: error: Memory Leak(MEMORY_LEAK_C)
   216.                                              aio->efd, custom,
   217.                                              afalg_waitfd_cleanup);
 
+FALSE_POSITIVE
 #111
 engines/e_dasync.c:608: error: Null Dereference(NULLPTR_DEREFERENCE)
   `EVP_aes_128_cbc_hmac_sha1()` could be null (from the call to `EVP_aes_128_cbc_hmac_sha1()` on line 608) and is dereferenced in the call to `EVP_CIPHER_meth_get_ctrl()`. 
@@ -1238,6 +1253,7 @@ ssl/statem/statem_dtls.c:1104: error: Memory Leak(MEMORY_LEAK_C)
   1105.     return 1;
   1106. }
 
+FALSE_POSITIVE
 #124
 test/asn1_encode_test.c:703: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `do_encode` may trigger the following issue: `data` could be null (from the call to `do_encode()` on line 703) and is dereferenced in the call to `do_encode()`. 
@@ -1328,6 +1344,7 @@ test/errtest.c:139: error: Uninitialized Value(PULSE_UNINITIALIZED_VALUE)
   140. }
   141. 
 
+FALSE_POSITIVE
 #133
 test/evp_extra_test.c:2391: error: Null Dereference(NULLPTR_DEREFERENCE)
   `ctx` could be null (null value originating from line 2367) and is dereferenced in the call to `EVP_PKEY_keygen()`. 

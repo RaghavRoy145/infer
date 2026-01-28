@@ -398,6 +398,7 @@ src/lxc/initutils.c:256: error: Use After Free(USE_AFTER_FREE)
   257. 	errno = saved_errno;
   258. 	return ret;
 
+FALSE_POSITIVE
 #40
 src/lxc/log.c:106: error: Null Dereference(NULLPTR_DEREFERENCE)
   null (null value originating from line 106) is dereferenced. 
@@ -668,6 +669,7 @@ src/lxc/network.c:1100: error: Use After Free(USE_AFTER_FREE)
   1101. 	nlmsg_free(nlmsg);
   1102. 	nlmsg_free(answer);
 
+FALSE_POSITIVE
 #67
 src/lxc/network.c:1156: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `nla_begin_nested` in turn calls `nla_put_attr` and may trigger the following issue: null (from the call to `nla_begin_nested()` on line 1156) is dereferenced in the call to `nla_begin_nested()`. 
@@ -678,6 +680,7 @@ src/lxc/network.c:1156: error: Null Dereference(NULLPTR_DEREFERENCE)
   1157. 	if (!nest1)
   1158. 		goto out;
 
+FALSE_POSITIVE
 #68
 src/lxc/network.c:1163: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `nla_begin_nested` in turn calls `nla_put_attr` and may trigger the following issue: null (from the call to `nla_begin_nested()` on line 1163) is dereferenced in the call to `nla_begin_nested()`. 
@@ -698,6 +701,7 @@ src/lxc/network.c:1189: error: Use After Free(USE_AFTER_FREE)
   1190. 	nlmsg_free(answer);
   1191. 	nlmsg_free(nlmsg);
 
+FALSE_POSITIVE
 #70
 src/lxc/network.c:1242: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `nla_begin_nested` in turn calls `nla_put_attr` and may trigger the following issue: null (from the call to `nla_begin_nested()` on line 1242) is dereferenced in the call to `nla_begin_nested()`. 
@@ -708,6 +712,7 @@ src/lxc/network.c:1242: error: Null Dereference(NULLPTR_DEREFERENCE)
   1243. 	if (!nest)
   1244. 		goto err1;
 
+FALSE_POSITIVE
 #71
 src/lxc/network.c:1249: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `nla_begin_nested` in turn calls `nla_put_attr` and may trigger the following issue: null (from the call to `nla_begin_nested()` on line 1249) is dereferenced in the call to `nla_begin_nested()`. 
@@ -728,6 +733,7 @@ src/lxc/network.c:1271: error: Use After Free(USE_AFTER_FREE)
   1272. 	return err;
   1273. }
 
+FALSE_POSITIVE
 #73
 src/lxc/network.c:1321: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `nla_begin_nested` in turn calls `nla_put_attr` and may trigger the following issue: null (from the call to `nla_begin_nested()` on line 1321) is dereferenced in the call to `nla_begin_nested()`. 
@@ -738,6 +744,7 @@ src/lxc/network.c:1321: error: Null Dereference(NULLPTR_DEREFERENCE)
   1322. 	if (!nest)
   1323. 		goto out;
 
+FALSE_POSITIVE
 #74
 src/lxc/network.c:1329: error: Null Dereference(NULLPTR_DEREFERENCE)
   The call to `nla_begin_nested` in turn calls `nla_put_attr` and may trigger the following issue: null (from the call to `nla_begin_nested()` on line 1329) is dereferenced in the call to `nla_begin_nested()`. 
@@ -1196,6 +1203,7 @@ src/lxc/tools/lxc_ls.c:858: error: Memory Leak(MEMORY_LEAK_C)
   859. 		for (s = tmp; s && *s; s++) {
   860. 			if (strcasecmp(*s, "NAME") == 0) {
 
+FALSE_POSITIVE
 #120
 src/lxc/tools/lxc_ls.c:1270: error: Null Dereference(NULLPTR_DEREFERENCE)
   `i` could be null (null value originating from line 1270) and is dereferenced. 

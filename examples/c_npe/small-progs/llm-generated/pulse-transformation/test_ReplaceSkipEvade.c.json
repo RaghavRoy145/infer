@@ -14,7 +14,7 @@
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 1,
         "nodes_in_scope": 2,
-        "true_slice_size": 2,
+        "true_slice_size": 3,
         "initial_candidate_plans": 2,
         "total_aliases": 1
       }
@@ -40,7 +40,7 @@
     "source_file": "test_ReplaceSkipEvade.c",
     "plan_type": "NoPlanGenerated",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "reason": "No valid plans remained after filtering",
       "npe_file": "test_ReplaceSkipEvade.c",
       "npe_line": 50,
       "original_pointer": "t"

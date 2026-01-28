@@ -5,7 +5,7 @@
     "source_file": "test04_array_index_null.c",
     "plan_type": "NoPlanGenerated",
     "details": {
-      "reason": "All potential crash sites were found to be already syntactically guarded.",
+      "reason": "No valid plans remained after filtering",
       "npe_file": "test04_array_index_null.c",
       "npe_line": 5,
       "original_pointer": "array"

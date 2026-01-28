@@ -1068,6 +1068,7 @@ src/dynamic-preprocessors/gtp/gtp_roptions.c:455: error: Null Dereference(NULLPT
   456.     {
   457.         DynamicPreprocessorFatalMessage(" %s(%d) => Bad value specified for %s. "
 
+FALSE_POSITIVE
 #107
 src/dynamic-preprocessors/gtp/spp_gtp.c:203: error: Null Dereference(NULLPTR_DEREFERENCE)
   `gtp_config` could be null (from the call to `sfPolicyConfigCreate()` on line 175) and is dereferenced in the call to `sfPolicyUserPolicySet()`. 
@@ -1248,6 +1249,7 @@ src/dynamic-preprocessors/modbus/modbus_roptions.c:121: error: Null Dereference(
   122.     modbus_data->arg = (uint8_t) func_code;
   123. 
 
+FALSE_POSITIVE
 #125
 src/dynamic-preprocessors/modbus/modbus_roptions.c:164: error: Null Dereference(NULLPTR_DEREFERENCE)
   `modbus_data` could be null (null value originating from line 148) and is dereferenced. 
@@ -1258,6 +1260,7 @@ src/dynamic-preprocessors/modbus/modbus_roptions.c:164: error: Null Dereference(
   165.     modbus_data->arg = (uint8_t) unit_code;
   166. 
 
+FALSE_POSITIVE
 #126
 src/dynamic-preprocessors/modbus/modbus_roptions.c:193: error: Null Dereference(NULLPTR_DEREFERENCE)
   `modbus_data` could be null (null value originating from line 186) and is dereferenced. 
@@ -1268,6 +1271,7 @@ src/dynamic-preprocessors/modbus/modbus_roptions.c:193: error: Null Dereference(
   194.     modbus_data->arg = 0;
   195. 
 
+FALSE_POSITIVE
 #127
 src/dynamic-preprocessors/pop/snort_pop.c:186: error: Null Dereference(NULLPTR_DEREFERENCE)
   `config->cmds` could be null (null value originating from line 176) and is dereferenced. 
@@ -1348,6 +1352,7 @@ src/dynamic-preprocessors/reputation/reputation_config.c:1442: error: Null Deref
   1443.             {
   1444.                 DynamicPreprocessorFatalMessage(" %s(%d) => Bad value specified for %s. "
 
+FALSE_POSITIVE
 #135
 src/dynamic-preprocessors/reputation/spp_reputation.c:486: error: Null Dereference(NULLPTR_DEREFERENCE)
   `reputation_config` could be null (from the call to `sfPolicyConfigCreate()` on line 469) and is dereferenced in the call to `sfPolicyUserPolicySet()`. 
@@ -1388,6 +1393,7 @@ src/dynamic-preprocessors/sdf/sdf_detection_option.c:97: error: Use After Free(U
   98.         DynamicPreprocessorFatalMessage("SDF rule needs to have a count between "
   99.                 " 1 - 255: %s\n", args);
 
+FALSE_POSITIVE
 #139
 src/dynamic-preprocessors/sdf/sdf_detection_option.c:102: error: Null Dereference(NULLPTR_DEREFERENCE)
   `sdf_data` could be null (null value originating from line 71) and is dereferenced. 
@@ -1478,6 +1484,7 @@ src/dynamic-preprocessors/sdf/sdf_detection_option.c:132: error: Use After Free(
   133.         sdf_data->validate_func = NULL;
   134.     }
 
+FALSE_POSITIVE
 #148
 src/dynamic-preprocessors/sdf/sdf_pattern_match.c:178: error: Null Dereference(NULLPTR_DEREFERENCE)
   `new_pii` could be null (null value originating from line 146) and is dereferenced. 
@@ -1508,6 +1515,7 @@ src/dynamic-preprocessors/sdf/sdf_pattern_match.c:376: error: Null Dereference(N
   377.     node->num_children = 1;
   378.     node->option_data_list = NULL;
 
+FALSE_POSITIVE
 #151
 src/dynamic-preprocessors/sdf/sdf_pattern_match.c:403: error: Null Dereference(NULLPTR_DEREFERENCE)
   `new_child_ptrs` could be null (null value originating from line 395) and is dereferenced. 
@@ -1578,6 +1586,7 @@ src/dynamic-preprocessors/sdf/spp_sdf.c:171: error: Memory Leak(MEMORY_LEAK_C)
   172. 
   173.     /* Register callbacks */
 
+FALSE_POSITIVE
 #158
 src/dynamic-preprocessors/sdf/spp_sdf.c:250: error: Null Dereference(NULLPTR_DEREFERENCE)
   `session` could be null (null value originating from line 237) and is dereferenced. 
@@ -1598,6 +1607,7 @@ src/dynamic-preprocessors/sdf/spp_sdf.c:897: error: Memory Leak(MEMORY_LEAK_C)
   898. 
   899.     _dpd.addDetect(sc, ProcessSDF, PRIORITY_FIRST, PP_SDF,
 
+FALSE_POSITIVE
 #160
 src/dynamic-preprocessors/sip/spp_sip.c:244: error: Null Dereference(NULLPTR_DEREFERENCE)
   `sip_config` could be null (from the call to `sfPolicyConfigCreate()` on line 218) and is dereferenced in the call to `sfPolicyUserPolicySet()`. 
@@ -1618,6 +1628,7 @@ src/dynamic-preprocessors/sip/spp_sip.c:482: error: Memory Leak(MEMORY_LEAK_C)
   483.     {
   484.         DEBUG_WRAP(DebugMessage(DEBUG_SIP, "Missed packets - not inspecting.\n"));
 
+FALSE_POSITIVE
 #162
 src/dynamic-preprocessors/smtp/snort_smtp.c:265: error: Null Dereference(NULLPTR_DEREFERENCE)
   `config->cmds` could be null (null value originating from line 255) and is dereferenced. 
@@ -1658,6 +1669,7 @@ src/dynamic-preprocessors/smtp/snort_smtp.c:1355: error: Uninitialized Value(PUL
   1356. 
   1357.         /* Check for response code */
 
+FALSE_POSITIVE
 #166
 src/dynamic-preprocessors/ssh/spp_ssh.c:221: error: Null Dereference(NULLPTR_DEREFERENCE)
   `ssh_config` could be null (from the call to `sfPolicyConfigCreate()` on line 191) and is dereferenced in the call to `sfPolicyUserPolicySet()`. 
@@ -1718,6 +1730,7 @@ src/dynamic-preprocessors/ssl_common/ssl_config.c:470: error: Null Dereference(N
   471.             {
   472.                 DynamicPreprocessorFatalMessage("%s(%d) => Invalid argument to '%s' option in the"
 
+FALSE_POSITIVE
 #172
 src/dynamic-preprocessors/ssl_common/ssl_config.c:700: error: Null Dereference(NULLPTR_DEREFERENCE)
   `ssl_config` could be null (from the call to `sfPolicyConfigCreate()` on line 661) and is dereferenced in the call to `sfPolicyUserPolicySet()`. 
@@ -1998,6 +2011,7 @@ src/preprocessors/snort_httpinspect.c:2119: error: Memory Leak(MEMORY_LEAK_C)
   2120.         }
   2121.     }
 
+FALSE_POSITIVE
 #200
 src/preprocessors/snort_httpinspect.c:3729: error: Null Dereference(NULLPTR_DEREFERENCE)
   `HiEvent` could be null (null value originating from line 3637) and is dereferenced. 

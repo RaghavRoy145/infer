@@ -14,7 +14,7 @@
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 2,
         "nodes_in_scope": 1,
-        "true_slice_size": 4,
+        "true_slice_size": 8,
         "initial_candidate_plans": 2,
         "total_aliases": 1
       }
@@ -35,7 +35,7 @@
         "cost_l_imprecision": 0,
         "cost_g_overhead_final": 2,
         "nodes_in_scope": 1,
-        "true_slice_size": 4,
+        "true_slice_size": 8,
         "initial_candidate_plans": 2,
         "total_aliases": 1
       }

@@ -1,4 +1,5 @@
 #0
+FALSE_POSITIVE
 src/buf.c:80: error: Null Dereference(NULLPTR_DEREFERENCE)
   `t` could be null (null value originating from line 77) and is dereferenced. 
   78. 	if (!t)
@@ -8,6 +9,7 @@ src/buf.c:80: error: Null Dereference(NULLPTR_DEREFERENCE)
   81. 	buf = buf_strappend (buf, t);
   82. 	free(t);
 
+FALSE_POSITIVE
 #1
 src/buf.c:108: error: Null Dereference(NULLPTR_DEREFERENCE)
   `t` could be null (null value originating from line 105) and is dereferenced. 
@@ -18,6 +20,7 @@ src/buf.c:108: error: Null Dereference(NULLPTR_DEREFERENCE)
   109.       if (*src == '\\')   /* escape backslashes */
   110.         *dst++ = '\\';
 
+FALSE_POSITIVE
 #2
 src/buf.c:179: error: Null Dereference(NULLPTR_DEREFERENCE)
   `str` could be null (null value originating from line 175) and is dereferenced. 
@@ -28,6 +31,7 @@ src/buf.c:179: error: Null Dereference(NULLPTR_DEREFERENCE)
   180.     buf_append(buf, &str, 1);
   181.     return buf;
 
+FALSE_POSITIVE
 #3
 src/buf.c:180: error: Memory Leak(MEMORY_LEAK_C)
   Memory dynamically allocated by `malloc` on line 175 is not freed after the last access at line 180, column 5. 
@@ -118,6 +122,7 @@ src/dfa.c:886: error: Null Dereference(NULLPTR_DEREFERENCE)
   887. 
   888. 			if (accset[i] <= num_rules)
 
+FALSE_POSITIVE
 #12
 src/filter.c:53: error: Null Dereference(NULLPTR_DEREFERENCE)
   `f` could be null (null value originating from line 50) and is dereferenced. 
@@ -127,7 +132,8 @@ src/filter.c:53: error: Null Dereference(NULLPTR_DEREFERENCE)
        ^
   54. 	f->extra = NULL;
   55. 	f->next = NULL;
-
+ 
+FALSE_POSITIVE
 #13
 src/filter.c:71: error: Null Dereference(NULLPTR_DEREFERENCE)
   `f->argc` could be null (null value originating from line 68) and is dereferenced. 
@@ -138,6 +144,7 @@ src/filter.c:71: error: Null Dereference(NULLPTR_DEREFERENCE)
   72. 
   73. 	va_start (ap, cmd);
 
+FALSE_POSITIVE
 #14
 src/filter.c:105: error: Null Dereference(NULLPTR_DEREFERENCE)
   `f` could be null (null value originating from line 102) and is dereferenced. 
@@ -387,6 +394,7 @@ src/nfa.c:705: error: Null Dereference(NULLPTR_DEREFERENCE)
         ^
   706. }
 
+FALSE_POSITIVE
 #39
 src/regex.c:60: error: Null Dereference(NULLPTR_DEREFERENCE)
   `errbuf` could be null (null value originating from line 57) and is dereferenced. 

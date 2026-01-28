@@ -1,0 +1,353 @@
+[
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test01_simple_null.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 6,
+      "def_site_line": 5,
+      "target_pvar": "ptr",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": {
+        "cost_rep_modification": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test02_conditional_null.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 10,
+      "end_node": 10,
+      "start_line": 10,
+      "end_line": 10,
+      "guard_with_pointer": "data",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 5,
+        "initial_candidate_plans": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test03_struct_field_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test03_struct_field_null.c",
+      "npe_line": 10,
+      "original_pointer": "p"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test04_array_index_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test04_array_index_null.c",
+      "npe_line": 5,
+      "original_pointer": "array"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test05_function_return_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test05_function_return_null.c",
+      "npe_line": 13,
+      "original_pointer": "arr"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test06_loop_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "test06_loop_null.c",
+      "npe_line": 5,
+      "original_pointer": "i"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test07_double_pointer_null.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 7,
+      "def_site_line": 5,
+      "target_pvar": "ptr",
+      "pvar_type": "int**",
+      "reuse_candidate": null,
+      "metrics": {
+        "cost_rep_modification": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test08_malloc_fail.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test08_malloc_fail.c",
+      "npe_line": 7,
+      "original_pointer": "buffer"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test09_linked_list_null.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 9,
+      "end_node": 9,
+      "start_line": 19,
+      "end_line": 19,
+      "guard_with_pointer": "current",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 1,
+        "true_slice_size": 6,
+        "initial_candidate_plans": 1,
+        "total_aliases": 2
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test10_switch_case_null.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 7,
+      "end_node": 7,
+      "start_line": 17,
+      "end_line": 17,
+      "guard_with_pointer": "ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test10_switch_case_null.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 9,
+      "end_node": 9,
+      "start_line": 13,
+      "end_line": 13,
+      "guard_with_pointer": "ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 2,
+        "nodes_in_scope": 1,
+        "true_slice_size": 8,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test11_arithmetic_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "test11_arithmetic_null.c",
+      "npe_line": 5,
+      "original_pointer": "i"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test12_string_null.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 11,
+      "def_site_line": 6,
+      "target_pvar": "str",
+      "pvar_type": "char*",
+      "reuse_candidate": null,
+      "metrics": {
+        "cost_rep_modification": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test13_callback_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test13_callback_null.c",
+      "npe_line": 12,
+      "original_pointer": "handler"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test14_nested_struct_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "test14_nested_struct_null.c",
+      "npe_line": 15,
+      "original_pointer": "acc"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test16_ternary_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test16_ternary_null.c",
+      "npe_line": 7,
+      "original_pointer": "value"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test17_macro_null.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 7,
+      "def_site_line": 8,
+      "target_pvar": "ptr",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": {
+        "cost_rep_modification": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test18_realloc_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test18_realloc_null.c",
+      "npe_line": 9,
+      "original_pointer": "data"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test19_union_null.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "Alias analysis found no pointers to guard.",
+      "npe_file": "test19_union_null.c",
+      "npe_line": 12,
+      "original_pointer": "ptr"
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test20_cast_null.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 8,
+      "def_site_line": 13,
+      "target_pvar": "int_data",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": {
+        "cost_rep_modification": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "test_fallback_to_skip",
+    "procedure_id": "test_fallback_to_skip",
+    "source_file": "test_ReplaceSkipEvade.c",
+    "plan_type": "Skip",
+    "details": {
+      "start_node": 4,
+      "end_node": 3,
+      "start_line": 28,
+      "end_line": 31,
+      "guard_with_pointer": "escaping_ptr",
+      "metrics": {
+        "cost_l_imprecision": 0,
+        "cost_g_overhead_final": 1,
+        "nodes_in_scope": 2,
+        "true_slice_size": 3,
+        "initial_candidate_plans": 2,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "test_replace_success",
+    "procedure_id": "test_replace_success",
+    "source_file": "test_ReplaceSkipEvade.c",
+    "plan_type": "Replace",
+    "details": {
+      "def_site_node": 4,
+      "def_site_line": 15,
+      "target_pvar": "local_ptr",
+      "pvar_type": "int*",
+      "reuse_candidate": null,
+      "metrics": {
+        "cost_rep_modification": 1,
+        "total_aliases": 1
+      }
+    }
+  },
+  {
+    "procedure_name": "main",
+    "procedure_id": "main",
+    "source_file": "test_ReplaceSkipEvade.c",
+    "plan_type": "NoPlanGenerated",
+    "details": {
+      "reason": "No valid plans remained after filtering",
+      "npe_file": "test_ReplaceSkipEvade.c",
+      "npe_line": 50,
+      "original_pointer": "t"
+    }
+  }
+]

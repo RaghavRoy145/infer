@@ -2,7 +2,7 @@
   {
     "procedure_name": "main",
     "procedure_id": "main",
-    "source_file": "test02_conditional_null.c",
+    "source_file": "/home/ragroy01/repos/infer/examples/c_npe/small-progs/llm-generated/test02_conditional_null.c",
     "plan_type": "Skip",
     "details": {
       "start_node": 10,

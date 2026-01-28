@@ -9,11 +9,11 @@ int main(int argc, char *argv[]) {
             ptr = NULL;
             break;
         case 2:
-            ptr = malloc(sizeof(int));
+            ptr = NULL;
             *ptr = 20;
             break;
         default:
-            ptr = malloc(sizeof(int));
+            ptr = NULL;
             *ptr = 30;
             break;
     }
